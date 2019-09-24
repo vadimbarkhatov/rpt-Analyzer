@@ -39,6 +39,7 @@ namespace RptToXml
 			_oleCompoundFile = new CompoundFile(filename);
 
 			Trace.WriteLine("Loaded report");
+
 		}
 
 		public RptDefinitionWriter(ReportDocument value)
@@ -88,34 +89,34 @@ namespace RptToXml
 				writer.WriteAttributeString("FileName", report.FileName.Replace("rassdk://", ""));
 				writer.WriteAttributeString("HasSavedData", report.HasSavedData.ToString());
 
-				if (_oleCompoundFile != null)
-				{
-					writer.WriteStartElement("Embedinfo");
-					_oleCompoundFile.RootStorage.VisitEntries(fileItem =>
-					{
-						if (fileItem.Name.Contains("Ole"))
-						{
-							writer.WriteStartElement("Embed");
-							writer.WriteAttributeString("Name", fileItem.Name);
+				//if (_oleCompoundFile != null)
+				//{
+				//	writer.WriteStartElement("Embedinfo");
+				//	_oleCompoundFile.RootStorage.VisitEntries(fileItem =>
+				//	{
+				//		if (fileItem.Name.Contains("Ole"))
+				//		{
+				//			writer.WriteStartElement("Embed");
+				//			writer.WriteAttributeString("Name", fileItem.Name);
 
-							var cfStream = fileItem as CFStream;
-							if (cfStream != null)
-							{
-								var streamBytes = cfStream.GetData();
+				//			var cfStream = fileItem as CFStream;
+				//			if (cfStream != null)
+				//			{
+				//				var streamBytes = cfStream.GetData();
 
-								writer.WriteAttributeString("Size", cfStream.Size.ToString("0"));
+				//				writer.WriteAttributeString("Size", cfStream.Size.ToString("0"));
 
-								using (var md5Provider = new MD5CryptoServiceProvider())
-								{
-									byte[] md5Hash = md5Provider.ComputeHash(streamBytes);
-									writer.WriteAttributeString("MD5Hash", Convert.ToBase64String(md5Hash));
-								}
-							}
-							writer.WriteEndElement();
-						}
-					}, true);
-					writer.WriteEndElement();
-				}
+				//				using (var md5Provider = new MD5CryptoServiceProvider())
+				//				{
+				//					byte[] md5Hash = md5Provider.ComputeHash(streamBytes);
+				//					writer.WriteAttributeString("MD5Hash", Convert.ToBase64String(md5Hash));
+				//				}
+				//			}
+				//			writer.WriteEndElement();
+				//		}
+				//	}, true);
+				//	writer.WriteEndElement();
+				//}
 
 				GetSummaryinfo(report, writer);
 				GetReportOptions(report, writer);
@@ -125,7 +126,7 @@ namespace RptToXml
 
 			GetDatabase(report, writer);
 			GetDataDefinition(report, writer);
-			GetReportDefinition(report, writer);
+			//GetReportDefinition(report, writer);
 
 			writer.WriteEndElement();
 		}
@@ -319,6 +320,8 @@ namespace RptToXml
 
 		private static void GetFieldDefinition(CrystalDecisions.ReportAppServer.DataDefModel.Field fd, XmlWriter writer)
 		{
+            if (fd.UseCount < 1) return; //Only leave columns that are used in the report
+
 			writer.WriteStartElement("Field");
 
 			writer.WriteAttributeString("Description", fd.Description);

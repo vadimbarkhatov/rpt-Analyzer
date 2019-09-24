@@ -6,9 +6,9 @@ using System.Linq;
 
 namespace RptToXml
 {
-	class Program
+	public class RptToXml
 	{
-		static void Main2(string[] args)
+		public static void Main2(string[] args)
 		{
 			if (args.Length < 1)
 			{
