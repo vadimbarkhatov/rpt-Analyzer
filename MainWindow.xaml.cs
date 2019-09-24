@@ -24,39 +24,24 @@ namespace CHEORptAnalyzer
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    /// 
     public partial class MainWindow : Window
     {
+        XElement xroot;
+
+        public bool SearchFields { get; set; }
+        public bool SearchRF { get; set; }
+        public bool SearchCommand { get; set; }
+
+
         public MainWindow()
         {
             InitializeComponent();
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs events)
-        {
-
-            
-
-            //@"C:\test\Aged Trial Balance Summary for GL account 14241140.xml"
-
-            //XPathDocument doc = new XPathDocument(@"C:\test\Aged Trial Balance Summary for GL account 14241140.xml");
-            //doc.Load(@"C:\test\Aged Trial Balance Summary for GL account 14241140.xml");
-            //XmlNode root = doc.DocumentElement;
-            //XPathNavigator nav = doc.CreateNavigator();
-
-            //nav.Select()
-
-            //XmlNode node = root.SelectSingleNode("/Report/Database/Tables/Table[@ClassName='CrystalReports.CommandTable']/Command");
-            //Console.WriteLine(node.InnerXml);
-            //Console.ReadKey();
-            //txtOutput.Text = node.InnerXml;
-            //doc.
-
-            //Thread.Sleep(1000);
 
             string[] files =
                 Directory.GetFiles(@"C:\test\Reports\", "*.xml");
 
-            XElement xroot = new XElement("Reports");
+            xroot = new XElement("Reports");
 
             foreach (string reportDefPath in files)
             {
@@ -66,62 +51,69 @@ namespace CHEORptAnalyzer
                 //Trace.WriteLine(xroot.Nodes().Count());
             }
 
+            DataContext = this;
+        }
 
 
-            //xelement.Elements().Attribute("CrystalReports.CommandTable");
 
-            //xelement.Parent.
-
-            //XElement.Load()
+        private void Button_Click(object sender, RoutedEventArgs events)
+        {
 
             //.Elements("Database").Elements("Tables").Elements("Table")
             //.Elements("Database").Elements("Tables").Elements("Table").Elements("Fields").Elements("Field")
-
-
             //ClassName = "CrystalReports.CommandTable"
 
-            IEnumerable<XElement> childList =
-                from el in xroot.Elements("Report").Elements("Database").Elements("Tables").Elements("Table")
-                //from el in xroot.Elements()
-                //where (string)el.Attribute("ClassName") == "CrystalReports.CommandTable"
-                select el;
+            var searchString = tbSearch.Text;
 
-            //IEnumerable<XElement> anc = childList.First().Ancestors("Report");
+            //Func<XElement, XAttribute> attributes
 
-            foreach (XElement e in childList)
+            //XAttribute x2 = new XAttribute();
+
+            //x2.
+            //IEnumerable<XAttribute> attrFilter(XElement node) => node.Descendants("Field").Attributes("FormulaName").Where(x => x.Value.ToUpper().Contains(searchString.ToUpper()));
+
+            Func<string, bool> textFilter = s => s.ToUpper().Contains(searchString.ToUpper());
+
+            Func<XElement, IEnumerable<XElement>> attrFilter;
+
+            //attrFilter = node => node.Descendants("Field").Attributes("FormulaName").Where(x => textFilter(x.Value));
+
+            Func<XElement, IEnumerable<XElement>> fieldFilter = node => node.Descendants("Field").Where(x => x.Attribute("FormulaName") != null && textFilter(x.Attribute("FormulaName").Value));
+            Func<XElement, IEnumerable<XElement>> cmdFilter = node => node.Descendants("Command").Where(x => textFilter(x.Value));
+            Func<XElement, IEnumerable<XElement>> rcdFilter = node => node.Descendants("RecordSelectionFormula").Where(x => textFilter(x.Value));
+
+            attrFilter = node => fieldFilter(node).Union(cmdFilter(node)).Union(rcdFilter(node));
+            
+
+
+            IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => attrFilter(x).Count() > 0);
+
+
+            xroot.Descendants();
+            lbReports.Items.Clear();
+
+            foreach (XElement e in foundReports)
             {
-                //txtOutput.Text += e.Attribute("LongName").Value;
-                //txtOutput.Text += "\n";
-
-                foreach (XElement f in e.Ancestors("Report"))
-                {
-                    lbReports.Items.Add(f.Attribute("FileName"));
-                    //txtOutput.Text += f.Attribute("FileName");
-                    //txtOutput.Text += "\n";
-                }
-                //e.
+                lbReports.Items.Add(new ListTuple<XElement>() { Text = e.Attribute("FileName").Value, Obj = e});
+                Trace.WriteLine((e as IXmlLineInfo).HasLineInfo());
             }
-
-                //Console.WriteLine(e2);
-            //xelement.
         }
 
 
         private void ParseRPT(object sender, RoutedEventArgs e)
         {
-            //string[] paths = new string[1];
-
-            //Report/Database/Tables/Table[@ClassName='CrystalReports.CommandTable']/Command
-
-            string[] rptFiles = new string[1];// = Directory.GetFiles(@"C:\test\Reports\", "*.rpt");
-            //string[] rptFiles = Directory.GetFiles(@"C:\test\", "*.rpt");
-
+            string[] rptFiles = new string[1];
             rptFiles[0] = @"C:\test\Reports\*";
-            //rptFiles[1] = @"C:\test\Reports\Ambcare Clinic Visits with No Shows & Cancellations by Dept and Fiscal Year (Projected Visits).rpt";
-
-            //paths[0] = @"C:\test\Aged Trial Balance Summary for GL account 14241140.rpt";
-
             RptToXml.RptToXml.Main2(rptFiles);
         }
+
+
+        private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selReport = (lbReports.SelectedItem as ListTuple<XElement>)?.Obj;
+
+            tbPreview.Text = selReport?.ToString();
+        }
+
     }
 }

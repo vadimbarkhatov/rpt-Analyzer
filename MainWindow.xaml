@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CHEORptAnalyzer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Button Content="TestXpath" HorizontalAlignment="Left" Margin="45,339,0,0" VerticalAlignment="Top" Width="123" Height="54" RenderTransformOrigin="0.5,0.5" Click="Button_Click">
+        Title="CHEO RPT Analyzer" Height="450" Width="1018">
+    <Grid Margin="0,0,2,0">
+        <Button Content="Search Reports" HorizontalAlignment="Left" Margin="45,339,0,0" VerticalAlignment="Top" Width="123" Height="54" RenderTransformOrigin="0.5,0.5" Click="Button_Click">
             <Button.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleY="-1" ScaleX="-1"/>
@@ -17,9 +17,17 @@
                 </TransformGroup>
             </Button.RenderTransform>
         </Button>
-        <TextBox Name="txtOutput" HorizontalAlignment="Left" Height="274" Margin="850,156,-453,-11" TextWrapping="Wrap" VerticalAlignment="Top" Width="395"/>
-        <ListBox Name="lbReports" HorizontalAlignment="Left" Height="298" Margin="226,47,0,0" VerticalAlignment="Top" Width="503"/>
+        <ListBox Name="lbReports" HorizontalAlignment="Left" Height="139" Margin="240,42,0,0" VerticalAlignment="Top" Width="747" SelectionChanged="LbReports_SelectionChanged"/>
         <Button Content="Parse RPTs" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="90" Height="25" Click="ParseRPT"/>
+        <TextBox x:Name="tbSearch" HorizontalAlignment="Left" Height="23" Margin="46,245,0,0" VerticalAlignment="Top" Width="122"  MaxLines="1"/>
+        <TextBox x:Name="tbPreview" HorizontalAlignment="Left" Height="158" Margin="239,222,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="747"  IsReadOnly="True"/>
+        <StackPanel HorizontalAlignment="Left" Height="138" Margin="46,65,0,0" VerticalAlignment="Top" Width="147">
+            <CheckBox Content="Crystal Fields" IsChecked="{Binding SearchFields}"/>
+            <CheckBox Content="Record Select Formula" Height="15" IsChecked="{Binding SearchRF}"/>
+            <CheckBox Content="Command Objects" Height="15" IsChecked="{Binding SearchCommand}"/>
+        </StackPanel>
+        <Label Content="Report List" HorizontalAlignment="Left" Margin="242,17,0,0" VerticalAlignment="Top"/>
+        <Label Content="Preview" HorizontalAlignment="Left" Margin="242,197,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>
