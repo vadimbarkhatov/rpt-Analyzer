@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CHEORptAnalyzer"
         mc:Ignorable="d"
-        Title="CHEO RPT Analyzer" Height="450" Width="1018">
+        Title="CHEO RPT Analyzer" Height="546" Width="1331">
     <Grid Margin="0,0,2,0">
-        <Button Content="Search Reports" HorizontalAlignment="Left" Margin="45,339,0,0" VerticalAlignment="Top" Width="123" Height="54" RenderTransformOrigin="0.5,0.5" Click="Button_Click">
+        <Button Content="Search Reports" HorizontalAlignment="Left" Margin="290,468,0,0" VerticalAlignment="Top" Width="123" Height="26" RenderTransformOrigin="0.5,0.5" Click="Button_Click">
             <Button.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleY="-1" ScaleX="-1"/>
@@ -17,17 +17,19 @@
                 </TransformGroup>
             </Button.RenderTransform>
         </Button>
-        <ListBox Name="lbReports" HorizontalAlignment="Left" Height="139" Margin="240,42,0,0" VerticalAlignment="Top" Width="747" SelectionChanged="LbReports_SelectionChanged"/>
-        <Button Content="Parse RPTs" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="90" Height="25" Click="ParseRPT"/>
-        <TextBox x:Name="tbSearch" HorizontalAlignment="Left" Height="23" Margin="46,245,0,0" VerticalAlignment="Top" Width="122"  MaxLines="1"/>
-        <TextBox x:Name="tbPreview" HorizontalAlignment="Left" Height="158" Margin="239,222,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="747"  IsReadOnly="True"/>
-        <StackPanel HorizontalAlignment="Left" Height="138" Margin="46,65,0,0" VerticalAlignment="Top" Width="147">
+        <ListBox Name="lbReports" HorizontalAlignment="Left" Height="371" Margin="10,27,0,0" VerticalAlignment="Top" Width="494" SelectionChanged="LbReports_SelectionChanged"/>
+        <Button Content="Parse RPTs" HorizontalAlignment="Left" Margin="-117,91,0,0" VerticalAlignment="Top" Width="90" Height="25" Click="ParseRPT"/>
+        <TextBox x:Name="tbSearch" HorizontalAlignment="Left" Height="23" Margin="290,441,0,0" VerticalAlignment="Top" Width="122"  MaxLines="1"/>
+        <RichTextBox x:Name="tbPreview" VerticalScrollBarVisibility="Visible" HorizontalAlignment="Left" Height="468" Margin="532,27,0,0" VerticalAlignment="Top" Width="779"  IsReadOnly="True" FontFamily="Courier New" ScrollViewer.CanContentScroll="True"/>
+        <StackPanel HorizontalAlignment="Left" Height="52" Margin="109,425,0,0" VerticalAlignment="Top" Width="147">
             <CheckBox Content="Crystal Fields" IsChecked="{Binding SearchFields}"/>
             <CheckBox Content="Record Select Formula" Height="15" IsChecked="{Binding SearchRF}"/>
             <CheckBox Content="Command Objects" Height="15" IsChecked="{Binding SearchCommand}"/>
         </StackPanel>
-        <Label Content="Report List" HorizontalAlignment="Left" Margin="242,17,0,0" VerticalAlignment="Top"/>
-        <Label Content="Preview" HorizontalAlignment="Left" Margin="242,197,0,0" VerticalAlignment="Top"/>
+        <Label Content="Report List" HorizontalAlignment="Left" Margin="10,1,0,0" VerticalAlignment="Top"/>
+        <Label Content="Preview" HorizontalAlignment="Left" Margin="532,0,0,0" VerticalAlignment="Top"/>
+        <Label Content="Search (Contains)" HorizontalAlignment="Left" Margin="290,412,0,0" VerticalAlignment="Top"/>
+        <Button Content="Button" HorizontalAlignment="Left" Margin="10,485,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
 
     </Grid>
 </Window>
