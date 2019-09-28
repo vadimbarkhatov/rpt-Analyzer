@@ -1,0 +1,1 @@
+﻿Search and analyze Crystal Reports files.
