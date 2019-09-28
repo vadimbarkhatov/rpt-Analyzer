@@ -145,6 +145,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BOEExporter.cs" />
     <Compile Include="ListTuple.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="RptDefinitionWriter.cs" />
