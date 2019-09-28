@@ -60,33 +60,46 @@ namespace CHEORptAnalyzer
             DataContext = this;
 
             tbPreview.Document.PageWidth = 1000;
+
+            fieldFilter = node => node.Descendants("Field");//.Where(x => textFilter(x.Value));
+            cmdFilter = node => node.Descendants("Command");//.Where(x => textFilter(x.Value));
+            rcdFilter = node => node.Descendants("RecordSelectionFormula");//.Where(x => textFilter(x.Value));
+
+            Func<string> searchString = tbSearch.Text.Trim;
+
+            textFilter = s => s.ToUpper().Contains(searchString().ToUpper());
         }
 
+        Func<XElement, IEnumerable<XElement>> fieldFilter;
+        Func<XElement, IEnumerable<XElement>> cmdFilter;
+        Func<XElement, IEnumerable<XElement>> rcdFilter;
+
+        //string searchString = "";
+
+        Func<string, bool> textFilter;// = s => s.ToUpper().Contains(searchString.ToUpper());
 
 
         private void Button_Click(object sender, RoutedEventArgs events)
         {
-            var searchString = tbSearch.Text;
+            //string searchString = tbSearch.Text.Trim;
+            Func<XElement, IEnumerable<XElement>> nodeFilter = x => Enumerable.Empty<XElement>();
 
-            Func<string, bool> textFilter = s => s.ToUpper().Contains(searchString.ToUpper());
-
-            Func<XElement, IEnumerable<XElement>> attrFilter;
-
-            Func<XElement, IEnumerable<XElement>> fieldFilter = node => node.Descendants("Field").Where(x => x.Attribute("FormulaName") != null && textFilter(x.Attribute("FormulaName").Value));
-            Func<XElement, IEnumerable<XElement>> cmdFilter = node => node.Descendants("Command").Where(x => textFilter(x.Value));
-            Func<XElement, IEnumerable<XElement>> rcdFilter = node => node.Descendants("RecordSelectionFormula").Where(x => textFilter(x.Value));
-
-            attrFilter = node => fieldFilter(node).Union(cmdFilter(node)).Union(rcdFilter(node));
+            //Func<XElement, IEnumerable<XElement>> fieldFilter = node => node.Descendants("Field").Where(x => x.Attribute("FormulaName") != null && textFilter(x.Attribute("FormulaName").Value));
             
-            IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => attrFilter(x).Count() > 0);
 
-            xroot.Descendants();
+            nodeFilter = x => fieldFilter(x).Concat(cmdFilter(x)).Concat(rcdFilter(x)).Where(y => textFilter(y.Value));
+            //attrFilter = x
+            //attrFilter = node => attrFilter(node).Union(fieldFilter(node)).Union(cmdFilter(node)).Union(rcdFilter(node));
+
+            IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => nodeFilter(x).Count() > 0);
+
+            //xroot.Descendants();
             lbReports.Items.Clear();
 
             
             foreach (XElement e in foundReports)
             {
-                var results = attrFilter(e).Select(x => x.Value).ToList();
+                var results = nodeFilter(e).Select(x => x.Value).ToList();
                 results.RemoveAll(x => x == "");
                 
                 lbReports.Items.Add(new ListTuple<XElement>() { Text = e.Attribute("FileName").Value, Obj = e, SearchResults = results });
@@ -104,96 +117,28 @@ namespace CHEORptAnalyzer
 
         private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var selReport = (lbReports.SelectedItem as ListTuple<XElement>)?.Obj;
+            UpdatePreview();
+        }
 
-            
-
+        private void UpdatePreview()
+        {
             tbPreview.Document.Blocks.Clear();
-            tbPreview.AppendText(selReport?.ToString());
 
+            if (lbReports.SelectedItem == null) return;
 
-            var searchResults = (lbReports.SelectedItem as ListTuple<XElement>)?.SearchResults;
-            
-            if(searchResults != null)
-            { 
-                foreach (string f in searchResults)
-                {
-                    //Trace.WriteLine(f);
-                    //Highlighter(f);
-                }
+            var searchResults = (lbReports.SelectedItem as ListTuple<XElement>).SearchResults;
+
+            var text = "";
+
+            foreach (string f in searchResults ?? Enumerable.Empty<string>())
+            {
+                text += f + "\r";
+                
             }
 
-            Highlighter("INNER JOIN Clarity..CLARITY_SER d on a.BILLING_PROVIDER_ID = d.PROV_ID");
-        }
+            tbPreview.AppendText(text);
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-            RetrieveReport();
-        }
-
-        EnterpriseSession boEnterpriseSession;
-        InfoObject boInfoObject;
-        ReportClientDocument boReportClientDocument;
-
-        private void RetrieveReport()
-        {
-            SessionMgr boSessionMgr;
-            InfoStore boInfoStore;
-            EnterpriseService boEnterpriseService;
-            InfoObjects boInfoObjects;
-            string boReportName;
-            string boQuery;
-            CrystalDecisions.ReportAppServer.ClientDoc.ReportAppFactory boReportAppFactory;
-
-            //Log on to the Enterprise CMS
-            boSessionMgr = new CrystalDecisions.Enterprise.SessionMgr();
-            //boEnterpriseSession = boSessionMgr.Logon(Request.QueryString["username"], Request.QueryString["password"], Request.QueryString["cms"], Request.QueryString["authtype"]);
-            boEnterpriseSession = boSessionMgr.Logon("vbarkhatov", "wat", "boeappprd", "Enterprise");
-            //Session.Add("boEnterpriseSession", boEnterpriseSession);
-            boEnterpriseService = boEnterpriseSession.GetService("", "InfoStore");
-            boInfoStore = new CrystalDecisions.Enterprise.InfoStore(boEnterpriseService);
-
-            boReportName = "Daily Non Violent Crisis Intervention Skill (NVC3).rpt";
-
-            //Retrieve the report object from the InfoStore, only need the SI_ID for RAS
-            boQuery = "Select SI_ID From CI_INFOOBJECTS Where SI_NAME = '" + boReportName +
-                "' AND SI_Instance=0";
-            boInfoObjects = boInfoStore.Query(boQuery);
-            boInfoObject = boInfoObjects[1];
-
-            boEnterpriseService = null;
-
-            //Retrieve the RASReportFactory
-            boEnterpriseService = boEnterpriseSession.GetService("RASReportFactory");
-            boReportAppFactory = (CrystalDecisions.ReportAppServer.ClientDoc.ReportAppFactory)boEnterpriseService.Interface;
-            //Open the report from Enterprise
-            boReportClientDocument = boReportAppFactory.OpenDocument(boInfoObject.ID, 0);
-
-            /**
-             * This exports the report to a byte() that we will stream out using the default options for the enum
-             * The available enums are:
-             * CrReportExportFormatEnum.crReportExportFormatCharacterSeparatedValues
-             * CrReportExportFormatEnum.crReportExportFormatCrystalReports
-             * CrReportExportFormatEnum.crReportExportFormatEditableRTF
-             * CrReportExportFormatEnum.crReportExportFormatHTML
-             * CrReportExportFormatEnum.crReportExportFormatMSExcel
-             * CrReportExportFormatEnum.crReportExportFormatMSWord
-             * CrReportExportFormatEnum.crReportExportFormatPDF
-             * CrReportExportFormatEnum.crReportExportFormatRecordToMSExcel
-             * CrReportExportFormatEnum.crReportExportFormatRTF
-             * CrReportExportFormatEnum.crReportExportFormatTabSeparatedText
-             * CrReportExportFormatEnum.crReportExportFormatText
-             * CrReportExportFormatEnum.crReportExportFormatXML
-            */
-            CrystalDecisions.ReportAppServer.CommonObjectModel.ByteArray boByteArray = boReportClientDocument.PrintOutputController.Export(CrReportExportFormatEnum.crReportExportFormatCrystalReports, 1);
-            //Save the ByteArray to disk, overwriting any existing file with the same name.
-            boByteArray.Save(@"c:\test\myExport.rpt", true);
-
-            //Response.Write(@"File successfully saved to C:\Windows\Temp\myExport.pdf");
-
-
-            boReportClientDocument.Close();
-            boEnterpriseSession.Logoff();
+            Highlighter(tbSearch.Text.Trim());
         }
 
 
@@ -234,9 +179,83 @@ namespace CHEORptAnalyzer
                 range.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
             }
 
-
         }
 
-        
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            RetrieveReport();
+        }
+
+        EnterpriseSession boEnterpriseSession;
+        InfoObject boInfoObject;
+        ReportClientDocument boReportClientDocument;
+
+        private void RetrieveReport()
+        {
+            SessionMgr boSessionMgr;
+            InfoStore boInfoStore;
+            EnterpriseService boEnterpriseService;
+            InfoObjects boInfoObjects;
+            string boReportName;
+            string boQuery;
+            CrystalDecisions.ReportAppServer.ClientDoc.ReportAppFactory boReportAppFactory;
+
+            //Log on to the Enterprise CMS
+            boSessionMgr = new SessionMgr();
+            //boEnterpriseSession = boSessionMgr.Logon(Request.QueryString["username"], Request.QueryString["password"], Request.QueryString["cms"], Request.QueryString["authtype"]);
+            boEnterpriseSession = boSessionMgr.Logon("vbarkhatov", "wat", "boeappprd", "Enterprise");
+            //Session.Add("boEnterpriseSession", boEnterpriseSession);
+            boEnterpriseService = boEnterpriseSession.GetService("", "InfoStore");
+            boInfoStore = new InfoStore(boEnterpriseService);
+
+            boReportName = "Daily Non Violent Crisis Intervention Skill (NVC3).rpt";
+
+            //Retrieve the report object from the InfoStore, only need the SI_ID for RAS
+            boQuery = "Select SI_ID From CI_INFOOBJECTS Where SI_NAME = '" + boReportName +
+                "' AND SI_Instance=0";
+            boInfoObjects = boInfoStore.Query(boQuery);
+            boInfoObject = boInfoObjects[1];
+
+            boEnterpriseService = null;
+
+            //Retrieve the RASReportFactory
+            boEnterpriseService = boEnterpriseSession.GetService("RASReportFactory");
+            boReportAppFactory = (ReportAppFactory)boEnterpriseService.Interface;
+            //Open the report from Enterprise
+            boReportClientDocument = boReportAppFactory.OpenDocument(boInfoObject.ID, 0);
+
+            /**
+             * This exports the report to a byte() that we will stream out using the default options for the enum
+             * The available enums are:
+             * CrReportExportFormatEnum.crReportExportFormatCharacterSeparatedValues
+             * CrReportExportFormatEnum.crReportExportFormatCrystalReports
+             * CrReportExportFormatEnum.crReportExportFormatEditableRTF
+             * CrReportExportFormatEnum.crReportExportFormatHTML
+             * CrReportExportFormatEnum.crReportExportFormatMSExcel
+             * CrReportExportFormatEnum.crReportExportFormatMSWord
+             * CrReportExportFormatEnum.crReportExportFormatPDF
+             * CrReportExportFormatEnum.crReportExportFormatRecordToMSExcel
+             * CrReportExportFormatEnum.crReportExportFormatRTF
+             * CrReportExportFormatEnum.crReportExportFormatTabSeparatedText
+             * CrReportExportFormatEnum.crReportExportFormatText
+             * CrReportExportFormatEnum.crReportExportFormatXML
+            */
+            CrystalDecisions.ReportAppServer.CommonObjectModel.ByteArray boByteArray = boReportClientDocument.PrintOutputController.Export(CrReportExportFormatEnum.crReportExportFormatCrystalReports, 1);
+            //Save the ByteArray to disk, overwriting any existing file with the same name.
+            boByteArray.Save(@"c:\test\myExport.rpt", true);
+
+            //Response.Write(@"File successfully saved to C:\Windows\Temp\myExport.pdf");
+
+
+            boReportClientDocument.Close();
+            boEnterpriseSession.Logoff();
+        }
+
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        {
+            RadioButton rb = (RadioButton)sender;
+
+            
+        }
     }
 }

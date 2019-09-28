@@ -314,8 +314,8 @@ namespace RptToXml
 			writer.WriteAttributeString("Name", fd.Name);
 			writer.WriteAttributeString("NumberOfBytes", fd.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
 			writer.WriteAttributeString("ValueType", fd.ValueType.ToString());
-
-			writer.WriteEndElement();
+            
+            writer.WriteEndElement();
 		}
 
 		private static void GetFieldDefinition(CrystalDecisions.ReportAppServer.DataDefModel.Field fd, XmlWriter writer)
@@ -336,7 +336,9 @@ namespace RptToXml
 			writer.WriteAttributeString("Type", fd.Type.ToString());
 			writer.WriteAttributeString("UseCount", fd.UseCount.ToString(CultureInfo.InvariantCulture));
 
-			writer.WriteEndElement();
+            writer.WriteString(fd.FormulaForm);
+
+            writer.WriteEndElement();
 		}
 
 		private void GetDataDefinition(ReportDocument report, XmlWriter writer)
