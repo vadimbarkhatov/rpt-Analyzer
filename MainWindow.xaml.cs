@@ -38,29 +38,25 @@ namespace CHEORptAnalyzer
         public bool SearchFields { get; set; } = true;
         public bool SearchRF { get; set; } = true;
         public bool SearchCommand { get; set; } = true;
-
+        public string SearchString { get; set; } = "";
 
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = this;
 
-            string[] files; 
-                
+            string[] files;
+
             try { files = Directory.GetFiles(@"C:\test\Reports", "*.xml"); }
             catch { files = new string[0]; }
-                
 
             xroot = new XElement("Reports");
 
             foreach (string reportDefPath in files)
             {
                 XElement xelement = XElement.Load(reportDefPath);
-                //txtOutput.Text +=  reportDefPath;
                 xroot.Add(xelement);
-                //Trace.WriteLine(xroot.Nodes().Count());
             }
-
-            DataContext = this;
 
             tbPreview.Document.PageWidth = 1000;
 
@@ -68,18 +64,23 @@ namespace CHEORptAnalyzer
             cmdFilter = node => node.Descendants("Command");//.Where(x => textFilter(x.Value));
             rcdFilter = node => node.Descendants("RecordSelectionFormula");//.Where(x => textFilter(x.Value));
 
-            Func<string> searchString = tbSearch.Text.Trim;
 
-            textFilter = s => s.ToUpper().Contains(searchString().ToUpper());
+            textFilterMod = x => x;
+
+            textFilter = s => textFilterMod(s.ToUpper().Contains(SearchString.ToUpper()));
+            //.IndexOf("string", StringComparison.OrdinalIgnoreCase) >= 0;
+
         }
 
-        Func<XElement, IEnumerable<XElement>> fieldFilter;
-        Func<XElement, IEnumerable<XElement>> cmdFilter;
-        Func<XElement, IEnumerable<XElement>> rcdFilter;
+        readonly Func<XElement, IEnumerable<XElement>> fieldFilter;
+        readonly Func<XElement, IEnumerable<XElement>> cmdFilter;
+        readonly Func<XElement, IEnumerable<XElement>> rcdFilter;
+
 
         //string searchString = "";
 
-        Func<string, bool> textFilter;// = s => s.ToUpper().Contains(searchString.ToUpper());
+        readonly Func<string, bool> textFilter;// = s => s.ToUpper().Contains(searchString.ToUpper());
+        readonly Func<bool, bool> textFilterMod;
 
 
         private void Button_Click(object sender, RoutedEventArgs events)
@@ -88,7 +89,7 @@ namespace CHEORptAnalyzer
             Func<XElement, IEnumerable<XElement>> nodeFilter = x => Enumerable.Empty<XElement>();
 
             //Func<XElement, IEnumerable<XElement>> fieldFilter = node => node.Descendants("Field").Where(x => x.Attribute("FormulaName") != null && textFilter(x.Attribute("FormulaName").Value));
-            
+
 
             nodeFilter = x => fieldFilter(x).Concat(cmdFilter(x)).Concat(rcdFilter(x)).Where(y => textFilter(y.Value));
             //attrFilter = x
@@ -99,12 +100,12 @@ namespace CHEORptAnalyzer
             //xroot.Descendants();
             lbReports.Items.Clear();
 
-            
+
             foreach (XElement e in foundReports)
             {
                 var results = nodeFilter(e).Select(x => x.Value).ToList();
                 results.RemoveAll(x => x == "");
-                
+
                 lbReports.Items.Add(new ListTuple<XElement>() { Text = e.Attribute("FileName").Value, Obj = e, SearchResults = results });
             }
         }
@@ -138,7 +139,7 @@ namespace CHEORptAnalyzer
             foreach (string f in searchResults ?? Enumerable.Empty<string>())
             {
                 text += f + "\r";
-                
+
             }
 
             tbPreview.AppendText(text);
@@ -191,7 +192,7 @@ namespace CHEORptAnalyzer
             BOEExporter.RetrieveReport();
         }
 
-        
+
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
