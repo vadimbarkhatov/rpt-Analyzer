@@ -44,8 +44,11 @@ namespace CHEORptAnalyzer
         {
             InitializeComponent();
 
-            string[] files =
-                Directory.GetFiles(@"C:\test\Reports\", "*.xml");
+            string[] files; 
+                
+            try { files = Directory.GetFiles(@"C:\test\Reports", "*.xml"); }
+            catch { files = new string[0]; }
+                
 
             xroot = new XElement("Reports");
 
@@ -111,6 +114,8 @@ namespace CHEORptAnalyzer
         {
             string[] rptFiles = new string[1];
             rptFiles[0] = @"C:\test\Reports\*";
+
+
             RptToXml.RptToXml.Main2(rptFiles);
         }
 
@@ -191,8 +196,6 @@ namespace CHEORptAnalyzer
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
             RadioButton rb = (RadioButton)sender;
-
-            
         }
     }
 }
