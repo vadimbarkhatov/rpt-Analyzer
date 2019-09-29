@@ -20,11 +20,6 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
-using CrystalDecisions.Enterprise;
-using CrystalDecisions.ReportAppServer.ClientDoc;
-using CrystalDecisions.ReportAppServer.Controllers;
-using CrystalDecisions.ReportAppServer.ReportDefModel;
-
 namespace CHEORptAnalyzer
 {
     /// <summary>
@@ -39,12 +34,39 @@ namespace CHEORptAnalyzer
         public bool SearchRF { get; set; } = true;
         public bool SearchCommand { get; set; } = true;
         public string SearchString { get; set; } = "";
+        public string SearchMod { get; set; } = "";
+
+        public List<string> Item
+        {
+            get { return Items; }
+            set { Items = value; }
+        }
+
+        public List<string> Items { get; set; } = new List<string>();
 
         public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
+            tbPreview.Document.PageWidth = 1000;
 
+            Item.Add("Contains");
+            Item.Add("Does Not Contain");
+
+
+            LoadXML();
+
+            fieldFilter = node => node.Descendants("Field");
+            cmdFilter = node => node.Descendants("Command");
+            rcdFilter = node => node.Descendants("RecordSelectionFormula");
+
+            textFilterMod = x => x;
+
+            textFilter = s => textFilterMod(s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0); //Case insensitive contains
+        }
+
+        private void LoadXML()
+        {
             string[] files;
 
             try { files = Directory.GetFiles(@"C:\test\Reports", "*.xml"); }
@@ -57,50 +79,29 @@ namespace CHEORptAnalyzer
                 XElement xelement = XElement.Load(reportDefPath);
                 xroot.Add(xelement);
             }
-
-            tbPreview.Document.PageWidth = 1000;
-
-            fieldFilter = node => node.Descendants("Field");//.Where(x => textFilter(x.Value));
-            cmdFilter = node => node.Descendants("Command");//.Where(x => textFilter(x.Value));
-            rcdFilter = node => node.Descendants("RecordSelectionFormula");//.Where(x => textFilter(x.Value));
-
-
-            textFilterMod = x => x;
-
-            textFilter = s => textFilterMod(s.ToUpper().Contains(SearchString.ToUpper()));
-            //.IndexOf("string", StringComparison.OrdinalIgnoreCase) >= 0;
-
         }
 
         readonly Func<XElement, IEnumerable<XElement>> fieldFilter;
         readonly Func<XElement, IEnumerable<XElement>> cmdFilter;
         readonly Func<XElement, IEnumerable<XElement>> rcdFilter;
 
-
-        //string searchString = "";
-
-        readonly Func<string, bool> textFilter;// = s => s.ToUpper().Contains(searchString.ToUpper());
-        readonly Func<bool, bool> textFilterMod;
-
+        readonly Func<string, bool> textFilter;
+        Func<bool, bool> textFilterMod;
 
         private void Button_Click(object sender, RoutedEventArgs events)
         {
-            //string searchString = tbSearch.Text.Trim;
             Func<XElement, IEnumerable<XElement>> nodeFilter = x => Enumerable.Empty<XElement>();
 
             //Func<XElement, IEnumerable<XElement>> fieldFilter = node => node.Descendants("Field").Where(x => x.Attribute("FormulaName") != null && textFilter(x.Attribute("FormulaName").Value));
 
-
             nodeFilter = x => fieldFilter(x).Concat(cmdFilter(x)).Concat(rcdFilter(x)).Where(y => textFilter(y.Value));
-            //attrFilter = x
+            
             //attrFilter = node => attrFilter(node).Union(fieldFilter(node)).Union(cmdFilter(node)).Union(rcdFilter(node));
 
             IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => nodeFilter(x).Count() > 0);
 
-            //xroot.Descendants();
+
             lbReports.Items.Clear();
-
-
             foreach (XElement e in foundReports)
             {
                 var results = nodeFilter(e).Select(x => x.Value).ToList();
@@ -144,18 +145,25 @@ namespace CHEORptAnalyzer
 
             tbPreview.AppendText(text);
 
-            Highlighter(tbSearch.Text.Trim());
+            Highlighter(SearchString.Trim(), tbPreview);
         }
 
 
-        private void Highlighter(string searchText)
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
-            tbPreview.SelectAll();
-            tbPreview.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(Colors.Black));
-            tbPreview.Selection.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
+            //RadioButton rb = (RadioButton)sender;
+            var test = 3;
+        }
 
-            Regex reg = new Regex(searchText, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            TextPointer position = tbPreview.Document.ContentStart;
+        private static void Highlighter(string searchText, RichTextBox rtb)
+        {
+            rtb.SelectAll();
+            rtb.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(Colors.Black));
+            rtb.Selection.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
+
+            Regex reg = new Regex(Regex.Escape(searchText), RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            
+            TextPointer position = rtb.Document.ContentStart;
             List<TextRange> ranges = new List<TextRange>();
 
             while (position != null)
@@ -163,11 +171,10 @@ namespace CHEORptAnalyzer
                 if (position.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
                 {
                     string text = position.GetTextInRun(LogicalDirection.Forward);
-                    var matchs = reg.Matches(text);
+                    var matches = reg.Matches(text);
 
-                    foreach (Match match in matchs)
+                    foreach (Match match in matches)
                     {
-
                         TextPointer start = position.GetPositionAtOffset(match.Index);
                         TextPointer end = start.GetPositionAtOffset(searchText.Length);
 
@@ -178,13 +185,11 @@ namespace CHEORptAnalyzer
                 position = position.GetNextContextPosition(LogicalDirection.Forward);
             }
 
-
             foreach (TextRange range in ranges)
             {
                 range.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(Colors.Red));
                 range.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
             }
-
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
@@ -192,11 +197,21 @@ namespace CHEORptAnalyzer
             BOEExporter.RetrieveReport();
         }
 
-
-
-        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        private void CbSearchMod_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            RadioButton rb = (RadioButton)sender;
+            var mod = (cbSearchMod.SelectedItem as ComboBoxItem).Name;
+
+            //TODO: refactor...
+            switch (mod)
+            {
+                case "Contain":
+                    textFilterMod = x => x;
+                    break;
+                case "DNContain":
+                    textFilterMod = x => !x;
+                    break;
+            }
+            
         }
     }
 }
