@@ -49,12 +49,8 @@ namespace CHEORptAnalyzer
 
             LoadXML();
 
-            //fieldFilter = node => node.Descendants("Field");
-            //cmdFilter = node => node.Descendants("Command");
-            //rcdFilter = node => node.Descendants("RecordSelectionFormula");
-
             textFilterMod = x => x;
-            textFilter = s => textFilterMod(s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0); //Case insensitive contains
+            textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
         }
 
         private void LoadXML()
@@ -73,10 +69,6 @@ namespace CHEORptAnalyzer
             }
         }
 
-        //readonly Func<XElement, IEnumerable<XElement>> fieldFilter;
-        //readonly Func<XElement, IEnumerable<XElement>> cmdFilter;
-        //readonly Func<XElement, IEnumerable<XElement>> rcdFilter;
-
         readonly Func<string, bool> textFilter;
         Func<bool, bool> textFilterMod;
 
@@ -84,17 +76,19 @@ namespace CHEORptAnalyzer
         {
             Func<XElement, IEnumerable<XElement>> nodeFilter = x => Enumerable.Empty<XElement>();
 
-            //nodeFilter = x => fieldFilter(x).Concat(cmdFilter(x)).Concat(rcdFilter(x)).Where(y => textFilter(y.Value));
-            //nodeFilter = x => x.Descendants().W
+            var filterFuncs = new Dictionary<string, Func<XElement, IEnumerable<XElement>>>();
 
-            //"Field", "Command", "RecordSelectionFormula"
+
+            filterFuncs.Add("Field", x => x.Descendants("Tables").Descendants("Field"));
+            filterFuncs.Add("Command", x => x.Descendants("Command"));
+            filterFuncs.Add("RecordSelectionFormula", x => x.Descendants("RecordSelectionFormula"));
 
             nodeFilter = x => x.Descendants()
-                               .Where(y => (y.Name.LocalName == "Field" && SearchFields) || (y.Name.LocalName == "Command" && SearchCommand) || (y.Name.LocalName == "RecordSelectionFormula" && SearchRF))
+                               .Where(y => (y.Name.LocalName == "Field" && y.Parent.Name.LocalName == "Fields" && SearchFields) || (y.Name.LocalName == "Command" && SearchCommand) || (y.Name.LocalName == "RecordSelectionFormula" && SearchRF))
                                .Where(s => textFilter(s.Value));
 
 
-            IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => nodeFilter(x).Count() > 0);
+            IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => textFilterMod(nodeFilter(x).Count() > 0));
 
             lbReports.Items.Clear();
             foreach (XElement e in foundReports)
@@ -103,13 +97,8 @@ namespace CHEORptAnalyzer
 
                 foreach (var f in filters)
                 {
-                    results[f] = e.Descendants(f).Select(x => x.Value).Aggregate(string.Empty, (x, y) => x + "\r" + y);
-                    //results[f].RemoveAll(x => x == "");
+                    results[f] = filterFuncs[f](e).Select(x => x.Value).Aggregate(string.Empty, (x, y) => x + "\r" + y);
                 }
-
-                //var results2 = results.ToDictionary()
-                //var results2 = nodeFilter(e).Select(x => x.Value).Aggregate((x, y) => x + "\r" + y);
-
                 //results.RemoveAll(x => x == "");
 
                 var newItem = new XElementWrap() { Text = e.Attribute("FileName").Value, XEle = e, SearchResults = results };
@@ -168,9 +157,6 @@ namespace CHEORptAnalyzer
 
             UpdatePreview();
         }
-        //Content="Columns"
-        //Content="Formula"
-        //Content="Command"
 
 
         private static void Highlighter(string searchText, RichTextBox rtb)
