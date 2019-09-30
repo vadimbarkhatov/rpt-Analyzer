@@ -28,13 +28,13 @@ namespace CHEORptAnalyzer
             //Log on to the Enterprise CMS
             boSessionMgr = new SessionMgr();
             //boEnterpriseSession = boSessionMgr.Logon(Request.QueryString["username"], Request.QueryString["password"], Request.QueryString["cms"], Request.QueryString["authtype"]);
-            boEnterpriseSession = boSessionMgr.Logon("vadim", "test", "win-p09omoq0img", "Enterprise");
+            boEnterpriseSession = boSessionMgr.Logon("vbarkhatov", "", "boeappprd", "Enterprise");
             //boEnterpriseSession = boSessionMgr.
             //Session.Add("boEnterpriseSession", boEnterpriseSession);
             boEnterpriseService = boEnterpriseSession.GetService("", "InfoStore");
             boInfoStore = new InfoStore(boEnterpriseService);
 
-            boReportName = "Variance Analysis Report";
+            boReportName = "Daily Non Violent Crisis Intervention Skill (NVC3).rpt";
 
             //Retrieve the report object from the InfoStore, only need the SI_ID for RAS
             boQuery = "Select SI_ID From CI_INFOOBJECTS Where SI_NAME = '" + boReportName +
@@ -71,7 +71,6 @@ namespace CHEORptAnalyzer
             boByteArray.Save(@"c:\test\myExport.rpt", true);
 
             //Response.Write(@"File successfully saved to C:\Windows\Temp\myExport.pdf");
-
 
             boReportClientDocument.Close();
             boEnterpriseSession.Logoff();

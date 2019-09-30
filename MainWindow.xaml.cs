@@ -51,6 +51,8 @@ namespace CHEORptAnalyzer
 
             textFilterMod = x => x;
             textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
+
+            SearchReports();
         }
 
         private void LoadXML()
@@ -64,7 +66,11 @@ namespace CHEORptAnalyzer
 
             foreach (string reportDefPath in files)
             {
-                XElement xelement = XElement.Load(reportDefPath);
+                XElement xelement;
+
+                try { xelement = XElement.Load(reportDefPath); }
+                catch { continue; }
+
                 xroot.Add(xelement);
             }
         }
@@ -73,6 +79,11 @@ namespace CHEORptAnalyzer
         Func<bool, bool> textFilterMod;
 
         private void Button_Click(object sender, RoutedEventArgs events)
+        {
+            SearchReports();
+        }
+
+        private void SearchReports()
         {
             Func<XElement, IEnumerable<XElement>> nodeFilter = x => Enumerable.Empty<XElement>();
 
@@ -198,7 +209,10 @@ namespace CHEORptAnalyzer
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            BOEExporter.RetrieveReport();
+            //BOEExporter.RetrieveReport();
+
+            //System.Windows.Forms.MessageBox.Show("Test");
+            System.Windows.MessageBox.Show("Test");
         }
 
         private void CbSearchMod_SelectionChanged(object sender, SelectionChangedEventArgs e)

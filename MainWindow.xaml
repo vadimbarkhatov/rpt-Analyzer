@@ -35,6 +35,7 @@
             <CheckBox Content="Command Objects" Height="15" IsChecked="{Binding SearchCommand}"/>
         </StackPanel>
         <Label Content="Report List" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top"/>
+        <Label Content="{Binding ElementName=lbReports, Path=Items.Count, Mode=OneWay}" ContentStringFormat="{}({0})" HorizontalAlignment="Left" Margin="70,30,0,0" VerticalAlignment="Top" Width="50"/>
         <Label Content="Preview" HorizontalAlignment="Left" Margin="532,29,0,0" VerticalAlignment="Top"/>
         <Label Content="Seach" HorizontalAlignment="Left" Margin="261,452,0,0" VerticalAlignment="Top" Width="62"/>
         <Label HorizontalAlignment="Left" Margin="306,449,0,0" VerticalAlignment="Top" Width="136">
@@ -43,7 +44,7 @@
                 <ComboBoxItem Name="DNContain">Does Not Contain</ComboBoxItem>
             </ComboBox>
         </Label>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="-226,384,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
+        <Button Content="Button" HorizontalAlignment="Left" Margin="32,525,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
 
     </Grid>
 </Window>
