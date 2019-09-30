@@ -8,7 +8,7 @@ namespace RptToXml
 {
 	public class RptToXml
 	{
-		public static void Main2(string[] args)
+		public static void Convert(string[] args)
 		{
 			if (args.Length < 1)
 			{
