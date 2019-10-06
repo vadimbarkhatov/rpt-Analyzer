@@ -28,7 +28,7 @@
 
         <ListBox Name="lbReports" HorizontalAlignment="Left" Height="371" Margin="10,62,0,0" VerticalAlignment="Top" Width="494" SelectionChanged="LbReports_SelectionChanged"/>
         <TextBox x:Name="tbSearch" HorizontalAlignment="Left" Height="23" Margin="261,480,0,0" VerticalAlignment="Top" Width="181"  MaxLines="1" Text = "{Binding SearchString, Mode = TwoWay}"/>
-        <RichTextBox x:Name="tbPreview" VerticalScrollBarVisibility="Visible" Margin="537,62,10,16"  IsReadOnly="True" FontFamily="Courier New" ScrollViewer.CanContentScroll="True"/>
+        <RichTextBox x:Name="tbPreview" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Margin="537,62,10,16"  IsReadOnly="True" FontFamily="Courier New" ScrollViewer.CanContentScroll="True"/>
         <StackPanel HorizontalAlignment="Left" Height="52" Margin="109,454,0,0" VerticalAlignment="Top" Width="147">
             <CheckBox Content="Crystal Fields" IsChecked="{Binding SearchFields}"/>
             <CheckBox Content="Record Select Formula" Height="15" IsChecked="{Binding SearchRF}"/>
