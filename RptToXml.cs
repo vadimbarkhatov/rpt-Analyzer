@@ -55,12 +55,19 @@ namespace RptToXml
 			{
 				Trace.WriteLine("Dumping " + rptPath);
 
-				using (var writer = new RptDefinitionWriter(rptPath))
-				{
-					string xmlPath = args.Length > 1 ?
-						args[1] : Path.ChangeExtension(rptPath, "xml");
-					writer.WriteToXml(xmlPath);
-				}
+                try
+                {
+                    using (var writer = new RptDefinitionWriter(rptPath))
+                    {
+                        string xmlPath = args.Length > 1 ?
+                            args[1] : Path.ChangeExtension(rptPath, "xml");
+                        writer.WriteToXml(xmlPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Trace.Write(ex.Message);
+                }
 			}
 		}
 

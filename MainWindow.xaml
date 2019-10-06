@@ -25,7 +25,7 @@
             
         </DockPanel>
 
-        <Button Content="Search Reports" HorizontalAlignment="Left" Margin="319,508,0,0" VerticalAlignment="Top" Width="123" Height="26" Click="Button_Click" />
+        <Button Content="Search Reports" HorizontalAlignment="Left" Margin="319,508,0,0" VerticalAlignment="Top" Width="123" Height="26" Click="BtnSearch_Click" />
 
         <ListBox Name="lbReports" HorizontalAlignment="Left" Height="371" Margin="10,62,0,0" VerticalAlignment="Top" Width="494" SelectionChanged="LbReports_SelectionChanged"/>
         <TextBox x:Name="tbSearch" HorizontalAlignment="Left" Height="23" Margin="261,480,0,0" VerticalAlignment="Top" Width="181"  MaxLines="1" Text = "{Binding SearchString, Mode = TwoWay}"/>
@@ -44,7 +44,7 @@
                 <ComboBoxItem Name="DNContain">Does Not Contain</ComboBoxItem>
             </ComboBox>
         </Label>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="-226,384,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
+        <Button Content="btnSearch" HorizontalAlignment="Left" Margin="-226,384,0,0" VerticalAlignment="Top" Width="75" Click="BtnSearch_Click"/>
 
     </Grid>
 </Window>

@@ -29,7 +29,7 @@ namespace CHEORptAnalyzer
     public partial class MainWindow : Window
     {
         private const string rptPath = @"C:\test\Reports\*";
-        XElement xroot;
+        readonly XElement xroot;
 
         public bool SearchFields { get; set; } = true;
         public bool SearchRF { get; set; } = true;
@@ -43,20 +43,6 @@ namespace CHEORptAnalyzer
             DataContext = this;
             tbPreview.Document.PageWidth = 1000;
 
-            LoadXML();
-
-            textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
-
-            resultFilterFuncs = new Dictionary<string, Func<XElement, IEnumerable<XElement>>>
-            {
-                { "Field", x => x.Descendants("Tables").Descendants("Field") },
-                { "Command", x => x.Descendants("Command") },
-                { "RecordSelectionFormula", x => x.Descendants("RecordSelectionFormula") }
-            };
-        }
-
-        private void LoadXML()
-        {
             string[] files;
 
             try { files = Directory.GetFiles(@"C:\test\Reports", "*.xml"); }
@@ -69,12 +55,22 @@ namespace CHEORptAnalyzer
                 XElement xelement = XElement.Load(reportDefPath);
                 xroot.Add(xelement);
             }
+
+            textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
+
+            resultFilterFuncs = new Dictionary<string, Func<XElement, IEnumerable<XElement>>>
+            {
+                { "Field", x => x.Descendants("Tables").Descendants("Field") },
+                { "Command", x => x.Descendants("Command") },
+                { "RecordSelectionFormula", x => x.Descendants("RecordSelectionFormula") }
+            };
         }
 
-        readonly Func<string, bool> textFilter;
-        Dictionary<string, Func<XElement, IEnumerable<XElement>>> resultFilterFuncs;
 
-        private void Button_Click(object sender, RoutedEventArgs events)
+        readonly Func<string, bool> textFilter;
+        readonly Dictionary<string, Func<XElement, IEnumerable<XElement>>> resultFilterFuncs;
+
+        private void BtnSearch_Click(object sender, RoutedEventArgs events)
         {
             Func<XElement, IEnumerable<XElement>> nodeFilter;
 
@@ -84,12 +80,6 @@ namespace CHEORptAnalyzer
                                         .Concat(SearchCommand ? resultFilterFuncs["Command"](x) : Enumerable.Empty<XElement>())
                                         .Where(s => textFilter(s.Value));
 
-
-            // 
-            //foreach(string s in resultFilterFuncs.Keys)
-            //{
-                //var foundReports2 += xroot.Elements("Report").
-            //}
 
             IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == nodeFilter(x).Count() > 0);
 
@@ -122,6 +112,7 @@ namespace CHEORptAnalyzer
         {
             string[] rptFiles = new string[1];
             rptFiles[0] = rptPath;
+            //rptFiles[1] = @".\ReportCache\";
 
             RptToXml.RptToXml.Convert(rptFiles);
         }

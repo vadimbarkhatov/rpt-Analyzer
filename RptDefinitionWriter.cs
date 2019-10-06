@@ -33,7 +33,8 @@ namespace RptToXml
 		{
 			_createdReport = true;
 			_report = new ReportDocument();
-			_report.Load(filename, OpenReportMethod.OpenReportByTempCopy);
+
+            try { _report.Load(filename, OpenReportMethod.OpenReportByTempCopy); } catch (Exception ex) { throw ex; };
 			_rcd = _report.ReportClientDocument;
 
 			_oleCompoundFile = new CompoundFile(filename);
