@@ -35,9 +35,7 @@ namespace CHEORptAnalyzer
         public bool SearchRF { get; set; } = true;
         public bool SearchCommand { get; set; } = true;
         public string SearchString { get; set; } = "";
-        public string SearchMod { get; set; } = "";
-
-        public List<string> Items { get; set; } = new List<string>();
+        public bool ContainsSeach { get; set; } = true;
 
         public MainWindow()
         {
@@ -47,7 +45,6 @@ namespace CHEORptAnalyzer
 
             LoadXML();
 
-            textFilterMod = x => x;
             textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
 
             resultFilterFuncs = new Dictionary<string, Func<XElement, IEnumerable<XElement>>>
@@ -75,24 +72,30 @@ namespace CHEORptAnalyzer
         }
 
         readonly Func<string, bool> textFilter;
-        Func<bool, bool> textFilterMod;
-
         Dictionary<string, Func<XElement, IEnumerable<XElement>>> resultFilterFuncs;
 
         private void Button_Click(object sender, RoutedEventArgs events)
         {
-            Func<XElement, IEnumerable<XElement>> nodeFilter = x => Enumerable.Empty<XElement>();
+            Func<XElement, IEnumerable<XElement>> nodeFilter;
 
-            nodeFilter = x => x.Descendants()
-                               .Where(y => (y.Name.LocalName == "Field" && y.Parent.Name.LocalName == "Fields" && SearchFields) || (y.Name.LocalName == "Command" && SearchCommand) || (y.Name.LocalName == "RecordSelectionFormula" && SearchRF))
-                               .Where(s => textFilter(s.Value));
+            nodeFilter = x => Enumerable.Empty<XElement>()
+                                        .Concat(SearchFields ? resultFilterFuncs["Field"](x) : Enumerable.Empty<XElement>())
+                                        .Concat(SearchRF ? resultFilterFuncs["RecordSelectionFormula"](x) : Enumerable.Empty<XElement>())
+                                        .Concat(SearchCommand ? resultFilterFuncs["Command"](x) : Enumerable.Empty<XElement>())
+                                        .Where(s => textFilter(s.Value));
 
 
-            IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => textFilterMod(nodeFilter(x).Count() > 0));
+            // 
+            //foreach(string s in resultFilterFuncs.Keys)
+            //{
+                //var foundReports2 += xroot.Elements("Report").
+            //}
+
+            IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == nodeFilter(x).Count() > 0);
 
             var currItem = lbReports.SelectedItem as XElementWrap;
-
             lbReports.Items.Clear();
+
             foreach (XElement e in foundReports)
             {
                 var results = new Dictionary<string, string>();
@@ -102,8 +105,6 @@ namespace CHEORptAnalyzer
                     Func<XElement, IEnumerable<XElement>> filterFunc = resultFilterFuncs[f];
 
                     results[f] = filterFunc(e).Select(x => x.Value).Aggregate(string.Empty, (x, y) => x + "\r" + y);
-
-                    var test = resultFilterFuncs[f];
                 }
 
                 var newItem = new XElementWrap() { Text = e.Attribute("FileName").Value, XEle = e, SearchResults = results };
@@ -115,7 +116,6 @@ namespace CHEORptAnalyzer
                     lbReports.SelectedItem = lbReports.Items[lbReports.Items.Count - 1];
                 }
             }
-
         }
 
         private void ParseRPT(object sender, RoutedEventArgs e)
@@ -209,23 +209,6 @@ namespace CHEORptAnalyzer
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             BOEExporter.RetrieveReport();
-        }
-
-        private void CbSearchMod_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var mod = (cbSearchMod.SelectedItem as ComboBoxItem).Name;
-
-            //TODO: refactor...
-            switch (mod)
-            {
-                case "Contain":
-                    textFilterMod = x => x;
-                    break;
-                case "DNContain":
-                    textFilterMod = x => !x;
-                    break;
-            }
-
         }
     }
 }
