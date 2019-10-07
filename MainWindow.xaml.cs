@@ -101,28 +101,12 @@ namespace CHEORptAnalyzer
         {
             Func<XElement, IEnumerable<XElement>> nodeFilter = x => Enumerable.Empty<XElement>();
 
-            //var testFunc 
-
-            //nodeFilter = x => Enumerable.Empty<XElement>()
-            //.Concat(SearchFields ? resultFilterFuncs["Field"](x) : Enumerable.Empty<XElement>())
-            //.Concat(SearchRF ? resultFilterFuncs["RecordSelectionFormula"](x) : Enumerable.Empty<XElement>())
-            //.Concat(SearchCommand ? resultFilterFuncs["Command"](x) : Enumerable.Empty<XElement>())
-            //.Where(s => textFilter(s.Value));
-
-            //nodeFilter = resultFilterFuncs["Field"].Combine<XElement>(resultFilterFuncs["RecordSelectionFormula"]);
-
-
-            foreach(string f in resultFilterFuncs.Keys)
-            {
-                nodeFilter = nodeFilter.Combine<XElement>(resultFilterFuncs[f]);
-            }
-
-            //if (SearchFields) nodeFilter = nodeFilter.Combine<XElement>(resultFilterFuncs["Field"]);
+            if (SearchFields) nodeFilter = nodeFilter.Combine<XElement>(resultFilterFuncs["Field"]);
+            if (SearchRF) nodeFilter = nodeFilter.Combine<XElement>(resultFilterFuncs["RecordSelectionFormula"]);
+            if (SearchCommand) nodeFilter = nodeFilter.Combine<XElement>(resultFilterFuncs["Command"]);
 
             nodeFilter = nodeFilter.Filter<XElement>(s => textFilter(s.Value));
             
-
-
             IEnumerable <XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == nodeFilter(x).Count() > 0);
 
             var currItem = lbReports.SelectedItem as XElementWrap;
@@ -136,9 +120,9 @@ namespace CHEORptAnalyzer
                 {
                     Func<XElement, IEnumerable<XElement>> filterFunc = resultFilterFuncs[f];
 
-                    var test = resultFilterFuncs[f](e);
-
-                    results[f] = filterFunc(e).Select(x => x.Value).Aggregate(string.Empty, (x, y) => x + "\r" + y);
+                    results[f] = filterFunc(e).Select(x => x.Value)
+                                              .DefaultIfEmpty(string.Empty)
+                                              .Aggregate((x, y) => x + "\r" + y);
                 }
 
                 var newItem = new XElementWrap() { Text = e.Attribute("FileName").Value, XEle = e, SearchResults = results };
@@ -166,6 +150,9 @@ namespace CHEORptAnalyzer
             rptFiles[1] = cacheFolder;
 
             RptToXml.RptToXml.Convert(rptFiles);
+
+            LoadXML();
+            SearchReports();
         }
 
         private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
