@@ -22,11 +22,6 @@ namespace RptToXml
 			if (!wildCard && !ReportFilenameValid(rptPathArg))
 				return;
 
-			if (wildCard && args.Length > 1)
-			{
-				Console.WriteLine("Output filename may not be specified with wildcard.");
-				return;
-			}
 
 			Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 
@@ -54,13 +49,31 @@ namespace RptToXml
 			foreach (string rptPath in rptPaths)
 			{
 				Trace.WriteLine("Dumping " + rptPath);
+                string xmlPath;
 
-				using (var writer = new RptDefinitionWriter(rptPath))
-				{
-					string xmlPath = args.Length > 1 ?
-						args[1] : Path.ChangeExtension(rptPath, "xml");
-					writer.WriteToXml(xmlPath);
-				}
+                if (args.Length > 1)
+                {
+                    xmlPath = args[1] + Path.GetFileName(rptPath);
+                }
+                else
+                {
+                    xmlPath = rptPath;
+                }
+
+                xmlPath = Path.ChangeExtension(xmlPath, "xml");
+
+                try
+                {
+                    using (var writer = new RptDefinitionWriter(rptPath))
+                    {
+                        //string xmlPath = args.Length > 1 ? Path.ChangeExtension(args[1] + rptPath, "xml")  : Path.ChangeExtension(rptPath, "xml");
+                        writer.WriteToXml(xmlPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Trace.Write(ex.Message);
+                }
 			}
 		}
 

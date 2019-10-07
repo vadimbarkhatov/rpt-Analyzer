@@ -19,6 +19,7 @@ using System.Windows.Shapes;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
+//using ExtensionMethods;
 
 
 
@@ -31,17 +32,14 @@ namespace CHEORptAnalyzer
     public partial class MainWindow : Window
     {
         private const string rptPath = @"C:\test\Reports\*";
-        XElement xroot;
+        private string cacheFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
+        readonly XElement xroot;
 
         public bool SearchFields { get; set; } = true;
         public bool SearchRF { get; set; } = true;
         public bool SearchCommand { get; set; } = true;
         public string SearchString { get; set; } = "";
-        public string SearchMod { get; set; } = "";
-
-        IEnumerable<string> filters = new List<string> { "Field", "Command", "RecordSelectionFormula" };
-
-        public List<string> Items { get; set; } = new List<string>();
+        public bool ContainsSeach { get; set; } = true;
 
         public MainWindow()
         {
@@ -61,7 +59,7 @@ namespace CHEORptAnalyzer
         {
             string[] files;
 
-            try { files = Directory.GetFiles(@"C:\test\Reports", "*.xml"); }
+            try { files = Directory.GetFiles(cacheFolder, "*.xml"); }
             catch { files = new string[0]; }
 
             xroot = new XElement("Reports");
@@ -75,12 +73,25 @@ namespace CHEORptAnalyzer
 
                 xroot.Add(xelement);
             }
+
+            textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
+
+            resultFilterFuncs = new Dictionary<string, Func<XElement, IEnumerable<XElement>>>
+            {
+                { "Field", x => x.Descendants("Tables").Descendants("Field") },
+                { "Command", x => x.Descendants("Command") },
+                { "RecordSelectionFormula", x => x.Descendants("RecordSelectionFormula") }
+            };
         }
 
-        readonly Func<string, bool> textFilter;
-        Func<bool, bool> textFilterMod;
 
-        private void Button_Click(object sender, RoutedEventArgs events)
+        readonly Func<string, bool> textFilter;
+        readonly Dictionary<string, Func<XElement, IEnumerable<XElement>>> resultFilterFuncs;
+
+
+        
+
+        private void BtnSearch_Click(object sender, RoutedEventArgs events)
         {
             SearchReports();
         }
@@ -89,40 +100,69 @@ namespace CHEORptAnalyzer
         {
             Func<XElement, IEnumerable<XElement>> nodeFilter = x => Enumerable.Empty<XElement>();
 
-            var filterFuncs = new Dictionary<string, Func<XElement, IEnumerable<XElement>>>();
+            //var testFunc 
+
+            //nodeFilter = x => Enumerable.Empty<XElement>()
+            //.Concat(SearchFields ? resultFilterFuncs["Field"](x) : Enumerable.Empty<XElement>())
+            //.Concat(SearchRF ? resultFilterFuncs["RecordSelectionFormula"](x) : Enumerable.Empty<XElement>())
+            //.Concat(SearchCommand ? resultFilterFuncs["Command"](x) : Enumerable.Empty<XElement>())
+            //.Where(s => textFilter(s.Value));
+
+            //nodeFilter = resultFilterFuncs["Field"].Combine<XElement>(resultFilterFuncs["RecordSelectionFormula"]);
 
 
-            filterFuncs.Add("Field", x => x.Descendants("Tables").Descendants("Field"));
-            filterFuncs.Add("Command", x => x.Descendants("Command"));
-            filterFuncs.Add("RecordSelectionFormula", x => x.Descendants("RecordSelectionFormula"));
+            foreach(string f in resultFilterFuncs.Keys)
+            {
+                nodeFilter = nodeFilter.Combine<XElement>(resultFilterFuncs[f]);
+            }
 
-            nodeFilter = x => x.Descendants()
-                               .Where(y => (y.Name.LocalName == "Field" && y.Parent.Name.LocalName == "Fields" && SearchFields) || (y.Name.LocalName == "Command" && SearchCommand) || (y.Name.LocalName == "RecordSelectionFormula" && SearchRF))
-                               .Where(s => textFilter(s.Value));
+            //if (SearchFields) nodeFilter = nodeFilter.Combine<XElement>(resultFilterFuncs["Field"]);
+
+            nodeFilter = nodeFilter.Filter<XElement>(s => textFilter(s.Value));
+            
 
 
-            IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => textFilterMod(nodeFilter(x).Count() > 0));
+            IEnumerable <XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == nodeFilter(x).Count() > 0);
 
+            var currItem = lbReports.SelectedItem as XElementWrap;
             lbReports.Items.Clear();
+
             foreach (XElement e in foundReports)
             {
                 var results = new Dictionary<string, string>();
 
-                foreach (var f in filters)
+                foreach (string f in resultFilterFuncs.Keys)
                 {
-                    results[f] = filterFuncs[f](e).Select(x => x.Value).Aggregate(string.Empty, (x, y) => x + "\r" + y);
+                    Func<XElement, IEnumerable<XElement>> filterFunc = resultFilterFuncs[f];
+
+                    var test = resultFilterFuncs[f](e);
+
+                    results[f] = filterFunc(e).Select(x => x.Value).Aggregate(string.Empty, (x, y) => x + "\r" + y);
                 }
-                //results.RemoveAll(x => x == "");
 
                 var newItem = new XElementWrap() { Text = e.Attribute("FileName").Value, XEle = e, SearchResults = results };
+
                 lbReports.Items.Add(newItem);
+
+                if (newItem.Text == currItem?.Text)
+                {
+                    lbReports.SelectedItem = lbReports.Items[lbReports.Items.Count - 1];
+                }
             }
         }
 
         private void ParseRPT(object sender, RoutedEventArgs e)
         {
-            string[] rptFiles = new string[1];
+            string[] rptFiles = new string[2];
             rptFiles[0] = rptPath;
+
+
+            if(!Directory.Exists(cacheFolder))
+            {
+                Directory.CreateDirectory(cacheFolder);
+            }
+
+            rptFiles[1] = cacheFolder;
 
             RptToXml.RptToXml.Convert(rptFiles);
         }
@@ -141,8 +181,6 @@ namespace CHEORptAnalyzer
             if (lbReports.SelectedItem == null) return;
 
             var selectedResults = (lbReports.SelectedItem as XElementWrap).SearchResults[previewMode];
-
-            //var text = searchResults.Aggregate((x, y) => x + "\r" + y);
 
             tbPreview.AppendText(selectedResults);
 
@@ -215,23 +253,6 @@ namespace CHEORptAnalyzer
 
             //System.Windows.Forms.MessageBox.Show("Test");
             //System.Windows.MessageBox.Show("Test");
-        }
-
-        private void CbSearchMod_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var mod = (cbSearchMod.SelectedItem as ComboBoxItem).Name;
-
-            //TODO: refactor...
-            switch (mod)
-            {
-                case "Contain":
-                    textFilterMod = x => x;
-                    break;
-                case "DNContain":
-                    textFilterMod = x => !x;
-                    break;
-            }
-
         }
     }
 }

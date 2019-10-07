@@ -18,17 +18,18 @@
                 </MenuItem>
             </Menu>
             <StackPanel Orientation="Horizontal" Height="18" VerticalAlignment="Top" Width="220" Margin="0,17,-150,0" HorizontalAlignment="Center">
-                <RadioButton Content="Columns" Margin="0,0,3,0" IsChecked="True" Checked="RadioButton_Checked"/>
+                <RadioButton Content="Columns" Tag="lel"  Margin="0,0,3,0" IsChecked="True" Checked="RadioButton_Checked"/>
                 <RadioButton Content="Formula" Margin="0,0,3,0" Checked="RadioButton_Checked"/>
                 <RadioButton Content="Command" Margin="0,0,3,0" Checked="RadioButton_Checked"/>
             </StackPanel>
+            
         </DockPanel>
 
-        <Button Content="Search Reports" HorizontalAlignment="Left" Margin="319,508,0,0" VerticalAlignment="Top" Width="123" Height="26" Click="Button_Click" />
+        <Button Content="Search Reports" HorizontalAlignment="Left" Margin="319,508,0,0" VerticalAlignment="Top" Width="123" Height="26" Click="BtnSearch_Click" />
 
         <ListBox Name="lbReports" HorizontalAlignment="Left" Height="371" Margin="10,62,0,0" VerticalAlignment="Top" Width="494" SelectionChanged="LbReports_SelectionChanged"/>
         <TextBox x:Name="tbSearch" HorizontalAlignment="Left" Height="23" Margin="261,480,0,0" VerticalAlignment="Top" Width="181"  MaxLines="1" Text = "{Binding SearchString, Mode = TwoWay}"/>
-        <RichTextBox x:Name="tbPreview" VerticalScrollBarVisibility="Visible" Margin="537,62,10,16"  IsReadOnly="True" FontFamily="Courier New" ScrollViewer.CanContentScroll="True"/>
+        <RichTextBox x:Name="tbPreview" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Margin="537,62,10,16"  IsReadOnly="True" FontFamily="Courier New" ScrollViewer.CanContentScroll="True"/>
         <StackPanel HorizontalAlignment="Left" Height="52" Margin="109,454,0,0" VerticalAlignment="Top" Width="147">
             <CheckBox Content="Crystal Fields" IsChecked="{Binding SearchFields}"/>
             <CheckBox Content="Record Select Formula" Height="15" IsChecked="{Binding SearchRF}"/>
@@ -39,12 +40,12 @@
         <Label Content="Preview" HorizontalAlignment="Left" Margin="532,29,0,0" VerticalAlignment="Top"/>
         <Label Content="Seach" HorizontalAlignment="Left" Margin="261,452,0,0" VerticalAlignment="Top" Width="62"/>
         <Label HorizontalAlignment="Left" Margin="306,449,0,0" VerticalAlignment="Top" Width="136">
-            <ComboBox Name="cbSearchMod" Width="126" SelectionChanged="CbSearchMod_SelectionChanged" >
-                <ComboBoxItem Name="Contain" IsSelected="True">Contains</ComboBoxItem>
+            <ComboBox Name="cbSearchMod" Width="126" SelectedIndex="0">
+                <ComboBoxItem Name="Contains"  IsSelected="{Binding ContainsSeach, Mode=OneWayToSource}" >Contains</ComboBoxItem>
                 <ComboBoxItem Name="DNContain">Does Not Contain</ComboBoxItem>
             </ComboBox>
         </Label>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="32,525,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
+        <Button Content="Button" HorizontalAlignment="Left" Margin="-226,384,0,0" VerticalAlignment="Top" Width="75"/>
 
     </Grid>
 </Window>
