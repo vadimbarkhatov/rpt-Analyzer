@@ -20,6 +20,8 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
+
+
 namespace CHEORptAnalyzer
 {
     /// <summary>
@@ -168,7 +170,7 @@ namespace CHEORptAnalyzer
 
             UpdatePreview();
         }
-
+        //log reivewed by person
 
         private static void Highlighter(string searchText, RichTextBox rtb)
         {
@@ -209,10 +211,10 @@ namespace CHEORptAnalyzer
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            //BOEExporter.RetrieveReport();
+            BOEExporter.RetrieveReport();
 
             //System.Windows.Forms.MessageBox.Show("Test");
-            System.Windows.MessageBox.Show("Test");
+            //System.Windows.MessageBox.Show("Test");
         }
 
         private void CbSearchMod_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CrystalDecisions.ReportAppServer.Utilities;
 
 namespace CHEORptAnalyzer
 {
@@ -28,7 +29,7 @@ namespace CHEORptAnalyzer
             //Log on to the Enterprise CMS
             boSessionMgr = new SessionMgr();
             //boEnterpriseSession = boSessionMgr.Logon(Request.QueryString["username"], Request.QueryString["password"], Request.QueryString["cms"], Request.QueryString["authtype"]);
-            boEnterpriseSession = boSessionMgr.Logon("vbarkhatov", "", "boeappprd", "Enterprise");
+            boEnterpriseSession = boSessionMgr.Logon("vbarkhatov", "Friday67", "boeappprd", "Enterprise");
             //boEnterpriseSession = boSessionMgr.
             //Session.Add("boEnterpriseSession", boEnterpriseSession);
             boEnterpriseService = boEnterpriseSession.GetService("", "InfoStore");
@@ -50,8 +51,11 @@ namespace CHEORptAnalyzer
             //Open the report from Enterprise
             boReportClientDocument = boReportAppFactory.OpenDocument(boInfoObject.ID, 0);
 
+            //boReportClientDocument.ReportDocument
+
             /**
              * This exports the report to a byte() that we will stream out using the default options for the enum
+             * 
              * The available enums are:
              * CrReportExportFormatEnum.crReportExportFormatCharacterSeparatedValues
              * CrReportExportFormatEnum.crReportExportFormatCrystalReports
@@ -67,6 +71,19 @@ namespace CHEORptAnalyzer
              * CrReportExportFormatEnum.crReportExportFormatXML
             */
             CrystalDecisions.ReportAppServer.CommonObjectModel.ByteArray boByteArray = boReportClientDocument.PrintOutputController.Export(CrReportExportFormatEnum.crReportExportFormatCrystalReports, 1);
+
+
+            CrystalDecisions.ReportAppServer.Utilities.Conversion boConversion = new CrystalDecisions.ReportAppServer.Utilities.Conversion();
+
+            var test = 3;
+
+            //boReportClientDocument.ReportDocument.
+
+
+            //ExportOptions exportOptions = new ExportOptions();
+            //exportOptions.
+
+            //var test = boReportClientDocument.PrintOutputController.ExportEx()
             //Save the ByteArray to disk, overwriting any existing file with the same name.
             boByteArray.Save(@"c:\test\myExport.rpt", true);
 
