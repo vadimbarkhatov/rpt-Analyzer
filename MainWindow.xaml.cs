@@ -33,7 +33,7 @@ namespace CHEORptAnalyzer
     {
         private const string rptPath = @"C:\test\Reports\*";
         private string cacheFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
-        readonly XElement xroot;
+        XElement xroot;
 
         public bool SearchFields { get; set; } = true;
         public bool SearchRF { get; set; } = true;
@@ -49,7 +49,6 @@ namespace CHEORptAnalyzer
 
             LoadXML();
 
-            textFilterMod = x => x;
             textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
 
             SearchReports();
@@ -69,7 +68,11 @@ namespace CHEORptAnalyzer
                 XElement xelement;
 
                 try { xelement = XElement.Load(reportDefPath); }
-                catch { continue; }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine(ex.Message);
+                    continue;
+                }
 
                 xroot.Add(xelement);
             }
@@ -85,11 +88,9 @@ namespace CHEORptAnalyzer
         }
 
 
-        readonly Func<string, bool> textFilter;
-        readonly Dictionary<string, Func<XElement, IEnumerable<XElement>>> resultFilterFuncs;
+        Func<string, bool> textFilter;
+        Dictionary<string, Func<XElement, IEnumerable<XElement>>> resultFilterFuncs;
 
-
-        
 
         private void BtnSearch_Click(object sender, RoutedEventArgs events)
         {
