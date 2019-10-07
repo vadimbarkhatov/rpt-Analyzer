@@ -44,7 +44,7 @@
                 <ComboBoxItem Name="DNContain">Does Not Contain</ComboBoxItem>
             </ComboBox>
         </Label>
-        <Button Content="btnSearch" HorizontalAlignment="Left" Margin="-226,384,0,0" VerticalAlignment="Top" Width="75" Click="BtnSearch_Click"/>
+        <Button Content="Button" HorizontalAlignment="Left" Margin="-226,384,0,0" VerticalAlignment="Top" Width="75"/>
 
     </Grid>
 </Window>

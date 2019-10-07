@@ -19,6 +19,7 @@ using System.Windows.Shapes;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
+//using ExtensionMethods;
 
 namespace CHEORptAnalyzer
 {
@@ -29,6 +30,7 @@ namespace CHEORptAnalyzer
     public partial class MainWindow : Window
     {
         private const string rptPath = @"C:\test\Reports\*";
+        private string cacheFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
         readonly XElement xroot;
 
         public bool SearchFields { get; set; } = true;
@@ -45,7 +47,7 @@ namespace CHEORptAnalyzer
 
             string[] files;
 
-            try { files = Directory.GetFiles(@"C:\test\Reports", "*.xml"); }
+            try { files = Directory.GetFiles(cacheFolder, "*.xml"); }
             catch { files = new string[0]; }
 
             xroot = new XElement("Reports");
@@ -70,18 +72,36 @@ namespace CHEORptAnalyzer
         readonly Func<string, bool> textFilter;
         readonly Dictionary<string, Func<XElement, IEnumerable<XElement>>> resultFilterFuncs;
 
+
+        
+
         private void BtnSearch_Click(object sender, RoutedEventArgs events)
         {
-            Func<XElement, IEnumerable<XElement>> nodeFilter;
+            Func<XElement, IEnumerable<XElement>> nodeFilter = x => Enumerable.Empty<XElement>();
 
-            nodeFilter = x => Enumerable.Empty<XElement>()
-                                        .Concat(SearchFields ? resultFilterFuncs["Field"](x) : Enumerable.Empty<XElement>())
-                                        .Concat(SearchRF ? resultFilterFuncs["RecordSelectionFormula"](x) : Enumerable.Empty<XElement>())
-                                        .Concat(SearchCommand ? resultFilterFuncs["Command"](x) : Enumerable.Empty<XElement>())
-                                        .Where(s => textFilter(s.Value));
+            //var testFunc 
+
+            //nodeFilter = x => Enumerable.Empty<XElement>()
+            //.Concat(SearchFields ? resultFilterFuncs["Field"](x) : Enumerable.Empty<XElement>())
+            //.Concat(SearchRF ? resultFilterFuncs["RecordSelectionFormula"](x) : Enumerable.Empty<XElement>())
+            //.Concat(SearchCommand ? resultFilterFuncs["Command"](x) : Enumerable.Empty<XElement>())
+            //.Where(s => textFilter(s.Value));
+
+            //nodeFilter = resultFilterFuncs["Field"].Combine<XElement>(resultFilterFuncs["RecordSelectionFormula"]);
 
 
-            IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == nodeFilter(x).Count() > 0);
+            foreach(string f in resultFilterFuncs.Keys)
+            {
+                nodeFilter = nodeFilter.Combine<XElement>(resultFilterFuncs[f]);
+            }
+
+            //if (SearchFields) nodeFilter = nodeFilter.Combine<XElement>(resultFilterFuncs["Field"]);
+
+            nodeFilter = nodeFilter.Filter<XElement>(s => textFilter(s.Value));
+            
+
+
+            IEnumerable <XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == nodeFilter(x).Count() > 0);
 
             var currItem = lbReports.SelectedItem as XElementWrap;
             lbReports.Items.Clear();
@@ -93,6 +113,8 @@ namespace CHEORptAnalyzer
                 foreach (string f in resultFilterFuncs.Keys)
                 {
                     Func<XElement, IEnumerable<XElement>> filterFunc = resultFilterFuncs[f];
+
+                    var test = resultFilterFuncs[f](e);
 
                     results[f] = filterFunc(e).Select(x => x.Value).Aggregate(string.Empty, (x, y) => x + "\r" + y);
                 }
@@ -110,9 +132,16 @@ namespace CHEORptAnalyzer
 
         private void ParseRPT(object sender, RoutedEventArgs e)
         {
-            string[] rptFiles = new string[1];
+            string[] rptFiles = new string[2];
             rptFiles[0] = rptPath;
-            //rptFiles[1] = @".\ReportCache\";
+
+
+            if(!Directory.Exists(cacheFolder))
+            {
+                Directory.CreateDirectory(cacheFolder);
+            }
+
+            rptFiles[1] = cacheFolder;
 
             RptToXml.RptToXml.Convert(rptFiles);
         }
