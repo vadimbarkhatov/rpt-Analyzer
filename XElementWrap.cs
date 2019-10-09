@@ -10,7 +10,6 @@ namespace CHEORptAnalyzer
     public class XElementWrap
     {
         public string Text;
-        public XElement XEle;
         public Dictionary<string, string> SearchResults = new Dictionary<string, string>();
 
         public override string ToString()

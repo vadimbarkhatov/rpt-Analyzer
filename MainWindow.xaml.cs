@@ -79,7 +79,7 @@ namespace CHEORptAnalyzer
 
             textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
 
-            resultFilterFuncs = new Dictionary<string, Func<XElement, IEnumerable<XElement>>>
+            resultFilterFuncs = new Dictionary<string, Func<IEnumerable<XElement>, IEnumerable<XElement>>>
             {
                 { "Field", x => x.Descendants("Tables").Descendants("Field") },
                 { "Command", x => x.Descendants("Command") },
@@ -89,7 +89,7 @@ namespace CHEORptAnalyzer
 
 
         Func<string, bool> textFilter;
-        Dictionary<string, Func<XElement, IEnumerable<XElement>>> resultFilterFuncs;
+        Dictionary<string, Func<IEnumerable<XElement>, IEnumerable<XElement>>> resultFilterFuncs;
 
 
         private void BtnSearch_Click(object sender, RoutedEventArgs events)
@@ -99,33 +99,33 @@ namespace CHEORptAnalyzer
 
         private void SearchReports()
         {
-            Func<XElement, IEnumerable<XElement>> nodeFilter = x => Enumerable.Empty<XElement>();
+            Func<IEnumerable<XElement>, IEnumerable<XElement>> nodeFilter =
+                         x => x.Concat(resultFilterFuncs["Field"](x)).Gate(SearchFields)
+                               .Concat(resultFilterFuncs["RecordSelectionFormula"](x)).Gate(SearchRF)
+                               .Concat(resultFilterFuncs["Command"](x)).Gate(SearchCommand)
+                               .Where(s => textFilter(s.Value));
 
-            if (SearchFields) nodeFilter = nodeFilter.Combine<XElement>(resultFilterFuncs["Field"]);
-            if (SearchRF) nodeFilter = nodeFilter.Combine<XElement>(resultFilterFuncs["RecordSelectionFormula"]);
-            if (SearchCommand) nodeFilter = nodeFilter.Combine<XElement>(resultFilterFuncs["Command"]);
-
-            nodeFilter = nodeFilter.Filter<XElement>(s => textFilter(s.Value));
-            
-            IEnumerable <XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == nodeFilter(x).Count() > 0);
+            IEnumerable <XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == x.Descendants().X(nodeFilter).Count() > 0);
 
             var currItem = lbReports.SelectedItem as XElementWrap;
             lbReports.Items.Clear();
 
-            foreach (XElement e in foundReports)
+
+
+            foreach (XElement report in foundReports)
             {
                 var results = new Dictionary<string, string>();
 
                 foreach (string f in resultFilterFuncs.Keys)
                 {
-                    Func<XElement, IEnumerable<XElement>> filterFunc = resultFilterFuncs[f];
+                    Func<IEnumerable<XElement>, IEnumerable<XElement>> filterFunc = resultFilterFuncs[f];
 
-                    results[f] = filterFunc(e).Select(x => x.Value)
+                    results[f] = filterFunc(report.Descendants()).Select(x => x.Value)
                                               .DefaultIfEmpty(string.Empty)
                                               .Aggregate((x, y) => x + "\r" + y);
                 }
 
-                var newItem = new XElementWrap() { Text = e.Attribute("FileName").Value, XEle = e, SearchResults = results };
+                var newItem = new XElementWrap() { Text = report.Attribute("FileName").Value, SearchResults = results };
 
                 lbReports.Items.Add(newItem);
 
