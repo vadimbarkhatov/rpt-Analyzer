@@ -24,7 +24,7 @@ namespace CHEORptAnalyzer
                     return gateBool ? left : Enumerable.Empty<T>();
                 }
 
-                public static U X<T, U>(this T left, Func<T, U> func)
+                public static U Apply<T, U>(this T left, Func<T, U> func)
                 {
                     return func(left);
                 }

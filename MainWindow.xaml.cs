@@ -99,13 +99,13 @@ namespace CHEORptAnalyzer
 
         private void SearchReports()
         {
-            Func<IEnumerable<XElement>, IEnumerable<XElement>> nodeFilter =
+            Func<IEnumerable<XElement>, IEnumerable<XElement>> reportFilter =
                          x => x.Concat(resultFilterFuncs["Field"](x)).Gate(SearchFields)
                                .Concat(resultFilterFuncs["RecordSelectionFormula"](x)).Gate(SearchRF)
                                .Concat(resultFilterFuncs["Command"](x)).Gate(SearchCommand)
                                .Where(s => textFilter(s.Value));
 
-            IEnumerable <XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == x.Descendants().X(nodeFilter).Count() > 0);
+            IEnumerable <XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == reportFilter(x.Descendants()).Count() > 0);
 
             var currItem = lbReports.SelectedItem as XElementWrap;
             lbReports.Items.Clear();
@@ -120,9 +120,10 @@ namespace CHEORptAnalyzer
                 {
                     Func<IEnumerable<XElement>, IEnumerable<XElement>> filterFunc = resultFilterFuncs[f];
 
-                    results[f] = filterFunc(report.Descendants()).Select(x => x.Value)
-                                              .DefaultIfEmpty(string.Empty)
-                                              .Aggregate((x, y) => x + "\r" + y);
+                    results[f] = string.Join("\r", report.Descendants().Apply(filterFunc).Select(x => x.Value));
+
+
+                    //results[f] = string.Join("\r", report.Descendants().Apply(filterFunc));
                 }
 
                 var newItem = new XElementWrap() { Text = report.Attribute("FileName").Value, SearchResults = results };
