@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Xml.Linq;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 
 
@@ -54,6 +55,9 @@ namespace CHEORptAnalyzer
 
             SearchReports();
 
+            
+
+            
         }
 
         private void LoadXML(string folder)
@@ -114,7 +118,7 @@ namespace CHEORptAnalyzer
 
                     results[f] = string.Join("\r", report.Descendants().Apply(filterFunc).Select(x => x.Value));
                 }
-
+                
                 var newItem = new XElementWrap() { Text = report.Attribute("FileName").Value, SearchResults = results };
 
                 lbReports.Items.Add(newItem);
@@ -130,7 +134,6 @@ namespace CHEORptAnalyzer
         {
             string[] rptFiles = new string[2];
             rptFiles[0] = rptPath;
-
 
             if(!Directory.Exists(cacheFolder))
             {
@@ -189,9 +192,23 @@ namespace CHEORptAnalyzer
             UpdatePreview();
         }
 
+
+
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            BOEExporter.RetrieveReport();
+            
+        }
+
+        private void OpenFolder(object sender, RoutedEventArgs e)
+        {
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.InitialDirectory = @"c:\Users\";
+            dialog.IsFolderPicker = true;
+            dialog.Multiselect = true;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                MessageBox.Show("You selected: " + dialog.FileNames.Aggregate((x,y) => x + y));
+            }
         }
     }
 }
