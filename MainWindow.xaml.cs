@@ -2,26 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Xml;
 using System.Xml.Linq;
-using System.Xml.XPath;
-//using ExtensionMethods;
 
 
 
@@ -51,24 +37,30 @@ namespace CHEORptAnalyzer
             InitializeComponent();
             DataContext = this;
 
-            LoadXML();
+            windowsFormsHost.Child = textBox;
+            textBox.Language = FastColoredTextBoxNS.Language.HTML;
+            textBox.ReadOnly = true;
+
+            LoadXML(cacheFolder);
 
             textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
 
+            resultFilterFuncs = new Dictionary<string, Func<IEnumerable<XElement>, IEnumerable<XElement>>>
+            {
+                { "Field", x => x.Descendants("Tables").Descendants("Field") },
+                { "Command", x => x.Descendants("Command") },
+                { "RecordSelectionFormula", x => x.Descendants("RecordSelectionFormula") }
+            };
+
             SearchReports();
-
-            windowsFormsHost.Child = textBox;
-
-            textBox.Language = FastColoredTextBoxNS.Language.VB;
-            textBox.ReadOnly = true;
 
         }
 
-        private void LoadXML()
+        private void LoadXML(string folder)
         {
             string[] files;
 
-            try { files = Directory.GetFiles(cacheFolder, "*.xml"); }
+            try { files = Directory.GetFiles(folder, "*.xml", SearchOption.AllDirectories); }
             catch { files = new string[0]; }
 
             xroot = new XElement("Reports");
@@ -87,14 +79,6 @@ namespace CHEORptAnalyzer
                 xroot.Add(xelement);
             }
 
-            textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
-
-            resultFilterFuncs = new Dictionary<string, Func<IEnumerable<XElement>, IEnumerable<XElement>>>
-            {
-                { "Field", x => x.Descendants("Tables").Descendants("Field") },
-                { "Command", x => x.Descendants("Command") },
-                { "RecordSelectionFormula", x => x.Descendants("RecordSelectionFormula") }
-            };
         }
 
 
@@ -120,8 +104,6 @@ namespace CHEORptAnalyzer
             var currItem = lbReports.SelectedItem as XElementWrap;
             lbReports.Items.Clear();
 
-
-
             foreach (XElement report in foundReports)
             {
                 var results = new Dictionary<string, string>();
@@ -131,9 +113,6 @@ namespace CHEORptAnalyzer
                     Func<IEnumerable<XElement>, IEnumerable<XElement>> filterFunc = resultFilterFuncs[f];
 
                     results[f] = string.Join("\r", report.Descendants().Apply(filterFunc).Select(x => x.Value));
-
-
-                    //results[f] = string.Join("\r", report.Descendants().Apply(filterFunc));
                 }
 
                 var newItem = new XElementWrap() { Text = report.Attribute("FileName").Value, SearchResults = results };
@@ -162,7 +141,7 @@ namespace CHEORptAnalyzer
 
             RptToXml.RptToXml.Convert(rptFiles);
 
-            LoadXML();
+            LoadXML(cacheFolder);
             SearchReports();
         }
 
@@ -189,21 +168,23 @@ namespace CHEORptAnalyzer
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
             RadioButton rb = (RadioButton)sender;
+
             //TODO:refactor
             switch (rb.Content)
             {
                 case "Columns":
                     previewMode = "Field";
+                    textBox.Language = FastColoredTextBoxNS.Language.HTML;
                     break;
                 case "Formula":
                     previewMode = "RecordSelectionFormula";
+                    textBox.Language = FastColoredTextBoxNS.Language.CSharp;
                     break;
                 case "Command":
                     previewMode = "Command";
+                    textBox.Language = FastColoredTextBoxNS.Language.SQL;
                     break;
             }
-
-            
 
             UpdatePreview();
         }
@@ -211,9 +192,6 @@ namespace CHEORptAnalyzer
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             BOEExporter.RetrieveReport();
-
-            //System.Windows.Forms.MessageBox.Show("Test");
-            //System.Windows.MessageBox.Show("Test");
         }
     }
 }
