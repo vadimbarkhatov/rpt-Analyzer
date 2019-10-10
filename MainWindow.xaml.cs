@@ -22,7 +22,7 @@ namespace CHEORptAnalyzer
     {
         private const string rptPath = @"C:\test\Reports\*";
         private string cacheFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
-        XElement xroot;
+        XElement xroot = new XElement("null");
 
         public bool SearchFields { get; set; } = true;
         public bool SearchRF { get; set; } = true;
@@ -42,7 +42,7 @@ namespace CHEORptAnalyzer
             textBox.Language = FastColoredTextBoxNS.Language.HTML;
             textBox.ReadOnly = true;
 
-            LoadXML(cacheFolder);
+            //LoadXML(cacheFolder);
 
             textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
 
@@ -53,7 +53,7 @@ namespace CHEORptAnalyzer
                 { "RecordSelectionFormula", x => x.Descendants("RecordSelectionFormula") }
             };
 
-            SearchReports();
+            //SearchReports();
 
             
 
@@ -130,22 +130,28 @@ namespace CHEORptAnalyzer
             }
         }
 
-        private void ParseRPT(object sender, RoutedEventArgs e)
+        private void ParseRPT(IEnumerable<string> paths)
         {
-            string[] rptFiles = new string[2];
-            rptFiles[0] = rptPath;
-
-            if(!Directory.Exists(cacheFolder))
+            foreach (string path in paths)
             {
-                Directory.CreateDirectory(cacheFolder);
+                string rptPath = path + @"\*";
+
+                string[] rptFiles = new string[2];
+                rptFiles[0] = rptPath;
+
+
+                string outputFolder = cacheFolder + path.Remove(0, 2) + "\\";
+
+                Directory.CreateDirectory(outputFolder);
+                
+
+                rptFiles[1] = outputFolder;
+
+                RptToXml.RptToXml.Convert(rptFiles);
+
+                LoadXML(outputFolder);
+                SearchReports();
             }
-
-            rptFiles[1] = cacheFolder;
-
-            RptToXml.RptToXml.Convert(rptFiles);
-
-            LoadXML(cacheFolder);
-            SearchReports();
         }
 
         private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -201,13 +207,16 @@ namespace CHEORptAnalyzer
 
         private void OpenFolder(object sender, RoutedEventArgs e)
         {
-            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            dialog.InitialDirectory = @"c:\Users\";
-            dialog.IsFolderPicker = true;
-            dialog.Multiselect = true;
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog
+            {
+                InitialDirectory = @"\\localhost\c$\",
+                IsFolderPicker = true,
+                Multiselect = true
+            };
+
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                MessageBox.Show("You selected: " + dialog.FileNames.Aggregate((x,y) => x + y));
+                ParseRPT(dialog.FileNames);
             }
         }
     }

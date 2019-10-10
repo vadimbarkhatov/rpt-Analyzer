@@ -13,8 +13,7 @@
         <DockPanel Grid.ColumnSpan="2">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
-                    <MenuItem Header="_Open Folder" Click="OpenFolder"/>
-                    <MenuItem Header="_Parse RPT" Click="ParseRPT"/>
+                    <MenuItem Header="_Load Folder" Click="OpenFolder"/>
                     <Separator />
                     <MenuItem Header="_Exit" />
                 </MenuItem>

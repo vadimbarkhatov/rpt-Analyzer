@@ -8,7 +8,7 @@ namespace RptToXml
 {
 	public class RptToXml
 	{
-		public static void Convert(string[] args)
+		public static void Convert(string[] args, bool forceRefresh = false)
 		{
 			if (args.Length < 1)
 			{
@@ -61,6 +61,11 @@ namespace RptToXml
                 }
 
                 xmlPath = Path.ChangeExtension(xmlPath, "xml");
+
+                FileInfo xmlFile = new FileInfo(xmlPath);
+                FileInfo rptFile = new FileInfo(rptPath);
+
+                if (!forceRefresh && xmlFile.LastWriteTime > rptFile.LastWriteTime) continue;
 
                 try
                 {
