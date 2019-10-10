@@ -4,12 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CHEORptAnalyzer"
+        xmlns:wf="clr-namespace:FastColoredTextBoxNS"  
         mc:Ignorable="d"
         Title="CHEO RPT Analyzer" Height="592" Width="1331">
 
     <Grid Margin="0,0,0,0">
 
-        <DockPanel>
+        <DockPanel Grid.ColumnSpan="2">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
                     <MenuItem Header="_Parse RPT" Click="ParseRPT"/>
@@ -17,19 +18,15 @@
                     <MenuItem Header="_Exit" />
                 </MenuItem>
             </Menu>
-            <StackPanel Orientation="Horizontal" Height="18" VerticalAlignment="Top" Width="220" Margin="0,17,-150,0" HorizontalAlignment="Center">
-                <RadioButton Content="Columns" Tag="lel"  Margin="0,0,3,0" IsChecked="True" Checked="RadioButton_Checked"/>
-                <RadioButton Content="Formula" Margin="0,0,3,0" Checked="RadioButton_Checked"/>
-                <RadioButton Content="Command" Margin="0,0,3,0" Checked="RadioButton_Checked"/>
-            </StackPanel>
-            
+
         </DockPanel>
-
-        <Button Content="Search Reports" HorizontalAlignment="Left" Margin="319,508,0,0" VerticalAlignment="Top" Width="123" Height="26" Click="BtnSearch_Click" />
-
-        <ListBox Name="lbReports" HorizontalAlignment="Left" Height="371" Margin="10,62,0,0" VerticalAlignment="Top" Width="494" SelectionChanged="LbReports_SelectionChanged"/>
-        <TextBox x:Name="tbSearch" HorizontalAlignment="Left" Height="23" Margin="261,480,0,0" VerticalAlignment="Top" Width="181"  MaxLines="1" Text = "{Binding SearchString, Mode = TwoWay}"/>
-        <RichTextBox x:Name="tbPreview" VerticalScrollBarVisibility="Visible" Padding="0, 5, 0, 0" HorizontalScrollBarVisibility="Visible" Margin="537,62,10,16"  IsReadOnly="True" FontFamily="Courier New" ScrollViewer.CanContentScroll="True"/>
+        <StackPanel Orientation="Horizontal" Height="18" VerticalAlignment="Top" Width="220" Margin="592,36,0,0" HorizontalAlignment="Left">
+            <RadioButton Content="Columns" Margin="0,0,3,0" IsChecked="True" Checked="RadioButton_Checked"/>
+            <RadioButton Content="Formula" Margin="0,0,3,0" Checked="RadioButton_Checked"/>
+            <RadioButton Content="Command" Margin="0,0,3,0" Checked="RadioButton_Checked"/>
+        </StackPanel>
+        <ListBox Name="lbReports" HorizontalAlignment="Left" Height="371" Margin="10,56,0,0" VerticalAlignment="Top" Width="494" SelectionChanged="LbReports_SelectionChanged"/>
+        <TextBox x:Name="tbSearch" HorizontalAlignment="Left" Height="23" Margin="261,480,0,0" VerticalAlignment="Top" Width="181"  MaxLines="1" Text = "{Binding SearchString, Mode = TwoWay}" Grid.ColumnSpan="2"/>
         <StackPanel HorizontalAlignment="Left" Height="52" Margin="109,454,0,0" VerticalAlignment="Top" Width="147">
             <CheckBox Content="Crystal Fields" IsChecked="{Binding SearchFields}"/>
             <CheckBox Content="Record Select Formula" Height="15" IsChecked="{Binding SearchRF}"/>
@@ -37,15 +34,23 @@
         </StackPanel>
         <Label Content="Report List" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top"/>
         <Label Content="{Binding ElementName=lbReports, Path=Items.Count, Mode=OneWay}" ContentStringFormat="{}({0})" HorizontalAlignment="Left" Margin="70,30,0,0" VerticalAlignment="Top" Width="50"/>
-        <Label Content="Preview" HorizontalAlignment="Left" Margin="532,29,0,0" VerticalAlignment="Top"/>
+        <Label Content="Preview" HorizontalAlignment="Left" Margin="536,30,0,0" VerticalAlignment="Top"/>
         <Label Content="Seach" HorizontalAlignment="Left" Margin="261,452,0,0" VerticalAlignment="Top" Width="62"/>
-        <Label HorizontalAlignment="Left" Margin="306,449,0,0" VerticalAlignment="Top" Width="136">
+        <Label HorizontalAlignment="Left" Margin="306,449,0,0" VerticalAlignment="Top" Width="136" Grid.ColumnSpan="2">
             <ComboBox Name="cbSearchMod" Width="126" SelectedIndex="0">
                 <ComboBoxItem Name="Contains"  IsSelected="{Binding ContainsSeach, Mode=OneWayToSource}" >Contains</ComboBoxItem>
                 <ComboBoxItem Name="DNContain">Does Not Contain</ComboBoxItem>
             </ComboBox>
         </Label>
         <Button Content="Button" HorizontalAlignment="Left" Margin="-226,384,0,0" VerticalAlignment="Top" Width="75"/>
+
+        <DockPanel>
+            <WindowsFormsHost Name="windowsFormsHost" Margin="520,55,10,10" Padding="0,0,20,20"  />
+        </DockPanel>
+
+        <Button Content="Search Reports" HorizontalAlignment="Left" Margin="319,508,0,0" VerticalAlignment="Top" Width="123" Height="26" Click="BtnSearch_Click" Grid.ColumnSpan="2" />
+
+
 
     </Grid>
 </Window>

@@ -1,6 +1,8 @@
-﻿using System;
+﻿using FastColoredTextBoxNS;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -41,17 +43,25 @@ namespace CHEORptAnalyzer
         public string SearchString { get; set; } = "";
         public bool ContainsSeach { get; set; } = true;
 
+        FastColoredTextBox textBox = new FastColoredTextBox();
+        
+
         public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
-            tbPreview.Document.PageWidth = 1000;
 
             LoadXML();
 
             textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
 
             SearchReports();
+
+            windowsFormsHost.Child = textBox;
+
+            textBox.Language = FastColoredTextBoxNS.Language.VB;
+            textBox.ReadOnly = true;
+
         }
 
         private void LoadXML()
@@ -161,19 +171,17 @@ namespace CHEORptAnalyzer
             UpdatePreview();
         }
 
+        TextStyle SearchStyle = new TextStyle(null, System.Drawing.Brushes.Yellow, System.Drawing.FontStyle.Regular);
+
         private void UpdatePreview()
         {
-            if (tbPreview == null) return;
+            var selectedResults = (lbReports?.SelectedItem as XElementWrap)?.SearchResults[previewMode] ?? "";
 
-            tbPreview.Document.Blocks.Clear();
+            textBox.Text = selectedResults;
 
-            if (lbReports.SelectedItem == null) return;
-
-            var selectedResults = (lbReports.SelectedItem as XElementWrap).SearchResults[previewMode];
-
-            tbPreview.AppendText(selectedResults);
-
-            Highlighter(SearchString.Trim(), tbPreview);
+            textBox.AddStyle(SearchStyle);
+            textBox.Range.ClearStyle(SearchStyle);
+            textBox.Range.SetStyle(SearchStyle, Regex.Escape(SearchString.Trim()), RegexOptions.Multiline | RegexOptions.IgnoreCase);
         }
 
         string previewMode = "Field";
@@ -195,45 +203,9 @@ namespace CHEORptAnalyzer
                     break;
             }
 
+            
+
             UpdatePreview();
-        }
-        //log reivewed by person
-
-        private static void Highlighter(string searchText, RichTextBox rtb)
-        {
-            rtb.SelectAll();
-            rtb.Selection.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(Colors.Black));
-            rtb.Selection.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
-
-            Regex reg = new Regex(Regex.Escape(searchText), RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-            TextPointer position = rtb.Document.ContentStart;
-            List<TextRange> ranges = new List<TextRange>();
-
-            while (position != null)
-            {
-                if (position.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
-                {
-                    string text = position.GetTextInRun(LogicalDirection.Forward);
-                    var matches = reg.Matches(text);
-
-                    foreach (Match match in matches)
-                    {
-                        TextPointer start = position.GetPositionAtOffset(match.Index);
-                        TextPointer end = start.GetPositionAtOffset(searchText.Length);
-
-                        TextRange textrange = new TextRange(start, end);
-                        ranges.Add(textrange);
-                    }
-                }
-                position = position.GetNextContextPosition(LogicalDirection.Forward);
-            }
-
-            foreach (TextRange range in ranges)
-            {
-                range.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(Colors.Red));
-                range.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
-            }
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
