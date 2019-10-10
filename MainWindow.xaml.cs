@@ -130,22 +130,29 @@ namespace CHEORptAnalyzer
             }
         }
 
-        private void ParseRPT(object sender, RoutedEventArgs e)
+        private void ParseRPT(IEnumerable<string> folderPaths)
         {
-            string[] rptFiles = new string[2];
-            rptFiles[0] = rptPath;
-
-            if(!Directory.Exists(cacheFolder))
+            foreach (string path in folderPaths)
             {
-                Directory.CreateDirectory(cacheFolder);
+                string rptPath = path + @"\*";
+
+                string[] rptFiles = new string[2];
+                rptFiles[0] = rptPath;
+
+                Uri uri = new Uri(path);
+
+                if (uri.Host == "")
+                {
+                    //Directory.CreateDirectory(cacheFolder + Environment.MachineName + rptPath);
+                }
+                
+                rptFiles[1] = cacheFolder;
+
+                RptToXml.RptToXml.Convert(rptFiles);
+
+                LoadXML(cacheFolder);
+                SearchReports();
             }
-
-            rptFiles[1] = cacheFolder;
-
-            RptToXml.RptToXml.Convert(rptFiles);
-
-            LoadXML(cacheFolder);
-            SearchReports();
         }
 
         private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -202,12 +209,14 @@ namespace CHEORptAnalyzer
         private void OpenFolder(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            dialog.InitialDirectory = @"c:\Users\";
+            dialog.InitialDirectory = @"\\localhost\c$";
             dialog.IsFolderPicker = true;
             dialog.Multiselect = true;
+
+
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                MessageBox.Show("You selected: " + dialog.FileNames.Aggregate((x,y) => x + y));
+                ParseRPT(dialog.FileNames);
             }
         }
     }

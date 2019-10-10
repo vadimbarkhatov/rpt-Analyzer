@@ -14,7 +14,7 @@
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
                     <MenuItem Header="_Open Folder" Click="OpenFolder"/>
-                    <MenuItem Header="_Parse RPT" Click="ParseRPT"/>
+                    <MenuItem Header="_Parse RPT" />
                     <Separator />
                     <MenuItem Header="_Exit" />
                 </MenuItem>
