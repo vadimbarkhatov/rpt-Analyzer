@@ -34,7 +34,11 @@ namespace RptToXml
 			_createdReport = true;
 			_report = new ReportDocument();
 
-            try { _report.Load(filename, OpenReportMethod.OpenReportByTempCopy); } catch (Exception ex) { throw ex; };
+            try { _report.Load(filename, OpenReportMethod.OpenReportByTempCopy); }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
 			_rcd = _report.ReportClientDocument;
 
 			_oleCompoundFile = new CompoundFile(filename);
@@ -347,7 +351,7 @@ namespace RptToXml
 			writer.WriteStartElement("DataDefinition");
 
 			writer.WriteElementString("GroupSelectionFormula", report.DataDefinition.GroupSelectionFormula);
-			writer.WriteElementString("RecordSelectionFormula", report.DataDefinition.RecordSelectionFormula);
+			writer.WriteElementString("RecordSelectionFormula", report.DataDefinition.RecordSelectionFormulaRaw);
 
 			writer.WriteStartElement("Groups");
 			foreach (Group group in report.DataDefinition.Groups)

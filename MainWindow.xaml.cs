@@ -9,8 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Xml.Linq;
 using Microsoft.WindowsAPICodePack.Dialogs;
-
-
+using System.Runtime.InteropServices;
 
 namespace CHEORptAnalyzer
 {
@@ -31,7 +30,7 @@ namespace CHEORptAnalyzer
         public bool ContainsSeach { get; set; } = true;
 
         FastColoredTextBox textBox = new FastColoredTextBox();
-        
+
 
         public MainWindow()
         {
@@ -42,8 +41,6 @@ namespace CHEORptAnalyzer
             textBox.Language = FastColoredTextBoxNS.Language.HTML;
             textBox.ReadOnly = true;
 
-            //LoadXML(cacheFolder);
-
             textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
 
             resultFilterFuncs = new Dictionary<string, Func<IEnumerable<XElement>, IEnumerable<XElement>>>
@@ -52,37 +49,43 @@ namespace CHEORptAnalyzer
                 { "Command", x => x.Descendants("Command") },
                 { "RecordSelectionFormula", x => x.Descendants("RecordSelectionFormula") }
             };
-
-            //SearchReports();
-
-            
-
-            
         }
 
-        private void LoadXML(string folder)
+        private void LoadXML(IEnumerable<string> folders)
         {
-            string[] files;
-
-            try { files = Directory.GetFiles(folder, "*.xml", SearchOption.AllDirectories); }
-            catch { files = new string[0]; }
-
             xroot = new XElement("Reports");
 
-            foreach (string reportDefPath in files)
+            foreach (string folder in folders)
             {
-                XElement xelement;
+                string[] files;
 
-                try { xelement = XElement.Load(reportDefPath); }
+                try
+                {
+                    files = Directory.GetFiles(folder, "*.xml", SearchOption.AllDirectories);
+                }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine(ex.Message);
-                    continue;
+                    files = new string[0];
+                    System.Windows.Forms.MessageBox.Show(ex.Message);
                 }
 
-                xroot.Add(xelement);
-            }
+                
 
+                foreach (string reportDefPath in files)
+                {
+                    XElement xelement;
+
+                    try { xelement = XElement.Load(reportDefPath); }
+                    catch (Exception ex)
+                    {
+                        //Trace.WriteLine(ex.Message);
+                        System.Windows.Forms.MessageBox.Show(ex.Message);
+                        continue;
+                    }
+
+                    xroot.Add(xelement);
+                }
+            }
         }
 
 
@@ -98,12 +101,12 @@ namespace CHEORptAnalyzer
         private void SearchReports()
         {
             Func<IEnumerable<XElement>, IEnumerable<XElement>> reportFilter =
-                         x => x.Concat(resultFilterFuncs["Field"](x)).Gate(SearchFields)
-                               .Concat(resultFilterFuncs["RecordSelectionFormula"](x)).Gate(SearchRF)
-                               .Concat(resultFilterFuncs["Command"](x)).Gate(SearchCommand)
+                         x => x.Concat(resultFilterFuncs["Field"](x).Gate(SearchFields))
+                               .Concat(resultFilterFuncs["RecordSelectionFormula"](x).Gate(SearchRF))
+                               .Concat(resultFilterFuncs["Command"](x).Gate(SearchCommand))
                                .Where(s => textFilter(s.Value));
 
-            IEnumerable <XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == reportFilter(x.Descendants()).Count() > 0);
+            IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == reportFilter(x.Descendants()).Count() > 0);
 
             var currItem = lbReports.SelectedItem as XElementWrap;
             lbReports.Items.Clear();
@@ -118,7 +121,7 @@ namespace CHEORptAnalyzer
 
                     results[f] = string.Join("\r", report.Descendants().Apply(filterFunc).Select(x => x.Value));
                 }
-                
+
                 var newItem = new XElementWrap() { Text = report.Attribute("FileName").Value, SearchResults = results };
 
                 lbReports.Items.Add(newItem);
@@ -134,24 +137,34 @@ namespace CHEORptAnalyzer
         {
             foreach (string path in paths)
             {
-                string rptPath = path + @"\*";
+                string outputFolder = GetOutputFolderPath(path);
+                Directory.CreateDirectory(outputFolder);
 
+                string rptPath = path + @"\*";
                 string[] rptFiles = new string[2];
                 rptFiles[0] = rptPath;
-
-
-                string outputFolder = cacheFolder + path.Remove(0, 2) + "\\";
-
-                Directory.CreateDirectory(outputFolder);
-                
-
                 rptFiles[1] = outputFolder;
 
                 RptToXml.RptToXml.Convert(rptFiles);
-
-                LoadXML(outputFolder);
-                SearchReports();
             }
+        }
+
+        private string GetOutputFolderPath(string path)
+        {
+            string outputPath;
+
+            if (new Uri(path).Host == "") //if path is non UNC
+            {
+                outputPath = Extensions.LocalToUNC(path) ?? "";
+                if (outputPath == "")
+                {
+                    outputPath = System.Environment.MachineName + "\\" + path.Replace(":", "$");
+                }
+
+            }
+            else outputPath = path.Remove(0, 2); //removes the first two slashes that all UNC paths have
+
+            return cacheFolder + outputPath + "\\";
         }
 
         private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -202,22 +215,38 @@ namespace CHEORptAnalyzer
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            
+
         }
 
         private void OpenFolder(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog
             {
-                InitialDirectory = @"\\localhost\c$\",
+                InitialDirectory = @"\\kesprdcgtosmb.kidshealthalliance.ca\",
                 IsFolderPicker = true,
                 Multiselect = true
             };
 
+            IEnumerable<string> directories;
+
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                ParseRPT(dialog.FileNames);
+                directories = dialog.FileNames.SelectMany(x => Directory.GetDirectories(x, "*.*", SearchOption.AllDirectories)).Concat(dialog.FileNames);
+                foreach(var dir in directories)
+                {
+                    ParseRPT(directories);
+                }
+
+                //var searchFolder = GetOutputFolderPath(dialog.FileNames.First().Apply(x => Directory.GetParent(x).FullName));
+                var searchFolders = dialog.FileNames.Select(x => GetOutputFolderPath(x));
+                LoadXML(searchFolders);
+                SearchReports();
             }
         }
+
+
+        
+
+
     }
 }
