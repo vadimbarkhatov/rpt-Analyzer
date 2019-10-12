@@ -66,7 +66,8 @@ namespace CHEORptAnalyzer
                 catch (Exception ex)
                 {
                     files = new string[0];
-                    System.Windows.Forms.MessageBox.Show(ex.Message);
+                    Trace.WriteLine(ex);
+                    System.Windows.Forms.MessageBox.Show("Error", ex.Message, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
                 }
 
                 
@@ -79,7 +80,8 @@ namespace CHEORptAnalyzer
                     catch (Exception ex)
                     {
                         //Trace.WriteLine(ex.Message);
-                        System.Windows.Forms.MessageBox.Show(ex.Message);
+                        Trace.WriteLine(ex);
+                        System.Windows.Forms.MessageBox.Show("Error", ex.Message, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
                         continue;
                     }
 

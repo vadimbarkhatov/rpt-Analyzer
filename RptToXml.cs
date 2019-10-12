@@ -76,8 +76,8 @@ namespace RptToXml
                 }
                 catch (Exception ex)
                 {
-                    //Trace.Write(ex.Message);
-                    System.Windows.Forms.MessageBox.Show(ex.Message);
+                    Trace.Write(ex);
+                    System.Windows.Forms.MessageBox.Show(ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
                 }
 			}
 		}
