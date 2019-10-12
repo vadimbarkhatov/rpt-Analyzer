@@ -20,9 +20,12 @@
 
         </DockPanel>
         <StackPanel Orientation="Horizontal" Height="18" VerticalAlignment="Top" Width="220" Margin="592,36,0,0" HorizontalAlignment="Left">
-            <RadioButton Content="Columns" Margin="0,0,3,0" IsChecked="True" Checked="RadioButton_Checked"/>
-            <RadioButton Content="Formula" Margin="0,0,3,0" Checked="RadioButton_Checked"/>
-            <RadioButton Content="Command" Margin="0,0,3,0" Checked="RadioButton_Checked"/>
+            <StackPanel.Resources>
+                <local:ComparisonConverter x:Key="ComparisonConverter" />
+            </StackPanel.Resources>
+            <RadioButton Content="Columns" Margin="0,0,3,0" IsChecked="{Binding Path=PreviewElement, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static local:CRElement.Field}}" Checked="RadioButton_Checked"/>
+            <RadioButton Content="Formula" Margin="0,0,3,0" IsChecked="{Binding Path=PreviewElement, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static local:CRElement.Formula}}" Checked="RadioButton_Checked"/>
+            <RadioButton Content="Command" Margin="0,0,3,0" IsChecked="{Binding Path=PreviewElement, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static local:CRElement.Command}}" Checked="RadioButton_Checked"/>
         </StackPanel>
         <ListBox Name="lbReports" HorizontalAlignment="Left" Height="371" Margin="10,56,0,0" VerticalAlignment="Top" Width="494" SelectionChanged="LbReports_SelectionChanged"/>
         <TextBox x:Name="tbSearch" HorizontalAlignment="Left" Height="23" Margin="261,480,0,0" VerticalAlignment="Top" Width="181"  MaxLines="1" Text = "{Binding SearchString, Mode = TwoWay}" Grid.ColumnSpan="2"/>

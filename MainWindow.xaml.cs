@@ -9,34 +9,41 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Xml.Linq;
 using Microsoft.WindowsAPICodePack.Dialogs;
-using System.Runtime.InteropServices;
 
 namespace CHEORptAnalyzer
 {
+    public enum CRElement
+    {
+        Field,
+        Formula,
+        Command
+    }
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     /// 
     public partial class MainWindow : Window
     {
-        private const string rptPath = @"C:\test\Reports\*";
-        private string cacheFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
-        XElement xroot = new XElement("null");
-
         public bool SearchFields { get; set; } = true;
         public bool SearchRF { get; set; } = true;
         public bool SearchCommand { get; set; } = true;
         public string SearchString { get; set; } = "";
         public bool ContainsSeach { get; set; } = true;
-
-        public enum CRElement
-        {
-            Field,
-            Formula,
-            Command
-        }
-
+        public CRElement PreviewElement { get; set; } = CRElement.Field;
         FastColoredTextBox textBox = new FastColoredTextBox();
+
+        private const string rptPath = @"C:\test\Reports\*";
+        private string cacheFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
+        XElement xroot = new XElement("null");
+        Func<string, bool> textFilter;
+        Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>> resultFilterFuncs;
+        Dictionary<CRElement, FastColoredTextBoxNS.Language> CRElementLangs = new Dictionary<CRElement, FastColoredTextBoxNS.Language>
+            {
+                { CRElement.Field, FastColoredTextBoxNS.Language.Custom},
+                { CRElement.Command, FastColoredTextBoxNS.Language.SQL},
+                { CRElement.Formula, FastColoredTextBoxNS.Language.VB}
+            };
 
 
         public MainWindow()
@@ -49,9 +56,6 @@ namespace CHEORptAnalyzer
             textBox.ReadOnly = true;
 
             textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
-
-
-            //xroot.Descendants().Descendants()
 
             resultFilterFuncs = new Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>>
             {
@@ -97,11 +101,6 @@ namespace CHEORptAnalyzer
                 }
             }
         }
-
-
-        Func<string, bool> textFilter;
-        Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>> resultFilterFuncs;
-
 
         private void BtnSearch_Click(object sender, RoutedEventArgs events)
         {
@@ -186,7 +185,7 @@ namespace CHEORptAnalyzer
 
         private void UpdatePreview()
         {
-            var selectedResults = (lbReports?.SelectedItem as XElementWrap)?.SearchResults[previewMode] ?? "";
+            var selectedResults = (lbReports?.SelectedItem as XElementWrap)?.SearchResults[PreviewElement] ?? "";
 
             textBox.Text = selectedResults;
 
@@ -195,33 +194,7 @@ namespace CHEORptAnalyzer
             textBox.Range.SetStyle(SearchStyle, Regex.Escape(SearchString.Trim()), RegexOptions.Multiline | RegexOptions.IgnoreCase);
         }
 
-        CRElement previewMode = CRElement.Field;
-
-        private void RadioButton_Checked(object sender, RoutedEventArgs e)
-        {
-            RadioButton rb = (RadioButton)sender;
-
-            //TODO:refactor
-            switch (rb.Content)
-            {
-                case "Columns":
-                    previewMode = CRElement.Field;
-                    textBox.Language = FastColoredTextBoxNS.Language.HTML;
-                    break;
-                case "Formula":
-                    previewMode = CRElement.Formula;
-                    textBox.Language = FastColoredTextBoxNS.Language.CSharp;
-                    break;
-                case "Command":
-                    previewMode = CRElement.Command;
-                    textBox.Language = FastColoredTextBoxNS.Language.SQL;
-                    break;
-            }
-
-            UpdatePreview();
-        }
-
-
+        private void RadioButton_Checked(object sender, RoutedEventArgs e) { UpdatePreview(); }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
@@ -247,16 +220,11 @@ namespace CHEORptAnalyzer
                     ParseRPT(directories);
                 }
 
-                //var searchFolder = GetOutputFolderPath(dialog.FileNames.First().Apply(x => Directory.GetParent(x).FullName));
                 var searchFolders = dialog.FileNames.Select(x => GetOutputFolderPath(x));
                 LoadXML(searchFolders);
                 SearchReports();
             }
         }
-
-
-        
-
-
     }
+ 
 }

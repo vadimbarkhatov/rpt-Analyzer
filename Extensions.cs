@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace CHEORptAnalyzer
 {
@@ -79,6 +80,19 @@ namespace CHEORptAnalyzer
             {
                 Marshal.FreeHGlobal(lpBuff);
             }
+        }
+    }
+
+    public class ComparisonConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return value?.Equals(parameter);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return value?.Equals(true) == true ? parameter : Binding.DoNothing;
         }
     }
 }
