@@ -29,6 +29,13 @@ namespace CHEORptAnalyzer
         public string SearchString { get; set; } = "";
         public bool ContainsSeach { get; set; } = true;
 
+        public enum CRElement
+        {
+            Field,
+            Formula,
+            Command
+        }
+
         FastColoredTextBox textBox = new FastColoredTextBox();
 
 
@@ -43,11 +50,14 @@ namespace CHEORptAnalyzer
 
             textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
 
-            resultFilterFuncs = new Dictionary<string, Func<IEnumerable<XElement>, IEnumerable<XElement>>>
+
+            //xroot.Descendants().Descendants()
+
+            resultFilterFuncs = new Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>>
             {
-                { "Field", x => x.Descendants("Tables").Descendants("Field") },
-                { "Command", x => x.Descendants("Command") },
-                { "RecordSelectionFormula", x => x.Descendants("RecordSelectionFormula") }
+                { CRElement.Field, x => x.Descendants("Tables").Descendants("Field") },
+                { CRElement.Command, x => x.Descendants("Command") },
+                { CRElement.Formula, x => x.Descendants("RecordSelectionFormula") }
             };
         }
 
@@ -71,7 +81,6 @@ namespace CHEORptAnalyzer
                 }
 
                 
-
                 foreach (string reportDefPath in files)
                 {
                     XElement xelement;
@@ -79,7 +88,6 @@ namespace CHEORptAnalyzer
                     try { xelement = XElement.Load(reportDefPath); }
                     catch (Exception ex)
                     {
-                        //Trace.WriteLine(ex.Message);
                         Trace.WriteLine(ex);
                         System.Windows.Forms.MessageBox.Show("Error", ex.Message, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
                         continue;
@@ -92,7 +100,7 @@ namespace CHEORptAnalyzer
 
 
         Func<string, bool> textFilter;
-        Dictionary<string, Func<IEnumerable<XElement>, IEnumerable<XElement>>> resultFilterFuncs;
+        Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>> resultFilterFuncs;
 
 
         private void BtnSearch_Click(object sender, RoutedEventArgs events)
@@ -103,9 +111,9 @@ namespace CHEORptAnalyzer
         private void SearchReports()
         {
             Func<IEnumerable<XElement>, IEnumerable<XElement>> reportFilter =
-                         x => x.Concat(resultFilterFuncs["Field"](x).Gate(SearchFields))
-                               .Concat(resultFilterFuncs["RecordSelectionFormula"](x).Gate(SearchRF))
-                               .Concat(resultFilterFuncs["Command"](x).Gate(SearchCommand))
+                         x =>  resultFilterFuncs[CRElement.Field](x).Gate(SearchFields)
+                               .Concat(resultFilterFuncs[CRElement.Formula](x).Gate(SearchRF))
+                               .Concat(resultFilterFuncs[CRElement.Command](x).Gate(SearchCommand))
                                .Where(s => textFilter(s.Value));
 
             IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == reportFilter(x.Descendants()).Count() > 0);
@@ -115,9 +123,9 @@ namespace CHEORptAnalyzer
 
             foreach (XElement report in foundReports)
             {
-                var results = new Dictionary<string, string>();
+                var results = new Dictionary<CRElement, string>();
 
-                foreach (string f in resultFilterFuncs.Keys)
+                foreach (CRElement f in resultFilterFuncs.Keys)
                 {
                     Func<IEnumerable<XElement>, IEnumerable<XElement>> filterFunc = resultFilterFuncs[f];
 
@@ -187,7 +195,7 @@ namespace CHEORptAnalyzer
             textBox.Range.SetStyle(SearchStyle, Regex.Escape(SearchString.Trim()), RegexOptions.Multiline | RegexOptions.IgnoreCase);
         }
 
-        string previewMode = "Field";
+        CRElement previewMode = CRElement.Field;
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
@@ -197,15 +205,15 @@ namespace CHEORptAnalyzer
             switch (rb.Content)
             {
                 case "Columns":
-                    previewMode = "Field";
+                    previewMode = CRElement.Field;
                     textBox.Language = FastColoredTextBoxNS.Language.HTML;
                     break;
                 case "Formula":
-                    previewMode = "RecordSelectionFormula";
+                    previewMode = CRElement.Formula;
                     textBox.Language = FastColoredTextBoxNS.Language.CSharp;
                     break;
                 case "Command":
-                    previewMode = "Command";
+                    previewMode = CRElement.Command;
                     textBox.Language = FastColoredTextBoxNS.Language.SQL;
                     break;
             }
@@ -224,7 +232,7 @@ namespace CHEORptAnalyzer
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog
             {
-                InitialDirectory = @"\\kesprdcgtosmb.kidshealthalliance.ca\",
+                InitialDirectory = @"C:\test\",
                 IsFolderPicker = true,
                 Multiselect = true
             };

@@ -22,6 +22,11 @@ namespace CHEORptAnalyzer
         public static Func<T, bool> Or<T>(this Func<T, bool> left, Func<T, bool> right)
                 => a => left(a) || right(a);
 
+        public static IEnumerable<T> GetEnumValues<T>() where T : Enum
+        {
+            return Enum.GetValues(typeof(T)).Cast<T>();
+        }
+
         public static string CalculateMD5Hash(string input)
         {
             // step 1, calculate MD5 hash from input
