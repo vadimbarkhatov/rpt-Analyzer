@@ -17,6 +17,9 @@ namespace CHEORptAnalyzer
         public static U Apply<T, U>(this T left, Func<T, U> func)
             => func(left);
 
+        public static string Combine(this IEnumerable<string> left, string seperator)
+            => string.Join(seperator, left);
+
         public static Func<T, bool> And<T>(this Func<T, bool> left, Func<T, bool> right)
             => a => left(a) && right(a);
 

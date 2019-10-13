@@ -33,47 +33,37 @@ namespace CHEORptAnalyzer
         public bool ContainsSeach { get; set; } = true;
         public CRElement PreviewElement { get; set; } = CRElement.Field;
         FastColoredTextBox textBox = new FastColoredTextBox();
+        Func<string, bool> textFilter;
 
         private const string rptPath = @"C:\test\Reports\*";
         private string cacheFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
         XElement xroot = new XElement("null");
-        Func<string, bool> textFilter;
-        //Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>> resultFilterFuncs = new Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>>
-        //    {
-        //        { CRElement.Field, x => x.Descendants("Tables").Descendants("Field") },
-        //        { CRElement.Command, x => x.Descendants("Command") },
-        //        { CRElement.Formula, x => x.Descendants("RecordSelectionFormula") },
-        //        { CRElement.FormulaField, x => x.Descendants("FormulaFieldDefinition") }
-        //    };
-        //Dictionary<CRElement, FastColoredTextBoxNS.Language> CRElementLangs = new Dictionary<CRElement, FastColoredTextBoxNS.Language>
-        //    {
-        //        { CRElement.Field, FastColoredTextBoxNS.Language.Custom},
-        //        { CRElement.Command, FastColoredTextBoxNS.Language.SQL},
-        //        { CRElement.Formula, FastColoredTextBoxNS.Language.VB},
-        //        { CRElement.FormulaField, FastColoredTextBoxNS.Language.VB}
-        //    };
-
-        Dictionary<CRElement, CRSection> CRSections = new Dictionary <CRElement, CRSection>
+        Dictionary<CRElement, CRSection> CRSections = new Dictionary<CRElement, CRSection>
+        {
+            [CRElement.Field] = new CRSection
             {
-                [CRElement.Field] = new CRSection
-                {
-                    Language = FastColoredTextBoxNS.Language.Custom,
-                    ResultFilter = x => x.Descendants("Tables").Descendants("Field")
-                },
-                [CRElement.Command] = new CRSection
-                {
-                    Language = FastColoredTextBoxNS.Language.SQL,
-                    ResultFilter = x  => x.Descendants("Command")
-                },
-                [CRElement.Formula] = new CRSection
-                {
-                    Language = FastColoredTextBoxNS.Language.CSharp,
-                    ResultFilter = x => x.Descendants("RecordSelectionFormula")
-                },
-                [CRElement.FormulaField] = new CRSection
-                {
-                    Language = FastColoredTextBoxNS.Language.CSharp,
-                    ResultFilter = x => x.Descendants("FormulaFieldDefinition")
+                Language = FastColoredTextBoxNS.Language.Custom,
+                ResultFilter = x => x.Descendants("Tables").Descendants("Field")
+            },
+            [CRElement.Command] = new CRSection
+            {
+                Language = FastColoredTextBoxNS.Language.SQL,
+                ResultFilter = x => x.Descendants("Command")
+            },
+            [CRElement.Formula] = new CRSection
+            {
+                Language = FastColoredTextBoxNS.Language.CSharp,
+                ResultFilter = x => x.Descendants("RecordSelectionFormula")
+            },
+            [CRElement.FormulaField] = new CRSection
+            {
+                Language = FastColoredTextBoxNS.Language.CSharp,
+                ResultFilter = x => x.Descendants("FormulaFieldDefinition")
+                //,ResultFormat = s =>
+                //string.Join("\r\r",
+                //    s.Select(x => x.Attribute("FormulaName").Value
+                //                    + "\r\t"
+                //                    + string.Join(x.Value.Split('\r');
                 }
             };
 
@@ -154,7 +144,7 @@ namespace CHEORptAnalyzer
                 {
                     Func<IEnumerable<XElement>, IEnumerable<XElement>> filterFunc = CRSections[f].ResultFilter;
 
-                    results[f] = string.Join("\r", report.Descendants().Apply(filterFunc).Select(x => x.Value));
+                    results[f] = CRSections[f].ResultFormat(report.Descendants().Apply(filterFunc));
                 }
 
                 var newItem = new XElementWrap() { Text = report.Attribute("FileName").Value, SearchResults = results };
