@@ -38,19 +38,43 @@ namespace CHEORptAnalyzer
         private string cacheFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
         XElement xroot = new XElement("null");
         Func<string, bool> textFilter;
-        Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>> resultFilterFuncs = new Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>>
+        //Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>> resultFilterFuncs = new Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>>
+        //    {
+        //        { CRElement.Field, x => x.Descendants("Tables").Descendants("Field") },
+        //        { CRElement.Command, x => x.Descendants("Command") },
+        //        { CRElement.Formula, x => x.Descendants("RecordSelectionFormula") },
+        //        { CRElement.FormulaField, x => x.Descendants("FormulaFieldDefinition") }
+        //    };
+        //Dictionary<CRElement, FastColoredTextBoxNS.Language> CRElementLangs = new Dictionary<CRElement, FastColoredTextBoxNS.Language>
+        //    {
+        //        { CRElement.Field, FastColoredTextBoxNS.Language.Custom},
+        //        { CRElement.Command, FastColoredTextBoxNS.Language.SQL},
+        //        { CRElement.Formula, FastColoredTextBoxNS.Language.VB},
+        //        { CRElement.FormulaField, FastColoredTextBoxNS.Language.VB}
+        //    };
+
+        Dictionary<CRElement, CRSection> CRSections = new Dictionary <CRElement, CRSection>
             {
-                { CRElement.Field, x => x.Descendants("Tables").Descendants("Field") },
-                { CRElement.Command, x => x.Descendants("Command") },
-                { CRElement.Formula, x => x.Descendants("RecordSelectionFormula") },
-                { CRElement.FormulaField, x => x.Descendants("FormulaFieldDefinition") }
-            };
-        Dictionary<CRElement, FastColoredTextBoxNS.Language> CRElementLangs = new Dictionary<CRElement, FastColoredTextBoxNS.Language>
-            {
-                { CRElement.Field, FastColoredTextBoxNS.Language.Custom},
-                { CRElement.Command, FastColoredTextBoxNS.Language.SQL},
-                { CRElement.Formula, FastColoredTextBoxNS.Language.VB},
-                { CRElement.FormulaField, FastColoredTextBoxNS.Language.VB}
+                [CRElement.Field] = new CRSection
+                {
+                    Language = FastColoredTextBoxNS.Language.Custom,
+                    ResultFilter = x => x.Descendants("Tables").Descendants("Field")
+                },
+                [CRElement.Command] = new CRSection
+                {
+                    Language = FastColoredTextBoxNS.Language.SQL,
+                    ResultFilter = x  => x.Descendants("Command")
+                },
+                [CRElement.Formula] = new CRSection
+                {
+                    Language = FastColoredTextBoxNS.Language.CSharp,
+                    ResultFilter = x => x.Descendants("RecordSelectionFormula")
+                },
+                [CRElement.FormulaField] = new CRSection
+                {
+                    Language = FastColoredTextBoxNS.Language.CSharp,
+                    ResultFilter = x => x.Descendants("FormulaFieldDefinition")
+                }
             };
 
 
@@ -112,10 +136,10 @@ namespace CHEORptAnalyzer
         private void SearchReports()
         {
             Func<IEnumerable<XElement>, IEnumerable<XElement>> reportFilter =
-                         x =>  resultFilterFuncs[CRElement.Field](x).Gate(SearchFields)
-                               .Concat(resultFilterFuncs[CRElement.Formula](x).Gate(SearchRF))
-                               .Concat(resultFilterFuncs[CRElement.Command](x).Gate(SearchCommand))
-                               .Where(s => textFilter(s.Value));
+                         x => CRSections[CRElement.Field].ResultFilter(x).Gate(SearchFields)
+                                .Concat(CRSections[CRElement.Formula].ResultFilter(x).Gate(SearchRF))
+                                .Concat(CRSections[CRElement.Command].ResultFilter(x).Gate(SearchCommand))
+                                .Where(s => textFilter(s.Value));
 
             IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == reportFilter(x.Descendants()).Count() > 0);
 
@@ -126,9 +150,9 @@ namespace CHEORptAnalyzer
             {
                 var results = new Dictionary<CRElement, string>();
 
-                foreach (CRElement f in resultFilterFuncs.Keys)
+                foreach (CRElement f in CRSections.Keys)
                 {
-                    Func<IEnumerable<XElement>, IEnumerable<XElement>> filterFunc = resultFilterFuncs[f];
+                    Func<IEnumerable<XElement>, IEnumerable<XElement>> filterFunc = CRSections[f].ResultFilter;
 
                     results[f] = string.Join("\r", report.Descendants().Apply(filterFunc).Select(x => x.Value));
                 }
@@ -189,7 +213,7 @@ namespace CHEORptAnalyzer
         {
             var selectedResults = (lbReports?.SelectedItem as XElementWrap)?.SearchResults[PreviewElement] ?? "";
 
-            textBox.Language = CRElementLangs[PreviewElement];
+            textBox.Language = CRSections[PreviewElement].Language;
             textBox.Text = selectedResults;
 
             textBox.AddStyle(SearchStyle);

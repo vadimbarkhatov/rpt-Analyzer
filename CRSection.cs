@@ -9,8 +9,8 @@ namespace CHEORptAnalyzer
 {
     class CRSection
     {
-        readonly FastColoredTextBoxNS.Language lang;// = FastColoredTextBoxNS.Language.Custom;
-        readonly Func<IEnumerable<XElement>, IEnumerable<XElement>> resultFilter;
+        public FastColoredTextBoxNS.Language Language;// = FastColoredTextBoxNS.Language.Custom;
+        public Func<IEnumerable<XElement>, IEnumerable<XElement>> ResultFilter;
 
     }
 }
