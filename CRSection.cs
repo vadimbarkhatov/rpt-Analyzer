@@ -13,8 +13,5 @@ namespace CHEORptAnalyzer
         public Func<IEnumerable<XElement>, IEnumerable<XElement>> ResultFilter;
         public Func<IEnumerable<XElement>, string> ResultFormat 
             = s => s.Select(x => x.Value).Combine(Environment.NewLine);
-
-        //public Func<IEnumerable<XElement>, string> ResultFormat2
-            //= s => string.Join("\r", s.Select(x =>x.Attribute("FormulaName") + "\t" + x.Value));
     }
 }

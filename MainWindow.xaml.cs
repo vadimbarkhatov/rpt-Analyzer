@@ -38,7 +38,7 @@ namespace CHEORptAnalyzer
         private const string rptPath = @"C:\test\Reports\*";
         private string cacheFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
         XElement xroot = new XElement("null");
-        Dictionary<CRElement, CRSection> CRSections = new Dictionary<CRElement, CRSection>
+        static readonly Dictionary<CRElement, CRSection> CRSections = new Dictionary<CRElement, CRSection>
         {
             [CRElement.Field] = new CRSection
             {
@@ -58,14 +58,13 @@ namespace CHEORptAnalyzer
             [CRElement.FormulaField] = new CRSection
             {
                 Language = FastColoredTextBoxNS.Language.CSharp,
-                ResultFilter = x => x.Descendants("FormulaFieldDefinition")
-                //,ResultFormat = s =>
-                //string.Join("\r\r",
-                //    s.Select(x => x.Attribute("FormulaName").Value
-                //                    + "\r\t"
-                //                    + string.Join(x.Value.Split('\r');
-                }
-            };
+                ResultFilter = x => x.Descendants("FormulaFieldDefinition"),
+                ResultFormat = s =>
+                    s.Select(x => x.Attribute("FormulaName").Value + "\r\n{\r\n" + x.Value + "\r\n}")
+                     .Combine("\r\n\r\n")
+
+            }
+        };
 
 
         public MainWindow()
