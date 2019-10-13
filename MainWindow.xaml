@@ -19,11 +19,12 @@
             </Menu>
 
         </DockPanel>
-        <StackPanel Orientation="Horizontal" Height="18" VerticalAlignment="Top" Width="220" Margin="592,36,0,0" HorizontalAlignment="Left">
+        <StackPanel Orientation="Horizontal" Height="18" VerticalAlignment="Top" Margin="592,36,0,0" HorizontalAlignment="Left">
             <StackPanel.Resources>
                 <local:ComparisonConverter x:Key="ComparisonConverter" />
             </StackPanel.Resources>
             <RadioButton Content="Columns" Margin="0,0,3,0" IsChecked="{Binding Path=PreviewElement, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static local:CRElement.Field}}" Checked="RadioButton_Checked"/>
+            <RadioButton Content="Formula Field" Margin="0,0,3,0" IsChecked="{Binding Path=PreviewElement, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static local:CRElement.FormulaField}}" Checked="RadioButton_Checked"/>
             <RadioButton Content="Formula" Margin="0,0,3,0" IsChecked="{Binding Path=PreviewElement, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static local:CRElement.Formula}}" Checked="RadioButton_Checked"/>
             <RadioButton Content="Command" Margin="0,0,3,0" IsChecked="{Binding Path=PreviewElement, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static local:CRElement.Command}}" Checked="RadioButton_Checked"/>
         </StackPanel>

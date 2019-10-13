@@ -16,7 +16,8 @@ namespace CHEORptAnalyzer
     {
         Field,
         Formula,
-        Command
+        Command,
+        FormulaField
     }
 
     /// <summary>
@@ -37,12 +38,19 @@ namespace CHEORptAnalyzer
         private string cacheFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
         XElement xroot = new XElement("null");
         Func<string, bool> textFilter;
-        Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>> resultFilterFuncs;
+        Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>> resultFilterFuncs = new Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>>
+            {
+                { CRElement.Field, x => x.Descendants("Tables").Descendants("Field") },
+                { CRElement.Command, x => x.Descendants("Command") },
+                { CRElement.Formula, x => x.Descendants("RecordSelectionFormula") },
+                { CRElement.FormulaField, x => x.Descendants("FormulaFieldDefinition") }
+            };
         Dictionary<CRElement, FastColoredTextBoxNS.Language> CRElementLangs = new Dictionary<CRElement, FastColoredTextBoxNS.Language>
             {
                 { CRElement.Field, FastColoredTextBoxNS.Language.Custom},
                 { CRElement.Command, FastColoredTextBoxNS.Language.SQL},
-                { CRElement.Formula, FastColoredTextBoxNS.Language.VB}
+                { CRElement.Formula, FastColoredTextBoxNS.Language.VB},
+                { CRElement.FormulaField, FastColoredTextBoxNS.Language.VB}
             };
 
 
@@ -57,12 +65,6 @@ namespace CHEORptAnalyzer
 
             textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
 
-            resultFilterFuncs = new Dictionary<CRElement, Func<IEnumerable<XElement>, IEnumerable<XElement>>>
-            {
-                { CRElement.Field, x => x.Descendants("Tables").Descendants("Field") },
-                { CRElement.Command, x => x.Descendants("Command") },
-                { CRElement.Formula, x => x.Descendants("RecordSelectionFormula") }
-            };
         }
 
         private void LoadXML(IEnumerable<string> folders)
@@ -187,6 +189,7 @@ namespace CHEORptAnalyzer
         {
             var selectedResults = (lbReports?.SelectedItem as XElementWrap)?.SearchResults[PreviewElement] ?? "";
 
+            textBox.Language = CRElementLangs[PreviewElement];
             textBox.Text = selectedResults;
 
             textBox.AddStyle(SearchStyle);

@@ -21,12 +21,17 @@ namespace CHEORptAnalyzer
             => a => left(a) && right(a);
 
         public static Func<T, bool> Or<T>(this Func<T, bool> left, Func<T, bool> right)
-                => a => left(a) || right(a);
+            => a => left(a) || right(a);
 
         public static IEnumerable<T> GetEnumValues<T>() where T : Enum
         {
             return Enum.GetValues(typeof(T)).Cast<T>();
         }
+
+        public static U GetTupleValue<T, U>(this IEnumerable<(T, U)> left, T key)
+            => left.Where(x => x.Item1.Equals(key)).First().Item2;
+
+            //=> a => left.Where(x => x.Item1 == key).Single().Select(y => y.Item2);
 
         public static string CalculateMD5Hash(string input)
         {
