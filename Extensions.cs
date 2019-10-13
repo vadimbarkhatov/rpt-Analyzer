@@ -20,6 +20,9 @@ namespace CHEORptAnalyzer
         public static string Combine(this IEnumerable<string> left, string seperator)
             => string.Join(seperator, left);
 
+        public static string AppendToNewLine(this string left, string text)
+            => text + left.Split(new string[] { "\n"}, StringSplitOptions.None).Combine(Environment.NewLine + text);
+
         public static Func<T, bool> And<T>(this Func<T, bool> left, Func<T, bool> right)
             => a => left(a) && right(a);
 
@@ -34,7 +37,7 @@ namespace CHEORptAnalyzer
         public static U GetTupleValue<T, U>(this IEnumerable<(T, U)> left, T key)
             => left.Where(x => x.Item1.Equals(key)).First().Item2;
 
-            //=> a => left.Where(x => x.Item1 == key).Single().Select(y => y.Item2);
+
 
         public static string CalculateMD5Hash(string input)
         {

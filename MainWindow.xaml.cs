@@ -52,7 +52,7 @@ namespace CHEORptAnalyzer
             },
             [CRElement.Formula] = new CRSection
             {
-                Language = FastColoredTextBoxNS.Language.CSharp,
+                Language = FastColoredTextBoxNS.Language.SQL,
                 ResultFilter = x => x.Descendants("RecordSelectionFormula")
             },
             [CRElement.FormulaField] = new CRSection
@@ -60,9 +60,9 @@ namespace CHEORptAnalyzer
                 Language = FastColoredTextBoxNS.Language.CSharp,
                 ResultFilter = x => x.Descendants("FormulaFieldDefinition"),
                 ResultFormat = s =>
-                    s.Select(x => x.Attribute("FormulaName").Value + "\r\n{\r\n" + x.Value + "\r\n}")
-                     .Combine("\r\n\r\n")
-
+                    s.Select(x => x.Attribute("FormulaName").Value + Environment.NewLine + "{" + Environment.NewLine + x.Value.AppendToNewLine("\t") + Environment.NewLine + "}")
+                     .Combine(Environment.NewLine + Environment.NewLine)
+                    
             }
         };
 
@@ -117,6 +117,9 @@ namespace CHEORptAnalyzer
             }
         }
 
+        public static string AppendToNewLine(string left, string text)
+            => text + left.Split(new string[] { "\r\n", "\r" }, StringSplitOptions.None).Combine("\r\n" + text);
+
         private void BtnSearch_Click(object sender, RoutedEventArgs events)
         {
             SearchReports();
@@ -141,7 +144,9 @@ namespace CHEORptAnalyzer
 
                 foreach (CRElement f in CRSections.Keys)
                 {
+                    
                     Func<IEnumerable<XElement>, IEnumerable<XElement>> filterFunc = CRSections[f].ResultFilter;
+                    var SearchResult = report.Descendants().Apply(filterFunc);
 
                     results[f] = CRSections[f].ResultFormat(report.Descendants().Apply(filterFunc));
                 }
