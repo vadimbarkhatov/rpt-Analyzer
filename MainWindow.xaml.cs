@@ -9,6 +9,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Xml.Linq;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System.Text;
+using System.Xml;
 
 namespace CHEORptAnalyzer
 {
@@ -73,12 +75,31 @@ namespace CHEORptAnalyzer
             DataContext = this;
 
             windowsFormsHost.Child = textBox;
-            //textBox.Language = FastColoredTextBoxNS.Language.HTML;
-            textBox.DescriptionFile = @"C:\test\CrystalSyntax.xml";
+            textBox.DescriptionFile = "CrystalSyntax";
+
+            XmlDocument crystalSyntax = new XmlDocument();
+            crystalSyntax.LoadXml(Properties.Resources.CrystalSyntax);
+            textBox.SyntaxHighlighter.AddXmlDescription("CrystalSyntax", crystalSyntax);
+
             textBox.ReadOnly = true;
 
             textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
 
+        }
+
+        public string GetResourceTextFile(string filename)
+        {
+            string result = string.Empty;
+
+            using (Stream stream = GetType().Assembly.
+                       GetManifestResourceStream("CHEORptAnalyzer" + filename))
+            {
+                using (StreamReader sr = new StreamReader(stream))
+                {
+                    result = sr.ReadToEnd();
+                }
+            }
+            return result;
         }
 
         private void LoadXML(IEnumerable<string> folders)
@@ -247,6 +268,8 @@ namespace CHEORptAnalyzer
                 SearchReports();
             }
         }
+
+        
     }
  
 }

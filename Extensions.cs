@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -37,7 +38,7 @@ namespace CHEORptAnalyzer
         public static U GetTupleValue<T, U>(this IEnumerable<(T, U)> left, T key)
             => left.Where(x => x.Item1.Equals(key)).First().Item2;
 
-
+        
 
         public static string CalculateMD5Hash(string input)
         {

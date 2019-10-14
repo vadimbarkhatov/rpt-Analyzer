@@ -203,6 +203,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BOEExporter.cs" />
+    <Compile Include="Class1.cs" />
     <Compile Include="CRSection.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Settings.cs" />
@@ -239,7 +240,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="packages.config" />
@@ -257,6 +258,7 @@
     <Content Include="Examples.txt">
       <SubType>Designer</SubType>
     </Content>
+    <EmbeddedResource Include="CrystalSyntax.xml" />
     <Resource Include="TextTemplate.ico" />
   </ItemGroup>
   <ItemGroup>
