@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <doc>
-  <brackets left="{" right="}" left2="(" right2=")" />
   <style name="Green" color="Green"/>
   <style name="Maroon" color="Maroon"/>
   <style name="Black" color="Black"/>

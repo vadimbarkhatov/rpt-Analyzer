@@ -203,7 +203,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BOEExporter.cs" />
-    <Compile Include="Class1.cs" />
     <Compile Include="CRSection.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Settings.cs" />

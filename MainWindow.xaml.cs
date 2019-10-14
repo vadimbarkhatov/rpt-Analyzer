@@ -11,6 +11,8 @@ using System.Xml.Linq;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Text;
 using System.Xml;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace CHEORptAnalyzer
 {
@@ -34,11 +36,10 @@ namespace CHEORptAnalyzer
         public string SearchString { get; set; } = "";
         public bool ContainsSeach { get; set; } = true;
         public CRElement PreviewElement { get; set; } = CRElement.Field;
-        FastColoredTextBox textBox = new FastColoredTextBox();
-        Func<string, bool> textFilter;
+        public BindingList<XElementWrap> ReportItems { get; set; } = new BindingList<XElementWrap>();
 
-        private const string rptPath = @"C:\test\Reports\*";
-        private string cacheFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
+        const string rptPath = @"C:\test\Reports\*";
+        static readonly string cacheFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
         XElement xroot = new XElement("null");
         static readonly Dictionary<CRElement, CRSection> CRSections = new Dictionary<CRElement, CRSection>
         {
@@ -64,7 +65,6 @@ namespace CHEORptAnalyzer
                 ResultFormat = s =>
                     s.Select(x => x.Attribute("FormulaName").Value + Environment.NewLine + "{" + Environment.NewLine + x.Value.AppendToNewLine("\t") + Environment.NewLine + "}")
                      .Combine(Environment.NewLine + Environment.NewLine)
-                    
             }
         };
 
@@ -74,32 +74,15 @@ namespace CHEORptAnalyzer
             InitializeComponent();
             DataContext = this;
 
-            windowsFormsHost.Child = textBox;
-            textBox.DescriptionFile = "CrystalSyntax";
-
             XmlDocument crystalSyntax = new XmlDocument();
             crystalSyntax.LoadXml(Properties.Resources.CrystalSyntax);
+            textBox.DescriptionFile = "CrystalSyntax";
             textBox.SyntaxHighlighter.AddXmlDescription("CrystalSyntax", crystalSyntax);
-
-            textBox.ReadOnly = true;
-
-            textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
-
         }
 
-        public string GetResourceTextFile(string filename)
+        private bool TextFilter(string text)
         {
-            string result = string.Empty;
-
-            using (Stream stream = GetType().Assembly.
-                       GetManifestResourceStream("CHEORptAnalyzer" + filename))
-            {
-                using (StreamReader sr = new StreamReader(stream))
-                {
-                    result = sr.ReadToEnd();
-                }
-            }
-            return result;
+            return text.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private void LoadXML(IEnumerable<string> folders)
@@ -139,9 +122,6 @@ namespace CHEORptAnalyzer
             }
         }
 
-        public static string AppendToNewLine(string left, string text)
-            => text + left.Split(new string[] { "\r\n", "\r" }, StringSplitOptions.None).Combine("\r\n" + text);
-
         private void BtnSearch_Click(object sender, RoutedEventArgs events)
         {
             SearchReports();
@@ -153,69 +133,26 @@ namespace CHEORptAnalyzer
                          x => CRSections[CRElement.Field].ResultFilter(x).Gate(SearchFields)
                                 .Concat(CRSections[CRElement.Formula].ResultFilter(x).Gate(SearchRF))
                                 .Concat(CRSections[CRElement.Command].ResultFilter(x).Gate(SearchCommand))
-                                .Where(s => textFilter(s.Value));
+                                .Where(s => TextFilter(s.Value));
 
             IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == reportFilter(x.Descendants()).Count() > 0);
 
-            var currItem = lbReports.SelectedItem as XElementWrap;
-            lbReports.Items.Clear();
+            ReportItems.Clear();
 
             foreach (XElement report in foundReports)
             {
                 var results = new Dictionary<CRElement, string>();
 
-                foreach (CRElement f in CRSections.Keys)
+                foreach (CRElement crElement in CRSections.Keys)
                 {
-                    
-                    Func<IEnumerable<XElement>, IEnumerable<XElement>> filterFunc = CRSections[f].ResultFilter;
-                    var SearchResult = report.Descendants().Apply(filterFunc);
+                    Func<IEnumerable<XElement>, IEnumerable<XElement>> filterFunc = CRSections[crElement].ResultFilter;
+                    Func<IEnumerable<XElement>, string> resultFormatter = CRSections[crElement].ResultFormat;
 
-                    results[f] = CRSections[f].ResultFormat(report.Descendants().Apply(filterFunc));
+                    results[crElement] = report.Descendants().Apply(filterFunc).Apply(resultFormatter);
                 }
 
-                var newItem = new XElementWrap() { Text = report.Attribute("FileName").Value, SearchResults = results };
-
-                lbReports.Items.Add(newItem);
-
-                if (newItem.Text == currItem?.Text)
-                {
-                    lbReports.SelectedItem = lbReports.Items[lbReports.Items.Count - 1];
-                }
+                ReportItems.Add(new XElementWrap() { Text = report.Attribute("FileName").Value, SearchResults = results });
             }
-        }
-
-        private void ParseRPT(IEnumerable<string> paths)
-        {
-            foreach (string path in paths)
-            {
-                string outputFolder = GetOutputFolderPath(path);
-                Directory.CreateDirectory(outputFolder);
-
-                string rptPath = path + @"\*";
-                string[] rptFiles = new string[2];
-                rptFiles[0] = rptPath;
-                rptFiles[1] = outputFolder;
-
-                RptToXml.RptToXml.Convert(rptFiles);
-            }
-        }
-
-        private string GetOutputFolderPath(string path)
-        {
-            string outputPath;
-
-            if (new Uri(path).Host == "") //if path is non UNC
-            {
-                outputPath = Extensions.LocalToUNC(path) ?? "";
-                if (outputPath == "")
-                {
-                    outputPath = System.Environment.MachineName + "\\" + path.Replace(":", "$");
-                }
-
-            }
-            else outputPath = path.Remove(0, 2); //removes the first two slashes that all UNC paths have
-
-            return cacheFolder + outputPath + "\\";
         }
 
         private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -269,7 +206,41 @@ namespace CHEORptAnalyzer
             }
         }
 
-        
+        private void ParseRPT(IEnumerable<string> paths)
+        {
+            foreach (string path in paths)
+            {
+                string outputFolder = GetOutputFolderPath(path);
+                Directory.CreateDirectory(outputFolder);
+
+                string rptPath = path + @"\*";
+                string[] rptFiles = new string[2];
+                rptFiles[0] = rptPath;
+                rptFiles[1] = outputFolder;
+
+                RptToXml.RptToXml.Convert(rptFiles);
+            }
+        }
+
+        private string GetOutputFolderPath(string path)
+        {
+            string outputPath;
+
+            if (new Uri(path).Host == "") //if path is non UNC
+            {
+                outputPath = Extensions.LocalToUNC(path) ?? "";
+                if (outputPath == "")
+                {
+                    outputPath = System.Environment.MachineName + "\\" + path.Replace(":", "$");
+                }
+
+            }
+            else outputPath = path.Remove(0, 2); //removes the first two slashes that all UNC paths have
+
+            return cacheFolder + outputPath + "\\";
+        }
+
+
     }
  
 }
