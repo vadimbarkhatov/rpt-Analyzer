@@ -52,12 +52,12 @@ namespace CHEORptAnalyzer
             },
             [CRElement.Formula] = new CRSection
             {
-                Language = FastColoredTextBoxNS.Language.SQL,
+                Language = FastColoredTextBoxNS.Language.Custom,
                 ResultFilter = x => x.Descendants("RecordSelectionFormula")
             },
             [CRElement.FormulaField] = new CRSection
             {
-                Language = FastColoredTextBoxNS.Language.CSharp,
+                Language = FastColoredTextBoxNS.Language.Custom,
                 ResultFilter = x => x.Descendants("FormulaFieldDefinition"),
                 ResultFormat = s =>
                     s.Select(x => x.Attribute("FormulaName").Value + Environment.NewLine + "{" + Environment.NewLine + x.Value.AppendToNewLine("\t") + Environment.NewLine + "}")
@@ -73,7 +73,8 @@ namespace CHEORptAnalyzer
             DataContext = this;
 
             windowsFormsHost.Child = textBox;
-            textBox.Language = FastColoredTextBoxNS.Language.HTML;
+            //textBox.Language = FastColoredTextBoxNS.Language.HTML;
+            textBox.DescriptionFile = @"C:\test\CrystalSyntax.xml";
             textBox.ReadOnly = true;
 
             textFilter = s => s.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0; //Case insensitive contains
