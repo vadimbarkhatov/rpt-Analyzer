@@ -241,6 +241,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
@@ -257,7 +258,6 @@
     <Content Include="Examples.txt">
       <SubType>Designer</SubType>
     </Content>
-    <EmbeddedResource Include="CrystalSyntax.xml" />
     <Resource Include="TextTemplate.ico" />
   </ItemGroup>
   <ItemGroup>

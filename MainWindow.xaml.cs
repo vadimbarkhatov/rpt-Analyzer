@@ -73,11 +73,6 @@ namespace CHEORptAnalyzer
         {
             InitializeComponent();
             DataContext = this;
-
-            XmlDocument crystalSyntax = new XmlDocument();
-            crystalSyntax.LoadXml(Properties.Resources.CrystalSyntax);
-            textBox.DescriptionFile = "CrystalSyntax";
-            textBox.SyntaxHighlighter.AddXmlDescription("CrystalSyntax", crystalSyntax);
         }
 
         private bool TextFilter(string text)
@@ -104,7 +99,7 @@ namespace CHEORptAnalyzer
                     System.Windows.Forms.MessageBox.Show("Error", ex.Message, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
                 }
 
-                
+
                 foreach (string reportDefPath in files)
                 {
                     XElement xelement;
@@ -160,19 +155,23 @@ namespace CHEORptAnalyzer
             UpdatePreview();
         }
 
-        TextStyle SearchStyle = new TextStyle(null, System.Drawing.Brushes.Yellow, System.Drawing.FontStyle.Regular);
 
         private void UpdatePreview()
         {
             var selectedResults = (lbReports?.SelectedItem as XElementWrap)?.SearchResults[PreviewElement] ?? "";
 
+            textBox.ClearStylesBuffer();
             textBox.Language = CRSections[PreviewElement].Language;
             textBox.Text = selectedResults;
 
+            TextStyle SearchStyle = new TextStyle(null, System.Drawing.Brushes.Yellow, System.Drawing.FontStyle.Regular);
             textBox.AddStyle(SearchStyle);
             textBox.Range.ClearStyle(SearchStyle);
             textBox.Range.SetStyle(SearchStyle, Regex.Escape(SearchString.Trim()), RegexOptions.Multiline | RegexOptions.IgnoreCase);
+
+            if (CRSections[PreviewElement].Language == FastColoredTextBoxNS.Language.Custom) Extensions.CrystalSyntaxHighlight(textBox);
         }
+
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e) { UpdatePreview(); }
 
@@ -195,7 +194,7 @@ namespace CHEORptAnalyzer
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 directories = dialog.FileNames.SelectMany(x => Directory.GetDirectories(x, "*.*", SearchOption.AllDirectories)).Concat(dialog.FileNames);
-                foreach(var dir in directories)
+                foreach (var dir in directories)
                 {
                     ParseRPT(directories);
                 }
@@ -242,5 +241,5 @@ namespace CHEORptAnalyzer
 
 
     }
- 
+
 }

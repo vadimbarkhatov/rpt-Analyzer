@@ -1,10 +1,12 @@
-﻿using System;
+﻿using FastColoredTextBoxNS;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
@@ -38,7 +40,25 @@ namespace CHEORptAnalyzer
         public static U GetTupleValue<T, U>(this IEnumerable<(T, U)> left, T key)
             => left.Where(x => x.Item1.Equals(key)).First().Item2;
 
-        
+        public static void CrystalSyntaxHighlight(FastColoredTextBox textBox)
+        {
+            TextStyle StringStyle = new TextStyle(System.Drawing.Brushes.Black, null, System.Drawing.FontStyle.Regular);
+            TextStyle FuncStyle = new TextStyle(System.Drawing.Brushes.Blue, null, System.Drawing.FontStyle.Regular);
+            TextStyle CommentStyle = new TextStyle(System.Drawing.Brushes.Green, null, System.Drawing.FontStyle.Regular);
+            TextStyle FieldStyle = new TextStyle(System.Drawing.Brushes.Black, null, System.Drawing.FontStyle.Regular);
+
+            textBox.AddStyle(CommentStyle);
+            textBox.AddStyle(FieldStyle);
+            textBox.AddStyle(StringStyle);
+            textBox.AddStyle(FuncStyle);
+
+            string crystalFuncs = "(in|and|or|if|then|else|like|not)";
+
+            textBox.Range.SetStyle(CommentStyle, @"(\/\/).*", RegexOptions.IgnoreCase);
+            textBox.Range.SetStyle(StringStyle, @"""(.*?)""", RegexOptions.IgnoreCase);
+            textBox.Range.SetStyle(FuncStyle, crystalFuncs, RegexOptions.IgnoreCase);
+            textBox.Range.SetStyle(FieldStyle, @"{(.*?)}", RegexOptions.IgnoreCase);
+        }
 
         public static string CalculateMD5Hash(string input)
         {
