@@ -24,10 +24,10 @@
             <StackPanel.Resources>
                 <local:ComparisonConverter x:Key="ComparisonConverter" />
             </StackPanel.Resources>
-            <RadioButton Content="Columns" Margin="0,0,3,0" IsChecked="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Field}, Converter={StaticResource ComparisonConverter}}" Checked="RadioButton_Checked"/>
-            <RadioButton Content="Formula Field" Margin="0,0,3,0" IsChecked="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.FormulaField}, Converter={StaticResource ComparisonConverter}}" Checked="RadioButton_Checked"/>
-            <RadioButton Content="Formula" Margin="0,0,3,0" IsChecked="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Formula}, Converter={StaticResource ComparisonConverter}}" Checked="RadioButton_Checked"/>
-            <RadioButton Content="Command" Margin="0,0,3,0" IsChecked="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Command}, Converter={StaticResource ComparisonConverter}}" Checked="RadioButton_Checked"/>
+            <RadioButton Content="Columns" Margin="0,0,5,0" IsChecked="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Field}, Converter={StaticResource ComparisonConverter}}" Checked="RadioButton_Checked"/>
+            <RadioButton Content="Formula Field" Margin="0,0,5,0" IsChecked="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.FormulaField}, Converter={StaticResource ComparisonConverter}}" Checked="RadioButton_Checked"/>
+            <RadioButton Content="Formula" Margin="0,0,5,0" IsChecked="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Formula}, Converter={StaticResource ComparisonConverter}}" Checked="RadioButton_Checked"/>
+            <RadioButton Content="Command" Margin="0,0,5,0" IsChecked="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Command}, Converter={StaticResource ComparisonConverter}}" Checked="RadioButton_Checked"/>
         </StackPanel>
         <ListBox x:Name="lbReports" HorizontalAlignment="Left" Height="371" ItemsSource="{Binding ReportItems, Mode=TwoWay}"  Margin="10,56,0,0" VerticalAlignment="Top" Width="494" SelectionChanged="LbReports_SelectionChanged"/>
         <TextBox x:Name="tbSearch" HorizontalAlignment="Left" Height="23" Margin="261,480,0,0" VerticalAlignment="Top" Width="181"  MaxLines="1" Text = "{Binding SearchString, Mode=TwoWay}" Grid.ColumnSpan="2"/>
@@ -38,8 +38,8 @@
         </StackPanel>
         <Label Content="Report List" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top"/>
         <Label Content="{Binding Items.Count, ElementName=lbReports, Mode=OneWay}" ContentStringFormat="({0})" HorizontalAlignment="Left" Margin="70,30,0,0" VerticalAlignment="Top" Width="50"/>
-        <Label Content="Preview" HorizontalAlignment="Left" Margin="536,30,0,0" VerticalAlignment="Top"/>
-        <Label Content="Seach" HorizontalAlignment="Left" Margin="261,452,0,0" VerticalAlignment="Top" Width="62"/>
+        <Label Content="Preview:" HorizontalAlignment="Left" Margin="536,30,0,0" VerticalAlignment="Top"/>
+        <Label Content="Search" HorizontalAlignment="Left" Margin="261,452,0,0" VerticalAlignment="Top" Width="62"/>
         <Label HorizontalAlignment="Left" Margin="306,449,0,0" VerticalAlignment="Top" Width="136" Grid.ColumnSpan="2">
             <ComboBox x:Name="cbSearchMod" Width="126" SelectedIndex="0">
                 <ComboBoxItem x:Name="Contains"  IsSelected="{Binding ContainsSeach, Mode=OneWayToSource}" Content="Contains" />

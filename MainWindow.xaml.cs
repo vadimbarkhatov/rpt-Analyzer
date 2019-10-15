@@ -146,7 +146,7 @@ namespace CHEORptAnalyzer
                     results[crElement] = report.Descendants().Apply(filterFunc).Apply(resultFormatter);
                 }
 
-                ReportItems.Add(new XElementWrap() { Text = report.Attribute("FileName").Value, SearchResults = results });
+                ReportItems.Add(new XElementWrap() { Text = Path.GetFileName(report.Attribute("FileName").Value), SearchResults = results });
             }
         }
 
