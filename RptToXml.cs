@@ -3,21 +3,22 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using LiteDB;
 
 namespace RptToXml
 {
 	public class RptToXml
 	{
-		public static void Convert(string[] args, bool forceRefresh = false)
+		public static void Convert(string rptLoc, string liteDBPath, bool forceRefresh = false)
 		{
-			if (args.Length < 1)
-			{
-				Console.WriteLine("Usage: RptToXml.exe <RPT filename | wildcard> [outputfilename]");
-				Console.WriteLine("       outputfilename argument is valid only with single filename in first argument");
-				return;
-			}
+			//if (args.Length < 1)
+			//{
+				//Console.WriteLine("Usage: RptToXml.exe <RPT filename | wildcard> [outputfilename]");
+				//Console.WriteLine("       outputfilename argument is valid only with single filename in first argument");
+				//return;
+			//}
 
-			string rptPathArg = args[0];
+			string rptPathArg = rptLoc;
 			bool wildCard = rptPathArg.Contains("*");
 			if (!wildCard && !ReportFilenameValid(rptPathArg))
 				return;
@@ -46,40 +47,48 @@ namespace RptToXml
 				Trace.WriteLine("No reports matched the wildcard.");
 			}
 
-			foreach (string rptPath in rptPaths)
-			{
-				Trace.WriteLine("Dumping " + rptPath);
-                string xmlPath;
-
-                if (args.Length > 1)
+            using (var db = new LiteDatabase(liteDBPath))
+            {
+                foreach (string rptPath in rptPaths)
                 {
-                    xmlPath = args[1] + Path.GetFileName(rptPath);
-                }
-                else
-                {
-                    xmlPath = rptPath;
-                }
+                    Trace.WriteLine("Dumping " + rptPath);
+                    //string xmlPath;
 
-                xmlPath = Path.ChangeExtension(xmlPath, "xml");
+                    //if (args.Length > 1)
+                    //{
+                    //xmlPath = args[1] + Path.GetFileName(rptPath);
+                    //}
+                    //else
+                    //{
+                    //xmlPath = rptPath;
+                    //}
 
-                FileInfo xmlFile = new FileInfo(xmlPath);
-                FileInfo rptFile = new FileInfo(rptPath);
+                    //xmlPath = Path.ChangeExtension(xmlPath, "xml");
 
-                if (!forceRefresh && xmlFile.LastWriteTime > rptFile.LastWriteTime) continue;
+                    //FileInfo xmlFile = new FileInfo(xmlPath);
+                    FileInfo rptFile = new FileInfo(rptPath);
 
-                try
-                {
-                    using (var writer = new RptDefinitionWriter(rptPath))
+                    //if (!forceRefresh && xmlFile.LastWriteTime > rptFile.LastWriteTime) continue;
+
+                    string id = CHEORptAnalyzer.Extensions.ToLiteDBID(rptPath);
+
+                    Stream stream = new MemoryStream();
+
+                    try
                     {
-                        writer.WriteToXml(xmlPath);
+                        using (var writer = new RptDefinitionWriter(rptPath))
+                        {
+                            writer.WriteToXml(stream);
+                            db.FileStorage.Upload(id, "empty", stream);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.Write(ex);
+                        System.Windows.Forms.MessageBox.Show(ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
                     }
                 }
-                catch (Exception ex)
-                {
-                    Trace.Write(ex);
-                    System.Windows.Forms.MessageBox.Show(ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
-                }
-			}
+            }
 		}
 
 		static bool ReportFilenameValid(string rptPath)

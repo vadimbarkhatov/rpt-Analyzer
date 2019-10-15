@@ -55,10 +55,8 @@ namespace RptToXml
 
 		public void WriteToXml(System.IO.Stream output)
 		{
-			using (XmlTextWriter writer = new XmlTextWriter(output, Encoding.UTF8) { Formatting = Formatting.Indented })
-			{
-				WriteToXml(writer);
-			}
+            XmlTextWriter writer = new XmlTextWriter(output, Encoding.UTF8) { Formatting = Formatting.Indented };
+            WriteToXml(writer);
 		}
 
 		public void WriteToXml(string targetXmlPath)

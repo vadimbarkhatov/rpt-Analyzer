@@ -79,6 +79,19 @@ namespace CHEORptAnalyzer
         [DllImport("mpr.dll")]
         static extern int WNetGetUniversalNameA(string lpLocalPath, int dwInfoLevel, IntPtr lpBuffer, ref int lpBufferSize);
 
+        public static string ToLiteDBID(string path)
+        {
+            return "$/" + path
+                        .Replace("\\\\", string.Empty)
+                        .Replace("\\", "/")
+                        .Replace(":", string.Empty)
+                        .Replace(" ", "_")
+                        .Replace("(", "@")
+                        .Replace("&", ";")
+                        .Replace(",", "%")
+                        .Replace(")", "!");
+        }
+
         // I think max length for UNC is actually 32,767
         public static string LocalToUNC(string localPath, int maxLen = 2000)
         {

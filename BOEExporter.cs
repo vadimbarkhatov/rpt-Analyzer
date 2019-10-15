@@ -75,8 +75,6 @@ namespace CHEORptAnalyzer
 
             CrystalDecisions.ReportAppServer.Utilities.Conversion boConversion = new CrystalDecisions.ReportAppServer.Utilities.Conversion();
 
-            var test = 3;
-
             //boReportClientDocument.ReportDocument.
 
 

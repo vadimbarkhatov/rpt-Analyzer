@@ -91,6 +91,7 @@
 
                 try
                 {
+                    //files = Directory.GetFiles(folder, "*.xml", SearchOption.AllDirectories);
                     files = Directory.GetFiles(folder, "*.xml", SearchOption.AllDirectories);
                 }
                 catch (Exception ex)
@@ -187,10 +188,8 @@
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 directories = dialog.FileNames.SelectMany(x => Directory.GetDirectories(x, "*.*", SearchOption.AllDirectories)).Concat(dialog.FileNames);
-                foreach (var dir in directories)
-                {
-                    ParseRPT(directories);
-                }
+                ParseRPT(directories);
+                
 
                 var searchFolders = dialog.FileNames.Select(x => GetOutputFolderPath(x));
                 LoadXML(searchFolders);
@@ -202,15 +201,9 @@
         {
             foreach (string path in paths)
             {
-                string outputFolder = GetOutputFolderPath(path);
-                Directory.CreateDirectory(outputFolder);
-
                 string rptPath = path + @"\*";
-                string[] rptFiles = new string[2];
-                rptFiles[0] = rptPath;
-                rptFiles[1] = outputFolder;
 
-                RptToXml.RptToXml.Convert(rptFiles);
+                RptToXml.RptToXml.Convert(rptPath, @"C:\test\MyData.db");
             }
         }
 
@@ -225,7 +218,6 @@
                 {
                     outputPath = System.Environment.MachineName + "\\" + path.Replace(":", "$");
                 }
-
             }
             else
             {
