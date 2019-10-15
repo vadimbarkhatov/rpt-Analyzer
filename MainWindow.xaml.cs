@@ -1,21 +1,18 @@
-﻿using FastColoredTextBoxNS;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Windows;
-using System.Windows.Controls;
-using System.Xml.Linq;
-using Microsoft.WindowsAPICodePack.Dialogs;
-using System.Text;
-using System.Xml;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-
-namespace CHEORptAnalyzer
+﻿namespace CHEORptAnalyzer
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Xml.Linq;
+    using FastColoredTextBoxNS;
+    using Microsoft.WindowsAPICodePack.Dialogs;
+
     public enum CRElement
     {
         Field,
@@ -30,43 +27,47 @@ namespace CHEORptAnalyzer
     /// 
     public partial class MainWindow : Window
     {
-        public bool SearchFields { get; set; } = true;
-        public bool SearchRF { get; set; } = true;
-        public bool SearchCommand { get; set; } = true;
-        public string SearchString { get; set; } = "";
-        public bool ContainsSeach { get; set; } = true;
-        public CRElement PreviewElement { get; set; } = CRElement.Field;
-        public BindingList<XElementWrap> ReportItems { get; set; } = new BindingList<XElementWrap>();
-
         const string rptPath = @"C:\test\Reports\*";
-        static readonly string cacheFolder = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
-        XElement xroot = new XElement("null");
+        static readonly string CacheFolder = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
         static readonly Dictionary<CRElement, CRSection> CRSections = new Dictionary<CRElement, CRSection>
         {
             [CRElement.Field] = new CRSection
             {
                 Language = FastColoredTextBoxNS.Language.Custom,
-                ResultFilter = x => x.Descendants("Tables").Descendants("Field")
+                ResultFilter = x => x.Descendants("Tables").Descendants("Field"),
             },
             [CRElement.Command] = new CRSection
             {
                 Language = FastColoredTextBoxNS.Language.SQL,
-                ResultFilter = x => x.Descendants("Command")
+                ResultFilter = x => x.Descendants("Command"),
             },
             [CRElement.Formula] = new CRSection
             {
                 Language = FastColoredTextBoxNS.Language.Custom,
-                ResultFilter = x => x.Descendants("RecordSelectionFormula")
+                ResultFilter = x => x.Descendants("RecordSelectionFormula"),
             },
             [CRElement.FormulaField] = new CRSection
             {
                 Language = FastColoredTextBoxNS.Language.Custom,
                 ResultFilter = x => x.Descendants("FormulaFieldDefinition"),
                 ResultFormat = s =>
-                    s.Select(x => x.Attribute("FormulaName").Value + Environment.NewLine + "{" + Environment.NewLine + x.Value.AppendToNewLine("\t") + Environment.NewLine + "}")
-                     .Combine(Environment.NewLine + Environment.NewLine)
-            }
+                    s.Select(x =>
+                        x.Attribute("FormulaName").Value +
+                        "\r\n" + "{" +
+                        "\r\n" + x.Value.AppendToNewLine("\t") +
+                        "\r\n" + "}")
+                     .Combine("\r\n" + "\r\n"),
+            },
         };
+
+        public bool SearchFields { get; set; } = true;
+        public bool SearchRF { get; set; } = true;
+        public bool SearchCommand { get; set; } = true;
+        public bool ContainsSeach { get; set; } = true;
+        public string SearchString { get; set; } = string.Empty;
+        public CRElement PreviewElement { get; set; } = CRElement.Field;
+        public BindingList<XElementWrap> ReportItems { get; set; } = new BindingList<XElementWrap>();
+        XElement Xroot = new XElement("null");
 
 
         public MainWindow()
@@ -82,7 +83,7 @@ namespace CHEORptAnalyzer
 
         private void LoadXML(IEnumerable<string> folders)
         {
-            xroot = new XElement("Reports");
+            Xroot = new XElement("Reports");
 
             foreach (string folder in folders)
             {
@@ -112,7 +113,7 @@ namespace CHEORptAnalyzer
                         continue;
                     }
 
-                    xroot.Add(xelement);
+                    Xroot.Add(xelement);
                 }
             }
         }
@@ -130,7 +131,7 @@ namespace CHEORptAnalyzer
                                 .Concat(CRSections[CRElement.Command].ResultFilter(x).Gate(SearchCommand))
                                 .Where(s => TextFilter(s.Value));
 
-            IEnumerable<XElement> foundReports = xroot.Elements("Report").Where(x => ContainsSeach == reportFilter(x.Descendants()).Count() > 0);
+            IEnumerable<XElement> foundReports = Xroot.Elements("Report").Where(x => ContainsSeach == reportFilter(x.Descendants()).Count() > 0);
 
             ReportItems.Clear();
 
@@ -150,11 +151,9 @@ namespace CHEORptAnalyzer
             }
         }
 
-        private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            UpdatePreview();
-        }
+        private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdatePreview();
 
+        private void RadioButton_Checked(object sender, RoutedEventArgs e) => UpdatePreview();
 
         private void UpdatePreview()
         {
@@ -164,21 +163,15 @@ namespace CHEORptAnalyzer
             textBox.Language = CRSections[PreviewElement].Language;
             textBox.Text = selectedResults;
 
-            TextStyle SearchStyle = new TextStyle(null, System.Drawing.Brushes.Yellow, System.Drawing.FontStyle.Regular);
-            textBox.AddStyle(SearchStyle);
-            textBox.Range.ClearStyle(SearchStyle);
-            textBox.Range.SetStyle(SearchStyle, Regex.Escape(SearchString.Trim()), RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            TextStyle searchStyle = new TextStyle(null, System.Drawing.Brushes.Yellow, System.Drawing.FontStyle.Regular);
+            textBox.AddStyle(searchStyle);
+            textBox.Range.ClearStyle(searchStyle);
+            textBox.Range.SetStyle(searchStyle, Regex.Escape(SearchString.Trim()), RegexOptions.Multiline | RegexOptions.IgnoreCase);
 
             if (CRSections[PreviewElement].Language == FastColoredTextBoxNS.Language.Custom) Extensions.CrystalSyntaxHighlight(textBox);
         }
 
-
-        private void RadioButton_Checked(object sender, RoutedEventArgs e) { UpdatePreview(); }
-
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-
-        }
+        
 
         private void OpenFolder(object sender, RoutedEventArgs e)
         {
@@ -186,7 +179,7 @@ namespace CHEORptAnalyzer
             {
                 InitialDirectory = @"C:\test\",
                 IsFolderPicker = true,
-                Multiselect = true
+                Multiselect = true,
             };
 
             IEnumerable<string> directories;
@@ -225,21 +218,21 @@ namespace CHEORptAnalyzer
         {
             string outputPath;
 
-            if (new Uri(path).Host == "") //if path is non UNC
+            if (new Uri(path).Host == string.Empty) // if path is non UNC
             {
-                outputPath = Extensions.LocalToUNC(path) ?? "";
-                if (outputPath == "")
+                outputPath = Extensions.LocalToUNC(path) ?? string.Empty;
+                if (outputPath == string.Empty)
                 {
                     outputPath = System.Environment.MachineName + "\\" + path.Replace(":", "$");
                 }
 
             }
-            else outputPath = path.Remove(0, 2); //removes the first two slashes that all UNC paths have
+            else
+            {
+                outputPath = path.Remove(0, 2); // removes the first two slashes that all UNC paths have
+            }
 
-            return cacheFolder + outputPath + "\\";
+            return CacheFolder + outputPath + "\\";
         }
-
-
     }
-
 }
