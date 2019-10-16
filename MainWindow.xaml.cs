@@ -15,7 +15,7 @@
     using LiteDB;
     using Microsoft.WindowsAPICodePack.Dialogs;
 
-    
+
 
     public enum CRElement
     {
@@ -31,7 +31,7 @@
     /// 
     public partial class MainWindow : Window
     {
-        
+
         const string rptPath = @"C:\test\Reports\*";
         static readonly string CacheFolder = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
         static readonly Dictionary<CRElement, CRSection> CRSections = new Dictionary<CRElement, CRSection>
@@ -71,7 +71,13 @@
         public bool ContainsSeach { get; set; } = true;
         public string SearchString { get; set; } = string.Empty;
         public CRElement PreviewElement { get; set; } = CRElement.Field;
-        public BindingList<List<XElementWrap>> ReportItems { get; set; } = new BindingList<List<XElementWrap>>();
+        public BindingList<ReportItem> ReportItems { get; set; } = new BindingList<ReportItem>();
+        public BindingList<Dictionary<CRElement, string>> SubReports { get; set; }
+            = new BindingList<Dictionary<CRElement, string>>
+            { new Dictionary<CRElement, string> { [CRElement.Field] = "test"}};
+            
+        // = new BindingList<Dictionary<CRElement, string>>();
+
         XElement Xroot = new XElement("null");
 
         public MainWindow()
@@ -142,29 +148,38 @@
 
             foreach (XElement report in foundReports)
             {
-                List<XElementWrap> allReports = new List<XElementWrap>();
+                ReportItem reportItem = new ReportItem();
+                reportItem.Text = report.Attribute("FileName").Value;
+                IEnumerable<XElement> flattenedReport = FlattenReport(report);
 
-                foreach(var subReport in report.Elements("SubReports").Elements("Report"))
+                foreach (var subReport in flattenedReport)
                 {
-                    var results = ReportResults(subReport);
+                    Dictionary<CRElement, string> results = ReportResults(subReport.Descendants());
 
-                    allReports.Add(new XElementWrap() { Text = subReport.Attribute("Name").Value, SearchResults = results });
+                    reportItem.DisplayResults.Add(results);
                 }
 
-                var test = report.Elements().Where(x => x.Name != "SubReports").SelectMany(x => x.Descendants());
-
-                //ReportItems.
+                ReportItems.Add(reportItem);
             }
         }
 
-        private static Dictionary<CRElement, string> ReportResults(XElement report)
+        private static IEnumerable<XElement> FlattenReport(XElement report)
+        {
+            var mainReport = new XElement("BaseReport");
+            mainReport.Add(report.Elements().Where(x => x.Name != "SubReports"));
+            mainReport.SetAttributeValue("Name", mainReport.Element("Summaryinfo").Attribute("ReportTitle").Value);
+            var flattenedReports = new[] { mainReport }.Concat(report.Elements("SubReports").Elements("Report"));
+            return flattenedReports;
+        }
+
+
+        private static Dictionary<CRElement, string> ReportResults(IEnumerable<XElement> report)
         {
             var results = new Dictionary<CRElement, string>();
 
             foreach (CRElement crElement in CRSections.Keys)
             {
                 results[crElement] = report
-                    .Descendants()
                     .Apply(CRSections[crElement].ResultFilter)
                     .Apply(CRSections[crElement].ResultFormat);
             }
@@ -172,13 +187,19 @@
             return results;
         }
 
-        private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdatePreview();
+        private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SubReports = lbReports?.SelectedItem as BindingList<Dictionary<CRElement, string>>;
+            UpdatePreview();
+
+        }
+           // => UpdatePreview();
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e) => UpdatePreview();
 
         private void UpdatePreview()
         {
-            var selectedResults = (lbReports?.SelectedItem as XElementWrap)?.SearchResults[PreviewElement] ?? "";
+            var selectedResults = (lbReports?.SelectedItem as ReportItem)?.DisplayResults[0][PreviewElement] ?? "";
 
             textBox.ClearStylesBuffer();
             textBox.Language = CRSections[PreviewElement].Language;

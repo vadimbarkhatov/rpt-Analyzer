@@ -21,16 +21,23 @@
 
             </Menu>
         </DockPanel>
-        <TabControl Height="22" VerticalAlignment="Top" Margin="520,35,0,0" HorizontalAlignment="Left" Width="300" Panel.ZIndex="999" SelectionChanged="RadioButton_Checked">
-            <TabControl.Resources>
-                <local:ComparisonConverter x:Key="ComparisonConverter" />
-            </TabControl.Resources>
-            <TabItem Header="Columns" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Field}, Converter={StaticResource ComparisonConverter}}" />
-            <TabItem Header="Formula Fields" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.FormulaField}, Converter={StaticResource ComparisonConverter}}"/>
-            <TabItem Header="Formula" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Formula}, Converter={StaticResource ComparisonConverter}}"/>
-            <TabItem Header="Command" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Command}, Converter={StaticResource ComparisonConverter}}"/>
-        </TabControl>
-
+        
+        <StackPanel VerticalAlignment="Top" Margin="520,35,0,0" Panel.ZIndex="999"  HorizontalAlignment="Left" Orientation="Horizontal">
+            <TabControl Height="22" Width="300" SelectionChanged="RadioButton_Checked">
+                <TabControl.Resources>
+                    <local:ComparisonConverter x:Key="ComparisonConverter" />
+                </TabControl.Resources>
+                <TabItem Header="Columns" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Field}, Converter={StaticResource ComparisonConverter}}" />
+                <TabItem Header="Formula Fields" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.FormulaField}, Converter={StaticResource ComparisonConverter}}"/>
+                <TabItem Header="Formula" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Formula}, Converter={StaticResource ComparisonConverter}}"/>
+                <TabItem Header="Command" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Command}, Converter={StaticResource ComparisonConverter}}"/>
+            </TabControl>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="136" >
+                <ComboBox Width="126" SelectedIndex="0" ItemsSource="{Binding SubReports, Mode=TwoWay}">
+                </ComboBox>
+            </StackPanel>
+        </StackPanel>
+        
         <DockPanel HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" >
             <StackPanel HorizontalAlignment="Left"  VerticalAlignment="Top"  DockPanel.Dock="Top" Orientation="Horizontal">
                 <Label Content="Report List" HorizontalAlignment="Left" VerticalAlignment="Top" />
@@ -46,12 +53,7 @@
                             <CheckBox Content="Record Select Formula" Height="15" IsChecked="{Binding SearchRF}"/>
                             <CheckBox Content="Command Objects" Height="15" IsChecked="{Binding SearchCommand}"/>
                         </StackPanel>
-                        <Label HorizontalAlignment="Center" VerticalAlignment="Top" Width="136" >
-                            <ComboBox x:Name="cbSearchMod" Width="126" SelectedIndex="0">
-                                <ComboBoxItem x:Name="Contains" IsSelected="{Binding ContainsSeach, Mode=OneWayToSource}" Content="Contains" />
-                                <ComboBoxItem x:Name="DNContain" Content="Does Not Contain"/>
-                            </ComboBox>
-                        </Label>
+                        
                         <TextBox x:Name="tbSearch" Height="23"  Width="123"  MaxLines="1" Text = "{Binding SearchString, Mode=TwoWay}"/>
 
 

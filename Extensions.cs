@@ -32,9 +32,9 @@ namespace CHEORptAnalyzer
         public static Func<T, bool> Or<T>(this Func<T, bool> left, Func<T, bool> right)
             => a => left(a) || right(a);
 
-        public static IEnumerable<T> GetEnumValues<T>() where T : Enum
+        public static IEnumerable<T> ConcatSingle<T>(this IEnumerable<T> enumerable, T value)
         {
-            return Enum.GetValues(typeof(T)).Cast<T>();
+            return enumerable.Concat(new[] { value });
         }
 
         public static U GetTupleValue<T, U>(this IEnumerable<(T, U)> left, T key)

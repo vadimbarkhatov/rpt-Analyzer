@@ -228,7 +228,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="XElementWrap.cs" />
+    <Compile Include="ReportItem.cs" />
     <Compile Include="RptToXml.cs" />
     <Compile Include="RptDefinitionWriter.cs" />
     <Page Include="MainWindow.xaml">

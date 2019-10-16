@@ -8,10 +8,11 @@ using static CHEORptAnalyzer.MainWindow;
 
 namespace CHEORptAnalyzer
 {
-    public class XElementWrap
+    public class ReportItem
     {
         public string Text;
-        public Dictionary<CRElement, string> SearchResults = new Dictionary<CRElement, string>();
+        public List<Dictionary<CRElement, string>> DisplayResults = new List<Dictionary<CRElement, string>>();
+
 
         public override string ToString()
         {
