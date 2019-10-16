@@ -51,12 +51,17 @@ namespace RptToXml
             {
                 foreach (string rptPath in rptPaths)
                 {
+                    string id = CHEORptAnalyzer.Extensions.ToLiteDBID(rptPath);
+
                     Trace.WriteLine("Dumping " + rptPath);
                     FileInfo rptFile = new FileInfo(rptPath);
+                    LiteFileInfo xmlFile = db.FileStorage.FindById(id);
 
-                    //if (!forceRefresh && xmlFile.LastWriteTime > rptFile.LastWriteTime) continue;
-
-                    string id = CHEORptAnalyzer.Extensions.ToLiteDBID(rptPath);
+                    if(rptFile.Exists && xmlFile != null)
+                    {
+                        if (!forceRefresh && xmlFile.UploadDate > rptFile.LastWriteTime) continue;
+                    }
+                        
 
                     Stream stream = new MemoryStream();
 
@@ -65,12 +70,17 @@ namespace RptToXml
                         using (var writer = new RptDefinitionWriter(rptPath))
                         {
                             writer.WriteToXml(stream);
+                            stream.Position = 0;
                             db.FileStorage.Upload(id, "empty", stream);
+
+                            var filePathMeta = new BsonDocument();
+                            filePathMeta["fullPath"] = rptPath;
+                            db.FileStorage.SetMetadata(id, filePathMeta);
                         }
                     }
                     catch (Exception ex)
                     {
-                        Trace.Write(ex);
+                        Logs.Instance.log.Error(ex.Message, ex);
                         System.Windows.Forms.MessageBox.Show(ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
                     }
                 }

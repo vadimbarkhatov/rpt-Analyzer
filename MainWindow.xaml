@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:CHEORptAnalyzer"  
         xmlns:FastColoredTextBoxNS="clr-namespace:FastColoredTextBoxNS;assembly=FastColoredTextBox" x:Class="CHEORptAnalyzer.MainWindow"  
         mc:Ignorable="d"
@@ -21,6 +22,7 @@
             </Menu>
         </DockPanel>
 
+
         <StackPanel Orientation="Horizontal" Height="18" VerticalAlignment="Top" Margin="592,36,0,0" HorizontalAlignment="Left">
             <StackPanel.Resources>
                 <local:ComparisonConverter x:Key="ComparisonConverter" />
@@ -32,7 +34,7 @@
         </StackPanel>
         <DockPanel HorizontalAlignment="Left" VerticalAlignment="Top" >
             <Label Content="Report List" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" DockPanel.Dock="Top"/>
-            <ListBox x:Name="lbReports" ItemsSource="{Binding ReportItems, Mode=TwoWay}" Width="494"  Margin="10,5,0,0" SelectionChanged="LbReports_SelectionChanged" DockPanel.Dock="Top" Height="600"/>
+            <ListBox x:Name="lbReports" ItemsSource="{Binding ReportItems, Mode=TwoWay}" Width="494"  Margin="10,5,0,0" SelectionChanged="LbReports_SelectionChanged" DockPanel.Dock="Top" Height="500"/>
             <StackPanel Margin="10,0,0,10" HorizontalAlignment="Left" Width="494" Orientation="Horizontal" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
                 <GroupBox Header="Report Info" Width="329"  />
                 <GroupBox Header="Search" VerticalAlignment="Top">

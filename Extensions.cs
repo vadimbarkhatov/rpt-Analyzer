@@ -87,9 +87,14 @@ namespace CHEORptAnalyzer
                         .Replace(":", string.Empty)
                         .Replace(" ", "_")
                         .Replace("(", "@")
+                        .Replace("[", "@")
                         .Replace("&", ";")
+                        .Replace("~", ";")
                         .Replace(",", "%")
-                        .Replace(")", "!");
+                        .Replace(")", "!")
+                        .Replace("]", "!")
+                        .Replace("#", "-")
+                        ;
         }
 
         // I think max length for UNC is actually 32,767

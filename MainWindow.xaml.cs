@@ -9,10 +9,13 @@
     using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Xml;
     using System.Xml.Linq;
     using FastColoredTextBoxNS;
     using LiteDB;
     using Microsoft.WindowsAPICodePack.Dialogs;
+
+    
 
     public enum CRElement
     {
@@ -28,6 +31,7 @@
     /// 
     public partial class MainWindow : Window
     {
+        
         const string rptPath = @"C:\test\Reports\*";
         static readonly string CacheFolder = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
         static readonly Dictionary<CRElement, CRSection> CRSections = new Dictionary<CRElement, CRSection>
@@ -82,7 +86,7 @@
             return text.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-        private void LoadXML(IEnumerable<string> folders)
+        private void LoadXML(IEnumerable<string> folders, bool CleanupOrphans)
         {
             Xroot = new XElement("Reports");
 
@@ -90,32 +94,27 @@
             {
                 foreach (string folder in folders)
                 {
-                    //IEnumerable<LiteFileInfo> files = Enumerable.Empty<LiteFileInfo>();
+                    string folderId = Extensions.ToLiteDBID(folder) + "/";
+                    IEnumerable<LiteFileInfo> reportIds = db.FileStorage.Find(folderId);
 
-                    //try
-                    //{
-                        //files = Directory.GetFiles(folder, "*.xml", SearchOption.AllDirectories);
-                        string folderId = Extensions.ToLiteDBID(folder) + "/";
-                        IEnumerable<LiteFileInfo> files = db.FileStorage.Find(folderId);
-                    //}
-                    //catch (Exception ex)
-                    //{
-                        //files = new string[0];
-                        //files = Enumerable.Empty<LiteFileInfo>();
-                        //Trace.WriteLine(ex);
-                        //System.Windows.Forms.MessageBox.Show("Error", ex.Message, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
-                    //}
-
-
-                    foreach (LiteFileInfo reportDefPath in files)
+                    foreach (LiteFileInfo reportId in reportIds)
                     {
-                        XElement xelement;
+                        string fullPath = reportId.Metadata["fullPath"];
 
-                        try { xelement = XElement.Load(reportDefPath.OpenRead()); }
-                        catch (Exception ex)
+                        if (CleanupOrphans && fullPath != null && !File.Exists(fullPath))
                         {
-                            Trace.WriteLine(ex);
-                            System.Windows.Forms.MessageBox.Show("Error", ex.Message, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+                            db.FileStorage.Delete(reportId.Id);
+                            continue;
+                        }
+
+                        XElement xelement;
+                        try
+                        {
+                            xelement = XElement.Load(db.FileStorage.OpenRead(reportId.Id));
+                        }
+                        catch (XmlException ex)
+                        {
+                            Logs.Instance.log.Error(ex.Message, ex);
                             continue;
                         }
 
@@ -198,7 +197,7 @@
                 
 
                 var searchFolders = dialog.FileNames.Select(x => GetOutputFolderPath(x));
-                LoadXML(directories);
+                LoadXML(dialog.FileNames, true);
                 SearchReports();
             }
         }
@@ -209,7 +208,7 @@
             {
                 string rptPath = path + @"\*";
 
-                RptToXml.RptToXml.Convert(rptPath, @"C:\test\MyData.db");
+                RptToXml.RptToXml.Convert(rptPath, @"C:\test\MyData.db", false);
             }
         }
 
