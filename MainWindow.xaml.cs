@@ -71,7 +71,7 @@
         public bool ContainsSeach { get; set; } = true;
         public string SearchString { get; set; } = string.Empty;
         public CRElement PreviewElement { get; set; } = CRElement.Field;
-        public BindingList<XElementWrap> ReportItems { get; set; } = new BindingList<XElementWrap>();
+        public BindingList<List<XElementWrap>> ReportItems { get; set; } = new BindingList<List<XElementWrap>>();
         XElement Xroot = new XElement("null");
 
         public MainWindow()
@@ -142,18 +142,34 @@
 
             foreach (XElement report in foundReports)
             {
-                var results = new Dictionary<CRElement, string>();
+                List<XElementWrap> allReports = new List<XElementWrap>();
 
-                foreach (CRElement crElement in CRSections.Keys)
+                foreach(var subReport in report.Elements("SubReports").Elements("Report"))
                 {
-                    Func<IEnumerable<XElement>, IEnumerable<XElement>> filterFunc = CRSections[crElement].ResultFilter;
-                    Func<IEnumerable<XElement>, string> resultFormatter = CRSections[crElement].ResultFormat;
+                    var results = ReportResults(subReport);
 
-                    results[crElement] = report.Descendants().Apply(filterFunc).Apply(resultFormatter);
+                    allReports.Add(new XElementWrap() { Text = subReport.Attribute("Name").Value, SearchResults = results });
                 }
 
-                ReportItems.Add(new XElementWrap() { Text = Path.GetFileName(report.Attribute("FileName").Value), SearchResults = results });
+                var test = report.Elements().Where(x => x.Name != "SubReports").SelectMany(x => x.Descendants());
+
+                //ReportItems.
             }
+        }
+
+        private static Dictionary<CRElement, string> ReportResults(XElement report)
+        {
+            var results = new Dictionary<CRElement, string>();
+
+            foreach (CRElement crElement in CRSections.Keys)
+            {
+                results[crElement] = report
+                    .Descendants()
+                    .Apply(CRSections[crElement].ResultFilter)
+                    .Apply(CRSections[crElement].ResultFormat);
+            }
+
+            return results;
         }
 
         private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdatePreview();
