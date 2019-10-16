@@ -52,20 +52,6 @@ namespace RptToXml
                 foreach (string rptPath in rptPaths)
                 {
                     Trace.WriteLine("Dumping " + rptPath);
-                    //string xmlPath;
-
-                    //if (args.Length > 1)
-                    //{
-                    //xmlPath = args[1] + Path.GetFileName(rptPath);
-                    //}
-                    //else
-                    //{
-                    //xmlPath = rptPath;
-                    //}
-
-                    //xmlPath = Path.ChangeExtension(xmlPath, "xml");
-
-                    //FileInfo xmlFile = new FileInfo(xmlPath);
                     FileInfo rptFile = new FileInfo(rptPath);
 
                     //if (!forceRefresh && xmlFile.LastWriteTime > rptFile.LastWriteTime) continue;

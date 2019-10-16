@@ -11,6 +11,7 @@
     using System.Windows.Controls;
     using System.Xml.Linq;
     using FastColoredTextBoxNS;
+    using LiteDB;
     using Microsoft.WindowsAPICodePack.Dialogs;
 
     public enum CRElement
@@ -85,36 +86,41 @@
         {
             Xroot = new XElement("Reports");
 
-            foreach (string folder in folders)
+            using (var db = new LiteDatabase(@"C:\test\MyData.db"))
             {
-                string[] files;
-
-                try
+                foreach (string folder in folders)
                 {
-                    //files = Directory.GetFiles(folder, "*.xml", SearchOption.AllDirectories);
-                    files = Directory.GetFiles(folder, "*.xml", SearchOption.AllDirectories);
-                }
-                catch (Exception ex)
-                {
-                    files = new string[0];
-                    Trace.WriteLine(ex);
-                    System.Windows.Forms.MessageBox.Show("Error", ex.Message, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
-                }
+                    //IEnumerable<LiteFileInfo> files = Enumerable.Empty<LiteFileInfo>();
+
+                    //try
+                    //{
+                        //files = Directory.GetFiles(folder, "*.xml", SearchOption.AllDirectories);
+                        string folderId = Extensions.ToLiteDBID(folder) + "/";
+                        IEnumerable<LiteFileInfo> files = db.FileStorage.Find(folderId);
+                    //}
+                    //catch (Exception ex)
+                    //{
+                        //files = new string[0];
+                        //files = Enumerable.Empty<LiteFileInfo>();
+                        //Trace.WriteLine(ex);
+                        //System.Windows.Forms.MessageBox.Show("Error", ex.Message, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+                    //}
 
 
-                foreach (string reportDefPath in files)
-                {
-                    XElement xelement;
-
-                    try { xelement = XElement.Load(reportDefPath); }
-                    catch (Exception ex)
+                    foreach (LiteFileInfo reportDefPath in files)
                     {
-                        Trace.WriteLine(ex);
-                        System.Windows.Forms.MessageBox.Show("Error", ex.Message, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
-                        continue;
-                    }
+                        XElement xelement;
 
-                    Xroot.Add(xelement);
+                        try { xelement = XElement.Load(reportDefPath.OpenRead()); }
+                        catch (Exception ex)
+                        {
+                            Trace.WriteLine(ex);
+                            System.Windows.Forms.MessageBox.Show("Error", ex.Message, System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+                            continue;
+                        }
+
+                        Xroot.Add(xelement);
+                    }
                 }
             }
         }
@@ -192,7 +198,7 @@
                 
 
                 var searchFolders = dialog.FileNames.Select(x => GetOutputFolderPath(x));
-                LoadXML(searchFolders);
+                LoadXML(directories);
                 SearchReports();
             }
         }
