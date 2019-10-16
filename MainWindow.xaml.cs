@@ -74,7 +74,6 @@
         public BindingList<XElementWrap> ReportItems { get; set; } = new BindingList<XElementWrap>();
         XElement Xroot = new XElement("null");
 
-
         public MainWindow()
         {
             InitializeComponent();
@@ -177,8 +176,6 @@
             if (CRSections[PreviewElement].Language == FastColoredTextBoxNS.Language.Custom) Extensions.CrystalSyntaxHighlight(textBox);
         }
 
-        
-
         private void OpenFolder(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog
@@ -195,8 +192,6 @@
                 directories = dialog.FileNames.SelectMany(x => Directory.GetDirectories(x, "*.*", SearchOption.AllDirectories)).Concat(dialog.FileNames);
                 ParseRPT(directories);
                 
-
-                var searchFolders = dialog.FileNames.Select(x => GetOutputFolderPath(x));
                 LoadXML(dialog.FileNames, true);
                 SearchReports();
             }
@@ -210,26 +205,6 @@
 
                 RptToXml.RptToXml.Convert(rptPath, @"C:\test\MyData.db", false);
             }
-        }
-
-        private string GetOutputFolderPath(string path)
-        {
-            string outputPath;
-
-            if (new Uri(path).Host == string.Empty) // if path is non UNC
-            {
-                outputPath = Extensions.LocalToUNC(path) ?? string.Empty;
-                if (outputPath == string.Empty)
-                {
-                    outputPath = System.Environment.MachineName + "\\" + path.Replace(":", "$");
-                }
-            }
-            else
-            {
-                outputPath = path.Remove(0, 2); // removes the first two slashes that all UNC paths have
-            }
-
-            return CacheFolder + outputPath + "\\";
         }
     }
 }
