@@ -72,12 +72,8 @@
         public bool ContainsSeach { get; set; } = true;
         public string SearchString { get; set; } = string.Empty;
         public CRElement PreviewElement { get; set; } = CRElement.Field;
-        public BindingList<ReportItem> ReportItems { get; set; } = new BindingList<ReportItem>();
-        public BindingList<Dictionary<CRElement, string>> SubReports { get; set; } = new BindingList<Dictionary<CRElement, string>>();
-            //= new BindingList<Dictionary<CRElement, string>>
-            //{ new Dictionary<CRElement, string> { [CRElement.Field] = "test"}};
-            
-        // = new BindingList<Dictionary<CRElement, string>>();
+        public BindingList<List<ReportItem>> ReportItems { get; set; } = new BindingList<List<ReportItem>>();
+        public BindingList<ReportItem> SubReports { get; set; } = new BindingList<ReportItem>();
 
         XElement Xroot = new XElement("null");
 
@@ -149,18 +145,18 @@
 
             foreach (XElement report in foundReports)
             {
-                ReportItem reportItem = new ReportItem();
-                reportItem.Text = report.Attribute("FileName").Value;
+                var reportItems = new List<ReportItem>();
+
                 IEnumerable<XElement> flattenedReport = FlattenReport(report);
 
                 foreach (var subReport in flattenedReport)
                 {
                     Dictionary<CRElement, string> results = ReportResults(subReport.Descendants());
 
-                    reportItem.DisplayResults.Add(results);
+                    reportItems.Add(new ReportItem { Text = subReport.Attribute("Name").Value, DisplayResults = results });
                 }
 
-                ReportItems.Add(reportItem);
+                ReportItems.Add(reportItems);
             }
         }
 
@@ -168,7 +164,7 @@
         {
             var mainReport = new XElement("BaseReport");
             mainReport.Add(report.Elements().Where(x => x.Name != "SubReports"));
-            mainReport.SetAttributeValue("Name", mainReport.Element("Summaryinfo").Attribute("ReportTitle").Value);
+            mainReport.SetAttributeValue("Name", report.Attribute("FileName").Value);
             var flattenedReports = new[] { mainReport }.Concat(report.Elements("SubReports").Elements("Report"));
             return flattenedReports;
         }
@@ -192,8 +188,7 @@
         {
             
             SubReports.Clear();
-            //SubReports.Concat((lbReports.SelectedItem as ReportItem).DisplayResults);
-            SubReports.Add((lbReports.SelectedItem as ReportItem).DisplayResults[0]);
+            SubReports.Add(((List<ReportItem>)lbReports.SelectedItem)[0]);
 
             UpdatePreview();
 
@@ -203,7 +198,7 @@
 
         private void UpdatePreview()
         {
-            var selectedResults = (lbReports?.SelectedItem as ReportItem)?.DisplayResults[0][PreviewElement] ?? "";
+            var selectedResults = ((List<ReportItem>)lbReports?.SelectedItem )?[0].DisplayResults[PreviewElement] ?? "";
 
             textBox.ClearStylesBuffer();
             textBox.Language = CRSections[PreviewElement].Language;
@@ -247,5 +242,6 @@
                 RptToXml.RptToXml.Convert(rptPath, @"C:\test\MyData.db", false);
             }
         }
+
     }
 }

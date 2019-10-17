@@ -13,8 +13,8 @@ namespace CHEORptAnalyzer
     public class ReportItem
     {
         public string Text;
-        public BindingList<Dictionary<CRElement, string>> DisplayResults = new BindingList<Dictionary<CRElement, string>>();
-
+        public string Test = "test";
+        public Dictionary<CRElement, string> DisplayResults = new Dictionary<CRElement, string>();
 
         public override string ToString()
         {

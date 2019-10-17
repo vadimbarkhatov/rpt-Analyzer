@@ -22,7 +22,7 @@
             </Menu>
         </DockPanel>
         
-        <StackPanel VerticalAlignment="Top" Margin="520,35,0,0" Panel.ZIndex="999"  HorizontalAlignment="Left" Orientation="Horizontal">
+        <StackPanel VerticalAlignment="Top" Margin="520,35,0,0" Panel.ZIndex="999"  HorizontalAlignment="Left" Orientation="Horizontal" Width="514">
             <TabControl Height="22" Width="300" SelectionChanged="RadioButton_Checked">
                 <TabControl.Resources>
                     <local:ComparisonConverter x:Key="ComparisonConverter" />
@@ -33,28 +33,28 @@
                 <TabItem Header="Command" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Command}, Converter={StaticResource ComparisonConverter}}"/>
             </TabControl>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="136" >
-                <ComboBox Name="cbSubReports" Width="126" SelectedIndex="0" ItemsSource="{Binding SubReports, Mode=TwoWay}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Path=Value}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                <ComboBox Width="126" SelectedIndex="0" ItemsSource="{Binding SubReports, Mode=TwoWay}" Margin="15,-5" />
             </StackPanel>
         </StackPanel>
-        
+
         <DockPanel HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" >
             <StackPanel HorizontalAlignment="Left"  VerticalAlignment="Top"  DockPanel.Dock="Top" Orientation="Horizontal">
                 <Label Content="Report List" HorizontalAlignment="Left" VerticalAlignment="Top" />
                 <Label Content="{Binding Items.Count, ElementName=lbReports, Mode=OneWay}" ContentStringFormat="({0})" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50"/>
             </StackPanel>
-            <ListBox x:Name="lbReports" ItemsSource="{Binding ReportItems, Mode=TwoWay}" Width="494"  Margin="0,0,0,0" SelectionChanged="LbReports_SelectionChanged" DockPanel.Dock="Top" Height="500"/>
+            <ListBox x:Name="lbReports" ItemsSource="{Binding ReportItems, Mode=TwoWay}" Width="494"  Margin="0,0,0,0" SelectionChanged="LbReports_SelectionChanged" DockPanel.Dock="Top" Height="500">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Path=[0]}" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
             <StackPanel Margin="10,0,0,10" HorizontalAlignment="Left" Width="494" Orientation="Horizontal" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
                 <GroupBox Header="Report Info" Width="329"  />
                 <GroupBox Header="Search" VerticalAlignment="Top">
                     <StackPanel>
                         <StackPanel HorizontalAlignment="Left" Height="52" VerticalAlignment="Top" Width="147">
-                            <CheckBox Content="Crystal Fields" IsChecked="{Binding SearchFields}"/>
+                            <CheckBox Content="Crystal Fields" />
                             <CheckBox Content="Record Select Formula" Height="15" IsChecked="{Binding SearchRF}"/>
                             <CheckBox Content="Command Objects" Height="15" IsChecked="{Binding SearchCommand}"/>
                         </StackPanel>
