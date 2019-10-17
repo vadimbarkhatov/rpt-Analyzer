@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
@@ -72,9 +73,9 @@
         public string SearchString { get; set; } = string.Empty;
         public CRElement PreviewElement { get; set; } = CRElement.Field;
         public BindingList<ReportItem> ReportItems { get; set; } = new BindingList<ReportItem>();
-        public BindingList<Dictionary<CRElement, string>> SubReports { get; set; }
-            = new BindingList<Dictionary<CRElement, string>>
-            { new Dictionary<CRElement, string> { [CRElement.Field] = "test"}};
+        public BindingList<Dictionary<CRElement, string>> SubReports { get; set; } = new BindingList<Dictionary<CRElement, string>>();
+            //= new BindingList<Dictionary<CRElement, string>>
+            //{ new Dictionary<CRElement, string> { [CRElement.Field] = "test"}};
             
         // = new BindingList<Dictionary<CRElement, string>>();
 
@@ -189,11 +190,14 @@
 
         private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SubReports = lbReports?.SelectedItem as BindingList<Dictionary<CRElement, string>>;
+            
+            SubReports.Clear();
+            //SubReports.Concat((lbReports.SelectedItem as ReportItem).DisplayResults);
+            SubReports.Add((lbReports.SelectedItem as ReportItem).DisplayResults[0]);
+
             UpdatePreview();
 
         }
-           // => UpdatePreview();
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e) => UpdatePreview();
 

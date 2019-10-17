@@ -33,7 +33,12 @@
                 <TabItem Header="Command" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Command}, Converter={StaticResource ComparisonConverter}}"/>
             </TabControl>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="136" >
-                <ComboBox Width="126" SelectedIndex="0" ItemsSource="{Binding SubReports, Mode=TwoWay}">
+                <ComboBox Name="cbSubReports" Width="126" SelectedIndex="0" ItemsSource="{Binding SubReports, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path=Value}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
                 </ComboBox>
             </StackPanel>
         </StackPanel>
