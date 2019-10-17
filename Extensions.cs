@@ -52,7 +52,7 @@ namespace CHEORptAnalyzer
             textBox.AddStyle(StringStyle);
             textBox.AddStyle(FuncStyle);
 
-            string crystalFuncs = "(in|and|or|if|then|else|like|not)";
+            string crystalFuncs = "(in|and|or|if|then|else|like|not|LeftOuter|Equal)";
 
             textBox.Range.SetStyle(CommentStyle, @"(\/\/).*", RegexOptions.IgnoreCase);
             textBox.Range.SetStyle(StringStyle, @"""(.*?)""", RegexOptions.IgnoreCase);
@@ -143,6 +143,25 @@ namespace CHEORptAnalyzer
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             return value?.Equals(true) == true ? parameter : Binding.DoNothing;
+        }
+    }
+
+    public class IsGreaterOrEqualThanConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            IComparable v = value as IComparable;
+            IComparable p = parameter as IComparable;
+
+            if (v == null || p == null)
+                throw new FormatException("to use this converter, value and parameter shall inherit from IComparable");
+
+            return (v.CompareTo(p) >= 0);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -5,12 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:CHEORptAnalyzer"  
-        xmlns:FastColoredTextBoxNS="clr-namespace:FastColoredTextBoxNS;assembly=FastColoredTextBox" x:Class="CHEORptAnalyzer.MainWindow"  
+        xmlns:FastColoredTextBoxNS="clr-namespace:FastColoredTextBoxNS;assembly=FastColoredTextBox"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Class="CHEORptAnalyzer.MainWindow"  
         mc:Ignorable="d"
         Title="CHEO RPT Analyzer" Height="768" Width="1366">
 
     <Grid Margin="0,0,0,0">
-
+        <Grid.Resources>
+            <local:IsGreaterOrEqualThanConverter x:Key="IsEqualOrGreaterThanConverter"/>
+            <sys:Int32 x:Key="Int1">1</sys:Int32>
+        </Grid.Resources>
+        
+        
         <DockPanel Grid.ColumnSpan="2">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
@@ -22,8 +28,8 @@
             </Menu>
         </DockPanel>
         
-        <StackPanel VerticalAlignment="Top" Margin="520,35,0,0" Panel.ZIndex="999"  HorizontalAlignment="Left" Orientation="Horizontal" Width="514">
-            <TabControl Height="22" Width="300" SelectionChanged="RadioButton_Checked">
+        <StackPanel VerticalAlignment="Top" Margin="520,35,0,0" Panel.ZIndex="999"  HorizontalAlignment="Left" Orientation="Horizontal" Width="790">
+            <TabControl Height="22" Width="400" SelectionChanged="RadioButton_Checked">
                 <TabControl.Resources>
                     <local:ComparisonConverter x:Key="ComparisonConverter" />
                 </TabControl.Resources>
@@ -31,9 +37,14 @@
                 <TabItem Header="Formula Fields" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.FormulaField}, Converter={StaticResource ComparisonConverter}}"/>
                 <TabItem Header="Formula" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Formula}, Converter={StaticResource ComparisonConverter}}"/>
                 <TabItem Header="Command" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Command}, Converter={StaticResource ComparisonConverter}}"/>
+                <TabItem Header="Table Links" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.TableLinks}, Converter={StaticResource ComparisonConverter}}"/>
             </TabControl>
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Width="136" >
-                <ComboBox Width="126" SelectedIndex="0" ItemsSource="{Binding SubReports, Mode=TwoWay}" Margin="15,-5" />
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
+                <ComboBox Name ="cbSubReports"  Width="400" SelectedIndex="0" ItemsSource="{Binding ElementName=lbReports, Path=SelectedItem, Mode=OneWay}"
+                          IsEnabled="{Binding Path=Items.Count, 
+                                 Converter={StaticResource IsEqualOrGreaterThanConverter}, 
+                                 ConverterParameter={StaticResource Int1}}" 
+                          SelectionChanged="LbReports_SelectionChanged" IsSynchronizedWithCurrentItem="True" Margin="15,-5" VerticalAlignment="Top" />
             </StackPanel>
         </StackPanel>
 
@@ -54,7 +65,7 @@
                 <GroupBox Header="Search" VerticalAlignment="Top">
                     <StackPanel>
                         <StackPanel HorizontalAlignment="Left" Height="52" VerticalAlignment="Top" Width="147">
-                            <CheckBox Content="Crystal Fields" />
+                            <CheckBox Content="Crystal Fields" IsChecked="{Binding SearchFields}"/>
                             <CheckBox Content="Record Select Formula" Height="15" IsChecked="{Binding SearchRF}"/>
                             <CheckBox Content="Command Objects" Height="15" IsChecked="{Binding SearchCommand}"/>
                         </StackPanel>
@@ -68,13 +79,6 @@
             </StackPanel>
         </DockPanel>
 
-
-
-
-        
-
-
-
         <Border BorderThickness="1" Margin="520,55,10,10" BorderBrush="#FFABADB3">
             <DockPanel >
                 <WindowsFormsHost x:Name="windowsFormsHost" Padding="0,0,20,20" >
@@ -82,9 +86,6 @@
                 </WindowsFormsHost>
             </DockPanel>
         </Border>
-
-
-
 
     </Grid>
 </Window>

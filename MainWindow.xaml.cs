@@ -10,6 +10,7 @@
     using System.Text.RegularExpressions;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Data;
     using System.Xml;
     using System.Xml.Linq;
     using FastColoredTextBoxNS;
@@ -23,8 +24,11 @@
         Field,
         Formula,
         Command,
-        FormulaField
+        FormulaField,
+        TableLinks,
     }
+
+    
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -62,6 +66,18 @@
                         "\r\n" + "{" +
                         "\r\n" + x.Value.AppendToNewLine("\t") +
                         "\r\n" + "}")
+                     .Combine("\r\n" + "\r\n"),
+            },
+            [CRElement.TableLinks] = new CRSection
+            {
+                Language = FastColoredTextBoxNS.Language.Custom,
+                ResultFilter = x => x.Descendants("TableLinks").Elements("TableLink"),
+                ResultFormat = s =>
+                    s.Select(x =>
+                        x.Attribute("JoinType").Value + " "
+                        + x.Elements("SourceFields").Elements("Field").First().Attribute("FormulaName").Value + " ON "
+                        + x.Elements("DestinationFields").Elements("Field").First().Attribute("FormulaName").Value
+                        )
                      .Combine("\r\n" + "\r\n"),
             },
         };
@@ -164,7 +180,7 @@
         {
             var mainReport = new XElement("BaseReport");
             mainReport.Add(report.Elements().Where(x => x.Name != "SubReports"));
-            mainReport.SetAttributeValue("Name", report.Attribute("FileName").Value);
+            mainReport.SetAttributeValue("Name", Path.GetFileNameWithoutExtension(report.Attribute("FileName").Value));
             var flattenedReports = new[] { mainReport }.Concat(report.Elements("SubReports").Elements("Report"));
             return flattenedReports;
         }
@@ -186,19 +202,23 @@
 
         private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            
-            SubReports.Clear();
-            SubReports.Add(((List<ReportItem>)lbReports.SelectedItem)[0]);
+            if(cbSubReports.Items.Count > 1)
+            {
+                cbSubReports.IsEnabled = true;
+            }
+            else
+            {
+                cbSubReports.IsEnabled = false;
+            }
 
             UpdatePreview();
-
         }
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e) => UpdatePreview();
 
         private void UpdatePreview()
         {
-            var selectedResults = ((List<ReportItem>)lbReports?.SelectedItem )?[0].DisplayResults[PreviewElement] ?? "";
+            var selectedResults = ((ReportItem)cbSubReports?.SelectedItem)?.DisplayResults[PreviewElement] ?? "";
 
             textBox.ClearStylesBuffer();
             textBox.Language = CRSections[PreviewElement].Language;
