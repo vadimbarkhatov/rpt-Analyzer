@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CHEORptAnalyzer"  
+        xmlns:Controls="clr-namespace:System.Windows.Controls;assembly=MultiSelectTreeView" 
         xmlns:FastColoredTextBoxNS="clr-namespace:FastColoredTextBoxNS;assembly=FastColoredTextBox"
     xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Class="CHEORptAnalyzer.MainWindow"  
         mc:Ignorable="d"
@@ -28,16 +29,15 @@
         </DockPanel>
         
         <StackPanel VerticalAlignment="Top" Margin="520,35,0,0" Panel.ZIndex="999"  HorizontalAlignment="Left" Orientation="Horizontal" Width="790">
-            <TabControl Height="22" Width="350" SelectionChanged="RadioButton_Checked">
+            <TabControl Height="22" Width="500" SelectionChanged="RadioButton_Checked" >
                 <TabControl.Resources>
                     <local:ComparisonConverter x:Key="ComparisonConverter" />
                 </TabControl.Resources>
                 <TabItem Header="Columns" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Field}, Converter={StaticResource ComparisonConverter}}" />
                 <TabItem Header="Table Links" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.TableLinks}, Converter={StaticResource ComparisonConverter}}"/>
                 <TabItem Header="Formula Fields" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.FormulaField}, Converter={StaticResource ComparisonConverter}}"/>
-                <TabItem Header="Formula" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Formula}, Converter={StaticResource ComparisonConverter}}"/>
+                <TabItem Header="Record Selection Formula" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Formula}, Converter={StaticResource ComparisonConverter}}"/>
                 <TabItem Header="Command" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Command}, Converter={StaticResource ComparisonConverter}}"/>
-
             </TabControl>
         </StackPanel>
 
@@ -46,13 +46,13 @@
                 <Label Content="Report List" HorizontalAlignment="Left" VerticalAlignment="Top" />
                 <Label Content="{Binding Items.Count, ElementName=lbReports, Mode=OneWay}" ContentStringFormat="({0})" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50"/>
             </StackPanel>
-            <TreeView SelectedItemChanged="test" x:Name="lbReports" ItemsSource="{Binding ReportItems, Mode=TwoWay}" Width="494" Margin="0,0,0,0" DockPanel.Dock="Top" Height="500" FontSize="12">
-                <TreeView.Resources>
+            <Controls:MultiSelectTreeView SelectionChanged="TvReports_SelectionChanged"  x:Name="tvReports" ItemsSource="{Binding ReportItems, Mode=TwoWay}" Width="494" Margin="0,0,0,0" DockPanel.Dock="Top" Height="500" FontSize="12">
+                <Controls:MultiSelectTreeView.Resources>
                     <HierarchicalDataTemplate DataType="{x:Type local:ReportItem}" ItemsSource="{Binding SubReports}">
                         <TextBlock Text="{Binding Path=Text}" />
                     </HierarchicalDataTemplate>
-                </TreeView.Resources>
-            </TreeView>
+                </Controls:MultiSelectTreeView.Resources>
+            </Controls:MultiSelectTreeView>
             
             <StackPanel Margin="10,0,0,10" HorizontalAlignment="Left" Width="494" Orientation="Horizontal" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
                 <GroupBox Header="Report Info" Width="329">

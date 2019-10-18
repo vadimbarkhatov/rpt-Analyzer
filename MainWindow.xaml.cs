@@ -88,6 +88,7 @@
         public string SearchString { get; set; } = string.Empty;
         public CRElement PreviewElement { get; set; } = CRElement.Field;
         public BindingList<ReportItem> ReportItems { get; set; } = new BindingList<ReportItem>();
+        public BindingList<ReportItem> SelectedReportItems { get; set; } = new BindingList<ReportItem>();
         //public BindingList<ReportItem> SubReports { get; set; } = new BindingList<ReportItem>();
         //public BindingList<ReportItem> ReportLink
         XElement Xroot = new XElement("null");
@@ -205,17 +206,8 @@
             return results;
         }
 
-        private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void TvReports_SelectionChanged(object sender, EventArgs e)
         {
-            //if(cbSubReports.Items.Count > 1)
-            //{
-            //    cbSubReports.IsEnabled = true;
-            //}
-            //else
-            //{
-            //    cbSubReports.IsEnabled = false;
-            //}
-
             UpdatePreview();
         }
 
@@ -223,7 +215,15 @@
 
         private void UpdatePreview()
         {
-            var selectedResults = ((ReportItem)lbReports?.SelectedItem)?.DisplayResults[PreviewElement] ?? "";
+            var selectedResults = "ERROR";
+
+            if (tvReports?.SelectedItems.Count > 0)
+            {
+                ReportItem selectedItem = (ReportItem)tvReports.SelectedItems[0];
+
+                selectedResults = selectedItem.DisplayResults[PreviewElement];
+            }
+            else return;
 
             textBox.ClearStylesBuffer();
             textBox.Language = CRSections[PreviewElement].Language;
@@ -284,5 +284,8 @@
         {
             UpdatePreview();
         }
+
+
+
     }
 }

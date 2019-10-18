@@ -52,7 +52,7 @@ namespace CHEORptAnalyzer
             textBox.AddStyle(StringStyle);
             textBox.AddStyle(FuncStyle);
 
-            string crystalFuncs = "(in|and|or|if|then|else|like|not|LeftOuter|Equal)";
+            string crystalFuncs = "(in|and|or|if|then|else|like|not|LeftOuter|Equal)"; //Crystal Functions
 
             textBox.Range.SetStyle(CommentStyle, @"(\/\/).*", RegexOptions.IgnoreCase);
             textBox.Range.SetStyle(StringStyle, @"""(.*?)""", RegexOptions.IgnoreCase);
