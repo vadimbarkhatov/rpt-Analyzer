@@ -11,12 +11,12 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Data;
+    using System.Windows.Input;
     using System.Xml;
     using System.Xml.Linq;
     using FastColoredTextBoxNS;
     using LiteDB;
     using Microsoft.WindowsAPICodePack.Dialogs;
-
 
 
     public enum CRElement
@@ -29,16 +29,16 @@
     }
 
     
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     /// 
     public partial class MainWindow : Window
     {
+        static readonly string rptPath = @"C:\test\Reports\*";
+        static readonly string localDBPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\CRPTApp.db";
+        static readonly string sharedDBPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + "\\SharedCache.db";
 
-        const string rptPath = @"C:\test\Reports\*";
-        static readonly string CacheFolder = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + @"\ReportCache\";
         static readonly Dictionary<CRElement, CRSection> CRSections = new Dictionary<CRElement, CRSection>
         {
             [CRElement.Field] = new CRSection
@@ -76,8 +76,7 @@
                     s.Select(x =>
                         x.Attribute("JoinType").Value + " "
                         + x.Elements("SourceFields").Elements("Field").First().Attribute("FormulaName").Value + " ON "
-                        + x.Elements("DestinationFields").Elements("Field").First().Attribute("FormulaName").Value
-                        )
+                        + x.Elements("DestinationFields").Elements("Field").First().Attribute("FormulaName").Value)
                      .Combine("\r\n" + "\r\n"),
             },
         };
@@ -90,6 +89,7 @@
         public CRElement PreviewElement { get; set; } = CRElement.Field;
         public BindingList<List<ReportItem>> ReportItems { get; set; } = new BindingList<List<ReportItem>>();
         public BindingList<ReportItem> SubReports { get; set; } = new BindingList<ReportItem>();
+        //public BindingList<ReportItem> ReportLink
 
         XElement Xroot = new XElement("null");
 
@@ -104,11 +104,11 @@
             return text.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-        private void LoadXML(IEnumerable<string> folders, bool CleanupOrphans)
+        private void LoadXML(IEnumerable<string> folders, string dbPath, bool CleanupOrphans)
         {
             Xroot = new XElement("Reports");
 
-            using (var db = new LiteDatabase(@"C:\test\MyData.db"))
+            using (var db = new LiteDatabase(dbPath))
             {
                 foreach (string folder in folders)
                 {
@@ -142,10 +142,7 @@
             }
         }
 
-        private void BtnSearch_Click(object sender, RoutedEventArgs events)
-        {
-            SearchReports();
-        }
+        private void BtnSearch_Click(object sender, RoutedEventArgs events) => SearchReports();
 
         private void SearchReports()
         {
@@ -178,10 +175,12 @@
 
         private static IEnumerable<XElement> FlattenReport(XElement report)
         {
-            var mainReport = new XElement("BaseReport");
-            mainReport.Add(report.Elements().Where(x => x.Name != "SubReports"));
-            mainReport.SetAttributeValue("Name", Path.GetFileNameWithoutExtension(report.Attribute("FileName").Value));
-            var flattenedReports = new[] { mainReport }.Concat(report.Elements("SubReports").Elements("Report"));
+            var baseReport = new XElement("BaseReport");
+            baseReport.Add(report.Elements().Where(x => x.Name != "SubReports"));
+            baseReport.SetAttributeValue("Name", Path.GetFileNameWithoutExtension(report.Attribute("FileName").Value));
+
+            var flattenedReports = new[] { baseReport }.Concat(report.Elements("SubReports").Elements("Report"));
+
             return flattenedReports;
         }
 
@@ -241,27 +240,38 @@
                 Multiselect = true,
             };
 
-            IEnumerable<string> directories;
 
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                directories = dialog.FileNames.SelectMany(x => Directory.GetDirectories(x, "*.*", SearchOption.AllDirectories)).Concat(dialog.FileNames);
+                IEnumerable<string> directories = dialog.FileNames.SelectMany(x => Directory.GetDirectories(x, "*.*", SearchOption.AllDirectories)).Concat(dialog.FileNames);
                 ParseRPT(directories);
                 
-                LoadXML(dialog.FileNames, true);
+                //TODO: Refactor
+                LoadXML(dialog.FileNames, localDBPath, true);
                 SearchReports();
             }
         }
 
         private void ParseRPT(IEnumerable<string> paths)
         {
+            string dbLoc = @"C:\test\MyData.db";
+
+            if (new Uri(paths.First()).Host == "") //if path is non UNC
+            {
+                dbLoc = localDBPath;
+            }
+
             foreach (string path in paths)
             {
                 string rptPath = path + @"\*";
 
-                RptToXml.RptToXml.Convert(rptPath, @"C:\test\MyData.db", false);
+                RptToXml.RptToXml.Convert(rptPath, dbLoc, false);
             }
         }
 
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+
+        }
     }
 }
