@@ -87,10 +87,9 @@
         public bool ContainsSeach { get; set; } = true;
         public string SearchString { get; set; } = string.Empty;
         public CRElement PreviewElement { get; set; } = CRElement.Field;
-        public BindingList<List<ReportItem>> ReportItems { get; set; } = new BindingList<List<ReportItem>>();
-        public BindingList<ReportItem> SubReports { get; set; } = new BindingList<ReportItem>();
+        public BindingList<ReportItem> ReportItems { get; set; } = new BindingList<ReportItem>();
+        //public BindingList<ReportItem> SubReports { get; set; } = new BindingList<ReportItem>();
         //public BindingList<ReportItem> ReportLink
-
         XElement Xroot = new XElement("null");
 
         public MainWindow()
@@ -158,19 +157,26 @@
 
             foreach (XElement report in foundReports)
             {
-                var reportItems = new List<ReportItem>();
-
                 IEnumerable<XElement> flattenedReport = FlattenReport(report);
 
-                foreach (var subReport in flattenedReport)
+                var baseReport = flattenedReport.First();
+                var reportItem = new ReportItem { Text = baseReport.Attribute("Name").Value, DisplayResults = ReportResults(baseReport) };
+
+                foreach (var subReport in flattenedReport.Skip(1))
                 {
                     Dictionary<CRElement, string> results = ReportResults(subReport);
 
-                    reportItems.Add(new ReportItem { Text = subReport.Attribute("Name").Value, DisplayResults = results });
+
+
+                    reportItem.SubReports.Add(new ReportItem { Text = subReport.Attribute("Name").Value, DisplayResults = results });
                 }
 
-                ReportItems.Add(reportItems);
+                //lbReports.Items.Add(reportItem);
+                ReportItems.Add(reportItem);
             }
+
+            //var test = lbReports;
+            //lbReports.Items.Add(ReportItems);
         }
 
         private static IEnumerable<XElement> FlattenReport(XElement report)
@@ -201,14 +207,14 @@
 
         private void LbReports_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(cbSubReports.Items.Count > 1)
-            {
-                cbSubReports.IsEnabled = true;
-            }
-            else
-            {
-                cbSubReports.IsEnabled = false;
-            }
+            //if(cbSubReports.Items.Count > 1)
+            //{
+            //    cbSubReports.IsEnabled = true;
+            //}
+            //else
+            //{
+            //    cbSubReports.IsEnabled = false;
+            //}
 
             UpdatePreview();
         }
@@ -217,7 +223,7 @@
 
         private void UpdatePreview()
         {
-            var selectedResults = ((ReportItem)cbSubReports?.SelectedItem)?.DisplayResults[PreviewElement] ?? "";
+            var selectedResults = ((ReportItem)lbReports?.SelectedItem)?.DisplayResults[PreviewElement] ?? "";
 
             textBox.ClearStylesBuffer();
             textBox.Language = CRSections[PreviewElement].Language;
@@ -272,6 +278,11 @@
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
 
+        }
+
+        private void test(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            UpdatePreview();
         }
     }
 }

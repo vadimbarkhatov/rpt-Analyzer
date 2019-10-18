@@ -12,9 +12,20 @@ namespace CHEORptAnalyzer
 {
     public class ReportItem
     {
-        public string Text;
-        public string Test = "test";
+        public string Text
+        {
+            get => _text + (SubReports.Count > 0 ? " [" + SubReports.Count + "]" : "");
+            set => _text = value;
+        }
         public Dictionary<CRElement, string> DisplayResults = new Dictionary<CRElement, string>();
+        private string _text;
+
+        public BindingList<ReportItem> SubReports { get; set; }
+
+        public ReportItem()
+        {
+            this.SubReports = new BindingList<ReportItem>();
+        }
 
         public override string ToString()
         {

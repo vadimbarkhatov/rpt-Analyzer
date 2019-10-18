@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:CHEORptAnalyzer"  
         xmlns:FastColoredTextBoxNS="clr-namespace:FastColoredTextBoxNS;assembly=FastColoredTextBox"
     xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Class="CHEORptAnalyzer.MainWindow"  
@@ -38,15 +37,8 @@
                 <TabItem Header="Formula Fields" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.FormulaField}, Converter={StaticResource ComparisonConverter}}"/>
                 <TabItem Header="Formula" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Formula}, Converter={StaticResource ComparisonConverter}}"/>
                 <TabItem Header="Command" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Command}, Converter={StaticResource ComparisonConverter}}"/>
-                
+
             </TabControl>
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
-                <ComboBox Name ="cbSubReports"  Width="400" SelectedIndex="0" ItemsSource="{Binding ElementName=lbReports, Path=SelectedItem, Mode=OneWay}"
-                          IsEnabled="{Binding Path=Items.Count, 
-                                 Converter={StaticResource IsEqualOrGreaterThanConverter}, 
-                                 ConverterParameter={StaticResource Int1}}" 
-                          SelectionChanged="LbReports_SelectionChanged" IsSynchronizedWithCurrentItem="True" Margin="15,0" VerticalAlignment="Top" />
-            </StackPanel>
         </StackPanel>
 
         <DockPanel HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" >
@@ -54,12 +46,12 @@
                 <Label Content="Report List" HorizontalAlignment="Left" VerticalAlignment="Top" />
                 <Label Content="{Binding Items.Count, ElementName=lbReports, Mode=OneWay}" ContentStringFormat="({0})" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50"/>
             </StackPanel>
-            <TreeView  x:Name="lbReports" ItemsSource="{Binding ReportItems, Mode=TwoWay}" Width="494"  Margin="0,0,0,0" DockPanel.Dock="Top" Height="500">
-                <TreeView.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Path=[0]}" />
-                    </DataTemplate>
-                </TreeView.ItemTemplate>
+            <TreeView SelectedItemChanged="test" x:Name="lbReports" ItemsSource="{Binding ReportItems, Mode=TwoWay}" Width="494" Margin="0,0,0,0" DockPanel.Dock="Top" Height="500" FontSize="12">
+                <TreeView.Resources>
+                    <HierarchicalDataTemplate DataType="{x:Type local:ReportItem}" ItemsSource="{Binding SubReports}">
+                        <TextBlock Text="{Binding Path=Text}" />
+                    </HierarchicalDataTemplate>
+                </TreeView.Resources>
             </TreeView>
             
             <StackPanel Margin="10,0,0,10" HorizontalAlignment="Left" Width="494" Orientation="Horizontal" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
