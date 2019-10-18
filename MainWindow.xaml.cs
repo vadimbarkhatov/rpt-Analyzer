@@ -54,12 +54,12 @@
             [CRElement.Formula] = new CRSection
             {
                 Language = FastColoredTextBoxNS.Language.Custom,
-                ResultFilter = x => x.Descendants("RecordSelectionFormula"),
+                ResultFilter = x => x.Where(y => y.Name == "DataDefinition").Elements("RecordSelectionFormula"),
             },
             [CRElement.FormulaField] = new CRSection
             {
                 Language = FastColoredTextBoxNS.Language.Custom,
-                ResultFilter = x => x.Descendants("FormulaFieldDefinition"),
+                ResultFilter = x => x.Where(y => y.Name == "DataDefinition").Elements("FormulaFieldDefinitions").Elements("FormulaFieldDefinition"),
                 ResultFormat = s =>
                     s.Select(x =>
                         x.Attribute("FormulaName").Value +
@@ -164,7 +164,7 @@
 
                 foreach (var subReport in flattenedReport)
                 {
-                    Dictionary<CRElement, string> results = ReportResults(subReport.Descendants());
+                    Dictionary<CRElement, string> results = ReportResults(subReport);
 
                     reportItems.Add(new ReportItem { Text = subReport.Attribute("Name").Value, DisplayResults = results });
                 }
@@ -185,13 +185,13 @@
         }
 
 
-        private static Dictionary<CRElement, string> ReportResults(IEnumerable<XElement> report)
+        private static Dictionary<CRElement, string> ReportResults(XElement report)
         {
             var results = new Dictionary<CRElement, string>();
 
             foreach (CRElement crElement in CRSections.Keys)
             {
-                results[crElement] = report
+                results[crElement] = report.Descendants()
                     .Apply(CRSections[crElement].ResultFilter)
                     .Apply(CRSections[crElement].ResultFormat);
             }
@@ -254,7 +254,7 @@
 
         private void ParseRPT(IEnumerable<string> paths)
         {
-            string dbLoc = @"C:\test\MyData.db";
+            string dbLoc = localDBPath;
 
             if (new Uri(paths.First()).Host == "") //if path is non UNC
             {

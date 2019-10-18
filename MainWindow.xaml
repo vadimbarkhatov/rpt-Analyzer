@@ -29,7 +29,7 @@
         </DockPanel>
         
         <StackPanel VerticalAlignment="Top" Margin="520,35,0,0" Panel.ZIndex="999"  HorizontalAlignment="Left" Orientation="Horizontal" Width="790">
-            <TabControl Height="22" Width="400" SelectionChanged="RadioButton_Checked">
+            <TabControl Height="22" Width="350" SelectionChanged="RadioButton_Checked">
                 <TabControl.Resources>
                     <local:ComparisonConverter x:Key="ComparisonConverter" />
                 </TabControl.Resources>
@@ -45,7 +45,7 @@
                           IsEnabled="{Binding Path=Items.Count, 
                                  Converter={StaticResource IsEqualOrGreaterThanConverter}, 
                                  ConverterParameter={StaticResource Int1}}" 
-                          SelectionChanged="LbReports_SelectionChanged" IsSynchronizedWithCurrentItem="True" Margin="15,-5" VerticalAlignment="Top" />
+                          SelectionChanged="LbReports_SelectionChanged" IsSynchronizedWithCurrentItem="True" Margin="15,0" VerticalAlignment="Top" />
             </StackPanel>
         </StackPanel>
 
@@ -54,13 +54,13 @@
                 <Label Content="Report List" HorizontalAlignment="Left" VerticalAlignment="Top" />
                 <Label Content="{Binding Items.Count, ElementName=lbReports, Mode=OneWay}" ContentStringFormat="({0})" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50"/>
             </StackPanel>
-            <ListBox x:Name="lbReports" ItemsSource="{Binding ReportItems, Mode=TwoWay}" Width="494"  Margin="0,0,0,0" SelectionChanged="LbReports_SelectionChanged" DockPanel.Dock="Top" Height="500">
-                <ListBox.ItemTemplate>
+            <TreeView  x:Name="lbReports" ItemsSource="{Binding ReportItems, Mode=TwoWay}" Width="494"  Margin="0,0,0,0" DockPanel.Dock="Top" Height="500">
+                <TreeView.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Path=[0]}" />
                     </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                </TreeView.ItemTemplate>
+            </TreeView>
             
             <StackPanel Margin="10,0,0,10" HorizontalAlignment="Left" Width="494" Orientation="Horizontal" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
                 <GroupBox Header="Report Info" Width="329">
