@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CrystalDecisions.CrystalReports.Engine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,9 +20,22 @@ namespace CHEORptAnalyzer
     /// </summary>
     public partial class CRViewer : Window
     {
-        public CRViewer()
+        public CRViewer(string reportPath)
         {
             InitializeComponent();
+
+            ReportDocument reportDocument = new ReportDocument();
+
+            try
+            {
+                reportDocument.Load(reportPath);
+                crvReport.ViewerCore.ReportSource = reportDocument;
+            }
+            catch (Exception ex)
+            {
+                Logs.Instance.log.Error(ex.Message, ex);
+                System.Windows.Forms.MessageBox.Show(ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+            }
         }
     }
 }

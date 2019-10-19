@@ -6,10 +6,10 @@
         xmlns:local="clr-namespace:CHEORptAnalyzer"
         xmlns:Viewer="clr-namespace:SAPBusinessObjects.WPF.Viewer;assembly=SAPBusinessObjects.WPF.Viewer" x:Class="CHEORptAnalyzer.CRViewer"
         mc:Ignorable="d"
-        Title="CRViewer" Height="450" Width="800">
+        Title="CRViewer" Height="800" Width="900">
     <Grid>
 
-        <Viewer:CrystalReportsViewer ShowLogo="False" ShowOpenFileButton="True"/>
+        <Viewer:CrystalReportsViewer Name ="crvReport"  ShowLogo="False" ShowCopyButton="False" ShowStatusbar="True"/>
 
     </Grid>
 </Window>

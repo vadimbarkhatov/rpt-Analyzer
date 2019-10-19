@@ -122,20 +122,20 @@
                     string folderId = Extensions.ToLiteDBID(folder) + "/";
                     IEnumerable<LiteFileInfo> reportIds = db.FileStorage.Find(folderId);
 
-                    foreach (LiteFileInfo reportId in reportIds)
+                    foreach (LiteFileInfo reportLiteInfo in reportIds)
                     {
-                        string fullPath = reportId.Metadata["fullPath"];
+                        string fullPath = reportLiteInfo.Metadata["fullPath"];
 
                         if (CleanupOrphans && fullPath != null && !File.Exists(fullPath))
                         {
-                            db.FileStorage.Delete(reportId.Id);
+                            db.FileStorage.Delete(reportLiteInfo.Id);
                             continue;
                         }
 
                         XElement xelement;
                         try
                         {
-                            xelement = XElement.Load(db.FileStorage.OpenRead(reportId.Id));
+                            xelement = XElement.Load(db.FileStorage.OpenRead(reportLiteInfo.Id));
                         }
                         catch (XmlException ex)
                         {
@@ -168,7 +168,16 @@
                 IEnumerable<XElement> flattenedReport = FlattenReport(report);
 
                 var baseReport = flattenedReport.First();
-                var reportItem = new ReportItem { Text = baseReport.Attribute("Name").Value, DisplayResults = ReportResults(baseReport) };
+                var reportItem = 
+                    new ReportItem {
+                    Text = baseReport.Attribute("Name").Value,
+                    DisplayResults = ReportResults(baseReport),
+                    //FilePath = baseReport.Attribute("Name").Value,
+                    //public string Author { get; set; } = "";
+                    //public DateTime LastSaved { get; set; } = new DateTime();
+                    //public bool HasSavedData { get; set; } = false;
+                    //public string SummaryInfo { get; set; } = "";
+                    };
 
                 foreach (var subReport in flattenedReport.Skip(1))
                 {
@@ -284,14 +293,12 @@
 
         }
 
-        private void test(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            UpdatePreview();
-        }
-
         private void PreviewReport(object sender, RoutedEventArgs e)
         {
-            CRViewer crViewer = new CRViewer();
+            CRViewer crViewer = new CRViewer(@"C:\test\Reports\drilldown-guid[b84803ed-ba95-4b8d-8eb9-bf5835a1a69313].rpt");
+
+
+            //System.Diagnostics.Process.Start(@"C:\test\Reports\drilldown-guid[b84803ed-ba95-4b8d-8eb9-bf5835a1a69313].rpt");
 
             crViewer.Show();
         }

@@ -20,6 +20,12 @@ namespace CHEORptAnalyzer
         public Dictionary<CRElement, string> DisplayResults = new Dictionary<CRElement, string>();
         private string _text;
 
+        public string FilePath { get; set; } = "";
+        public string Author { get; set; } = "";
+        public DateTime LastSaved { get; set; } = new DateTime();
+        public bool HasSavedData { get; set; } = false;
+        public string SummaryInfo { get; set; } = "";
+
         public BindingList<ReportItem> SubReports { get; set; }
 
         public ReportItem()

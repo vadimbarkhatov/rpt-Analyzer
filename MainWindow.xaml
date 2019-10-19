@@ -8,7 +8,7 @@
         xmlns:FastColoredTextBoxNS="clr-namespace:FastColoredTextBoxNS;assembly=FastColoredTextBox"
     xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:Viewer="clr-namespace:SAPBusinessObjects.WPF.Viewer;assembly=SAPBusinessObjects.WPF.Viewer" x:Class="CHEORptAnalyzer.MainWindow"  
         mc:Ignorable="d"
-        Title="CHEO RPT Analyzer" Height="768" Width="1366" Icon="TextTemplate.ico" WindowStyle="ThreeDBorderWindow" Background="{DynamicResource CRBackground}" Foreground="{DynamicResource CRFont}" >
+        Title="CHEO RPT Analyzer" Height="768" Width="1366" Icon="TextTemplate.ico" WindowStyle="ThreeDBorderWindow"  >
 
     <Grid Margin="0,0,0,0" >
         <Grid.Resources>
@@ -29,16 +29,18 @@
 
 
         <DockPanel Grid.ColumnSpan="3">
-            <Menu DockPanel.Dock="Top" Background="{x:Null}" >
-                <MenuItem Header="_File" Foreground="{DynamicResource CRFont}">
+            <Menu DockPanel.Dock="Top" >
+                <MenuItem Header="_File" >
                     <MenuItem Header="_Load Folder" Click="OpenFolder"/>
+                    <MenuItem Header="_Export to XML" Click="OpenFolder"/>
                     <Separator />
                     <MenuItem Header="_Exit" />
                 </MenuItem>
-                <MenuItem Header="_Report" Foreground="{DynamicResource CRFont}">
-                    <MenuItem Header="_Preview" />
+                <MenuItem Header="_Report" >
+                    <MenuItem Header="_Preview" Click="PreviewReport"/>
+                    <MenuItem Header="_Open pn Designer" Click="PreviewReport"/>
                 </MenuItem>
-                <MenuItem Header="_Help" Foreground="{DynamicResource CRFont}">
+                <MenuItem Header="_Help" >
                     <MenuItem Header="_About" />
                 </MenuItem>
             </Menu>
@@ -46,7 +48,7 @@
 
         <DockPanel Grid.Row="1" Margin="0,0,0,0" LastChildFill="True">
             <StackPanel HorizontalAlignment="Left"  VerticalAlignment="Top"  DockPanel.Dock="Top" Orientation="Horizontal" Margin="3,2,0,0">
-                <Label Content="Report List" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="{DynamicResource CRFont}" />
+                <Label Content="Report List" HorizontalAlignment="Left" VerticalAlignment="Top" />
                 <Label Content="{Binding Items.Count, ElementName=lbReports, Mode=OneWay}" ContentStringFormat="({0})" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50"/>
             </StackPanel>
 
@@ -83,7 +85,7 @@
                 </GroupBox>
             </StackPanel>
 
-            <Controls:MultiSelectTreeView SelectionChanged="TvReports_SelectionChanged" ItemsSource="{Binding ReportItems, Mode=TwoWay}"   x:Name="tvReports" Margin="5,0,0,0" FontSize="12" DockPanel.Dock="Top" BorderBrush="{DynamicResource BorderBrush}">
+            <Controls:MultiSelectTreeView SelectionChanged="TvReports_SelectionChanged" ItemsSource="{Binding ReportItems, Mode=TwoWay}"   x:Name="tvReports" Margin="5,0,0,0" FontSize="12" DockPanel.Dock="Top" >
                 <Controls:MultiSelectTreeView.Resources>
                     <HierarchicalDataTemplate DataType="{x:Type local:ReportItem}" ItemsSource="{Binding SubReports}">
                         <TextBlock Text="{Binding Text}" />
@@ -93,7 +95,7 @@
 
         </DockPanel>
 
-        <GridSplitter Grid.Column="1" Grid.Row="1"  Width="7" HorizontalAlignment="Stretch" Background="#FFC1DBFF" />
+        <GridSplitter Grid.Column="1" Grid.Row="1"  Width="7" HorizontalAlignment="Stretch" />
 
         <DockPanel Grid.Column="2" Grid.Row="1" Margin="0,0,5,5">
             <StackPanel Margin="0,5,0,0" Panel.ZIndex="999" Orientation="Horizontal" Width="790" HorizontalAlignment="Left" VerticalAlignment="Top" DockPanel.Dock="Top" RenderTransformOrigin="0.5,0.5">
