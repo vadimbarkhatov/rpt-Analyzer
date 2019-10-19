@@ -11,13 +11,13 @@
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Data;
+    using System.Windows.Forms;
     using System.Windows.Input;
     using System.Xml;
     using System.Xml.Linq;
     using FastColoredTextBoxNS;
     using LiteDB;
     using Microsoft.WindowsAPICodePack.Dialogs;
-
 
     public enum CRElement
     {
@@ -28,16 +28,13 @@
         TableLinks,
     }
 
-    
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     /// 
     public partial class MainWindow : Window
     {
-        static readonly string rptPath = @"C:\test\Reports\*";
         static readonly string localDBPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\CRPTApp.db";
-        static readonly string sharedDBPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + "\\SharedCache.db";
 
         #region CR Section Definitions
 
@@ -94,9 +91,11 @@
         public string SearchString { get; set; } = string.Empty;
         public CRElement PreviewElement { get; set; } = CRElement.Field;
         public BindingList<ReportItem> ReportItems { get; set; } = new BindingList<ReportItem>();
-        public BindingList<ReportItem> SelectedReportItems { get; set; } = new BindingList<ReportItem>();
+        public IEnumerable<ReportItem> SelectedReportItems
+        {
+            get { return tvReports.SelectedItems.Count > 0 ? tvReports.SelectedItems.Cast<ReportItem>() : null; }
+        }
         #endregion GUI Bound Properties
-
 
         XElement Xroot = new XElement("null");
 
@@ -168,24 +167,24 @@
                 IEnumerable<XElement> flattenedReport = FlattenReport(report);
 
                 var baseReport = flattenedReport.First();
-                var reportItem = 
-                    new ReportItem {
-                    Text = baseReport.Attribute("Name").Value,
-                    DisplayResults = ReportResults(baseReport),
-                    //FilePath = baseReport.Attribute("Name").Value,
-                    //public string Author { get; set; } = "";
-                    //public DateTime LastSaved { get; set; } = new DateTime();
-                    //public bool HasSavedData { get; set; } = false;
-                    //public string SummaryInfo { get; set; } = "";
+                var reportItem =
+                    new ReportItem
+                    {
+                        Text = baseReport.Attribute("Name").Value,
+                        DisplayResults = ReportResults(baseReport),
+                        XMLView = report,
+                        FilePath = report.Attribute("FileName").Value,
+                        Author = report.Element("Summaryinfo").Attribute("ReportAuthor").Value,
+                        //TODO: LastSaved 
+                        HasSavedData = report.Attribute("HasSavedData").Value == "True" ? true : false,
+                        ReportComment = report.Element("Summaryinfo").Attribute("ReportComments").Value,
                     };
 
                 foreach (var subReport in flattenedReport.Skip(1))
                 {
                     Dictionary<CRElement, string> results = ReportResults(subReport);
 
-
-
-                    reportItem.SubReports.Add(new ReportItem { Text = subReport.Attribute("Name").Value, DisplayResults = results });
+                    reportItem.SubReports.Add(new ReportItem { Text = subReport.Attribute("Name").Value, DisplayResults = results, BaseReport = reportItem });
                 }
 
                 ReportItems.Add(reportItem);
@@ -228,15 +227,12 @@
 
         private void UpdatePreview()
         {
-            var selectedResults = "ERROR";
+            var selectedResults = "";
 
-            if (tvReports?.SelectedItems.Count > 0)
+            if (SelectedReportItems != null)
             {
-                ReportItem selectedItem = (ReportItem)tvReports.SelectedItems[0];
-
-                selectedResults = selectedItem.DisplayResults[PreviewElement];
+                selectedResults = SelectedReportItems.First().DisplayResults[PreviewElement];
             }
-            else return;
 
             textBox.ClearStylesBuffer();
             textBox.Language = CRSections[PreviewElement].Language;
@@ -264,7 +260,7 @@
             {
                 IEnumerable<string> directories = dialog.FileNames.SelectMany(x => Directory.GetDirectories(x, "*.*", SearchOption.AllDirectories)).Concat(dialog.FileNames);
                 ParseRPT(directories);
-                
+
                 //TODO: Refactor
                 LoadXML(dialog.FileNames, localDBPath, true);
                 SearchReports();
@@ -288,19 +284,37 @@
             }
         }
 
-        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
-        {
-
-        }
 
         private void PreviewReport(object sender, RoutedEventArgs e)
         {
-            CRViewer crViewer = new CRViewer(@"C:\test\Reports\drilldown-guid[b84803ed-ba95-4b8d-8eb9-bf5835a1a69313].rpt");
-
-
-            //System.Diagnostics.Process.Start(@"C:\test\Reports\drilldown-guid[b84803ed-ba95-4b8d-8eb9-bf5835a1a69313].rpt");
-
+            CRViewer crViewer = new CRViewer(SelectedReportItems?.First().GetBaseReport().FilePath);
             crViewer.Show();
+        }
+
+        private void ExportToXML(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "XML-File | *.xml";
+            saveFileDialog.InitialDirectory = Path.Combine(Environment.ExpandEnvironmentVariables("%userprofile%"), "Documents");
+
+            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                //TODO: error handling
+                SelectedReportItems?.First().GetBaseReport().XMLView?.Save(saveFileDialog.FileName);
+            }
+        }
+
+        private void OpenReportDesigner(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Process.Start(SelectedReportItems?.First().GetBaseReport().FilePath);
+            }
+            catch (Exception ex)
+            {
+                Logs.Instance.log.Error(ex.Message, ex);
+                System.Windows.Forms.MessageBox.Show(ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+            }
         }
     }
 }

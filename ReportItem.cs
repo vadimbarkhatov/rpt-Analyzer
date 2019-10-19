@@ -20,18 +20,34 @@ namespace CHEORptAnalyzer
         public Dictionary<CRElement, string> DisplayResults = new Dictionary<CRElement, string>();
         private string _text;
 
+        public XElement XMLView { get; set; }
+        
+
+
         public string FilePath { get; set; } = "";
         public string Author { get; set; } = "";
         public DateTime LastSaved { get; set; } = new DateTime();
         public bool HasSavedData { get; set; } = false;
-        public string SummaryInfo { get; set; } = "";
+        public string ReportComment { get; set; } = "";
 
+        public ReportItem BaseReport { get; set; }
         public BindingList<ReportItem> SubReports { get; set; }
 
         public ReportItem()
         {
             this.SubReports = new BindingList<ReportItem>();
         }
+
+        public ReportItem GetBaseReport()
+        {
+            if(BaseReport != null)
+            {
+                return BaseReport;
+            }
+
+            return this;
+        }
+
 
         public override string ToString()
         {

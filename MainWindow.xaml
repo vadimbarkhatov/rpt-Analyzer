@@ -32,13 +32,13 @@
             <Menu DockPanel.Dock="Top" >
                 <MenuItem Header="_File" >
                     <MenuItem Header="_Load Folder" Click="OpenFolder"/>
-                    <MenuItem Header="_Export to XML" Click="OpenFolder"/>
+                    <MenuItem Header="_Export to XML" Click="ExportToXML"/>
                     <Separator />
                     <MenuItem Header="_Exit" />
                 </MenuItem>
                 <MenuItem Header="_Report" >
                     <MenuItem Header="_Preview" Click="PreviewReport"/>
-                    <MenuItem Header="_Open pn Designer" Click="PreviewReport"/>
+                    <MenuItem Header="_Open in Designer" Click="OpenReportDesigner"/>
                 </MenuItem>
                 <MenuItem Header="_Help" >
                     <MenuItem Header="_About" />
@@ -54,7 +54,7 @@
 
             <StackPanel Margin="10,0,0,10" Orientation="Horizontal" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
                 <GroupBox Header="Report Info" BorderThickness="0" >
-                    <TextBlock VerticalAlignment="Top" Margin="5,5,0,0" MinWidth="250" ><Run Text="Path: "/><Hyperlink NavigateUri="http://www.google.com" RequestNavigate="Hyperlink_RequestNavigate"><Run Text="Click here"/></Hyperlink><LineBreak/><Run Text="Author:"/><LineBreak/><Run Text="Last Saved:"/><LineBreak/><Run Text="Has Saved Data:"/><LineBreak/><Run Text="Summary Info:"/></TextBlock>
+                    <TextBlock VerticalAlignment="Top" Margin="5,5,0,0" MinWidth="250" ><Run Text="Path: "/><LineBreak/><Run Text="Author:"/><LineBreak/><Run Text="Last Saved:"/><LineBreak/><Run Text="Has Saved Data:"/><LineBreak/><Run Text="Summary Info:"/></TextBlock>
                 </GroupBox>
 
                 <GroupBox Header="Search" VerticalAlignment="Top" BorderThickness="0">
