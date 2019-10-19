@@ -39,6 +39,8 @@
         static readonly string localDBPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\CRPTApp.db";
         static readonly string sharedDBPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName) + "\\SharedCache.db";
 
+        #region CR Section Definitions
+
         static readonly Dictionary<CRElement, CRSection> CRSections = new Dictionary<CRElement, CRSection>
         {
             [CRElement.Field] = new CRSection
@@ -81,6 +83,10 @@
             },
         };
 
+        #endregion CR Section Definitions
+
+        #region GUI Bound Properties
+
         public bool SearchFields { get; set; } = true;
         public bool SearchRF { get; set; } = true;
         public bool SearchCommand { get; set; } = true;
@@ -89,6 +95,9 @@
         public CRElement PreviewElement { get; set; } = CRElement.Field;
         public BindingList<ReportItem> ReportItems { get; set; } = new BindingList<ReportItem>();
         public BindingList<ReportItem> SelectedReportItems { get; set; } = new BindingList<ReportItem>();
+        #endregion GUI Bound Properties
+
+
         XElement Xroot = new XElement("null");
 
         public MainWindow()
@@ -170,12 +179,9 @@
                     reportItem.SubReports.Add(new ReportItem { Text = subReport.Attribute("Name").Value, DisplayResults = results });
                 }
 
-                //lbReports.Items.Add(reportItem);
                 ReportItems.Add(reportItem);
             }
 
-            //var test = lbReports;
-            //lbReports.Items.Add(ReportItems);
         }
 
         private static IEnumerable<XElement> FlattenReport(XElement report)
@@ -283,7 +289,11 @@
             UpdatePreview();
         }
 
+        private void PreviewReport(object sender, RoutedEventArgs e)
+        {
+            CRViewer crViewer = new CRViewer();
 
-
+            crViewer.Show();
+        }
     }
 }
