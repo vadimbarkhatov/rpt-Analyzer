@@ -89,8 +89,6 @@
         public CRElement PreviewElement { get; set; } = CRElement.Field;
         public BindingList<ReportItem> ReportItems { get; set; } = new BindingList<ReportItem>();
         public BindingList<ReportItem> SelectedReportItems { get; set; } = new BindingList<ReportItem>();
-        //public BindingList<ReportItem> SubReports { get; set; } = new BindingList<ReportItem>();
-        //public BindingList<ReportItem> ReportLink
         XElement Xroot = new XElement("null");
 
         public MainWindow()
