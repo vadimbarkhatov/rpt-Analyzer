@@ -83,15 +83,22 @@
             {
                 Language = FastColoredTextBoxNS.Language.Custom,
                 ResultFilter = x => x.Where(y => y.Name == "DataDefinition").Elements("ParameterFieldDefinitions").Elements("ParameterFieldDefinition"),
+
                 ResultFormat = s => //TODO: Could definately be better...
-                    s.Select(x => //Parameters that are linked to a subreport have a different schema and need to be handled seperately
-                        x.Attribute("IsLinkedToSubreport") != null ? "{" + x.Attribute("Name").Value + "} : " + x.Attribute("ReportName").Value
-                        : //""
-                        x.Attribute("ReportName").Value == "" ? x.Attribute("FormulaName").Value + " : " + x.Attribute("ReportName").Value : ""
-                    )
+                 s.Where(x => x.Attribute("IsLinkedToSubreport") != null).Select(y => y.Attribute("Name").Value + " -> " + y.Attribute("ReportName").Value).Concat(
+                s.Where(y => y.Attribute("IsLinkedToSubreport") == null && ).Select(y => y.Attribute("Name").Value)).Combine("\r\n" + "\r\n")
 
 
-                     .Combine("\r\n" + "\r\n"),
+
+                //Where(x => false)
+                //    .Select(x => //Parameters that are linked to a subreport have a different schema and need to be handled seperately
+                //        x.Attribute("IsLinkedToSubreport") != null ? "{" + x.Attribute("Name").Value + "} : " + x.Attribute("ReportName").Value
+                //        : //""
+                //        x.Attribute("ReportName").Value == "" ? x.Attribute("FormulaName").Value + " : " + x.Attribute("ReportName").Value : ""
+                //    )
+
+
+
                 //ResultFormat = s =>
                 //    s.Select(x =>
                 //        x.Attribute("JoinType").Value + " "
