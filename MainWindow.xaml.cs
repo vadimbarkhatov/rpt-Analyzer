@@ -287,8 +287,9 @@
 
         private void PreviewReport(object sender, RoutedEventArgs e)
         {
-            CRViewer crViewer = new CRViewer(SelectedReportItems?.First().GetBaseReport().FilePath);
+            CRViewer crViewer = new CRViewer();
             crViewer.Show();
+            crViewer.LoadReport(SelectedReportItems?.First().GetBaseReport().FilePath);
         }
 
         private void ExportToXML(object sender, RoutedEventArgs e)

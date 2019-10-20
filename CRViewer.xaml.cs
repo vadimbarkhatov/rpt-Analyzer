@@ -20,9 +20,20 @@ namespace CHEORptAnalyzer
     /// </summary>
     public partial class CRViewer : Window
     {
-        public CRViewer(string reportPath)
+        public CRViewer()
         {
             InitializeComponent();
+
+            this.Loaded += (s, e) => { crvReport.Owner = Window.GetWindow(this); };
+        }
+        
+        public void LoadReport(string reportPath)
+        {
+            //System.Windows.Window window = new System.Windows.Window();
+            //crvReport.Owner = window;
+
+            //System.Windows.Interop.WindowInteropHelper helper = new System.Windows.Interop.WindowInteropHelper(window);
+            //helper.Owner = new System.Windows.Interop.WindowInteropHelper(this).Owner;
 
             ReportDocument reportDocument = new ReportDocument();
 
@@ -37,5 +48,8 @@ namespace CHEORptAnalyzer
                 System.Windows.Forms.MessageBox.Show(ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
             }
         }
+
+
+        
     }
 }
