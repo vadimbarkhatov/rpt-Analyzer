@@ -116,6 +116,7 @@
                     <TabItem Header="Formula Fields" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.FormulaField}, Converter={StaticResource ComparisonConverter}}"/>
                     <TabItem Header="Record Selection Formula" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Formula}, Converter={StaticResource ComparisonConverter}}"/>
                     <TabItem Header="Command" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Command}, Converter={StaticResource ComparisonConverter}}"/>
+                    <TabItem Header="Parameters" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Parameters}, Converter={StaticResource ComparisonConverter}}"/>
                 </TabControl>
             </StackPanel>
             <Border BorderThickness="1" BorderBrush="#FFACACAC" >

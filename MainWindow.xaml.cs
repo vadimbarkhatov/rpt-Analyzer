@@ -26,6 +26,7 @@
         Command,
         FormulaField,
         TableLinks,
+        Parameters,
     }
 
     /// <summary>
@@ -74,9 +75,29 @@
                 ResultFormat = s =>
                     s.Select(x =>
                         x.Attribute("JoinType").Value + " "
-                        + x.Elements("SourceFields").Elements("Field").First().Attribute("FormulaName").Value + " ON "
+                        + x.Elements("SourceFields").Elements("Field").First().Attribute("FormulaName").Value + " On "
                         + x.Elements("DestinationFields").Elements("Field").First().Attribute("FormulaName").Value)
                      .Combine("\r\n" + "\r\n"),
+            },
+            [CRElement.Parameters] = new CRSection
+            {
+                Language = FastColoredTextBoxNS.Language.Custom,
+                ResultFilter = x => x.Where(y => y.Name == "DataDefinition").Elements("ParameterFieldDefinitions").Elements("ParameterFieldDefinition"),
+                ResultFormat = s => //TODO: Could definately be better...
+                    s.Select(x => //Parameters that are linked to a subreport have a different schema and need to be handled seperately
+                        x.Attribute("IsLinkedToSubreport") != null ? "{" + x.Attribute("Name").Value + "} : " + x.Attribute("ReportName").Value
+                        : //""
+                        x.Attribute("ReportName").Value == "" ? x.Attribute("FormulaName").Value + " : " + x.Attribute("ReportName").Value : ""
+                    )
+
+
+                     .Combine("\r\n" + "\r\n"),
+                //ResultFormat = s =>
+                //    s.Select(x =>
+                //        x.Attribute("JoinType").Value + " "
+                //        + x.Elements("SourceFields").Elements("Field").First().Attribute("FormulaName").Value + " ON "
+                //        + x.Elements("DestinationFields").Elements("Field").First().Attribute("FormulaName").Value)
+                //     .Combine("\r\n" + "\r\n"),
             },
         };
 
@@ -108,44 +129,6 @@
         private bool TextFilter(string text)
         {
             return text.IndexOf(SearchString.Trim(), StringComparison.OrdinalIgnoreCase) >= 0;
-        }
-
-        private void LoadXML(IEnumerable<string> folders, string dbPath, bool CleanupOrphans)
-        {
-            Xroot = new XElement("Reports");
-
-            using (var db = new LiteDatabase(dbPath))
-            {
-                foreach (string folder in folders)
-                {
-                    string folderId = Extensions.ToLiteDBID(folder) + "/";
-                    IEnumerable<LiteFileInfo> reportIds = db.FileStorage.Find(folderId);
-
-                    foreach (LiteFileInfo reportLiteInfo in reportIds)
-                    {
-                        string fullPath = reportLiteInfo.Metadata["fullPath"];
-
-                        if (CleanupOrphans && fullPath != null && !File.Exists(fullPath))
-                        {
-                            db.FileStorage.Delete(reportLiteInfo.Id);
-                            continue;
-                        }
-
-                        XElement xelement;
-                        try
-                        {
-                            xelement = XElement.Load(db.FileStorage.OpenRead(reportLiteInfo.Id));
-                        }
-                        catch (XmlException ex)
-                        {
-                            Logs.Instance.log.Error(ex.Message, ex);
-                            continue;
-                        }
-
-                        Xroot.Add(xelement);
-                    }
-                }
-            }
         }
 
         private void BtnSearch_Click(object sender, RoutedEventArgs events) => SearchReports();
@@ -259,28 +242,65 @@
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 IEnumerable<string> directories = dialog.FileNames.SelectMany(x => Directory.GetDirectories(x, "*.*", SearchOption.AllDirectories)).Concat(dialog.FileNames);
-                ParseRPT(directories);
 
-                //TODO: Refactor
-                LoadXML(dialog.FileNames, localDBPath, true);
+
+                IEnumerable<string> rptPaths = ParseRPT(directories);
+
+                LoadXMLFromDb(rptPaths, localDBPath);
                 SearchReports();
             }
         }
 
-        private void ParseRPT(IEnumerable<string> paths)
+        private IEnumerable<string> ParseRPT(IEnumerable<string> directories)
         {
             string dbLoc = localDBPath;
 
-            if (new Uri(paths.First()).Host == "") //if path is non UNC
+            //if (new Uri(directories.First()).Host == "") //if path is non UNC
+            //{
+            //dbLoc = localDBPath;
+            //}
+
+            List<string> rptPaths = new List<string>();
+
+            foreach (var dir in directories)
             {
-                dbLoc = localDBPath;
+                var matchingFiles = Directory.GetFiles(dir, searchPattern: "*.rpt");
+                rptPaths.AddRange(matchingFiles);
             }
 
-            foreach (string path in paths)
-            {
-                string rptPath = path + @"\*";
+            RptToXml.RptToXml.Convert(rptPaths, dbLoc, false);
 
-                RptToXml.RptToXml.Convert(rptPath, dbLoc, false);
+            return rptPaths;
+        }
+
+        private void LoadXMLFromDb(IEnumerable<string> rptPaths, string dbPath)
+        {
+            Xroot = new XElement("Reports");
+
+            using (var db = new LiteDatabase(dbPath))
+            {
+                foreach (string rptPath in rptPaths)
+                {
+                    string rptPathId = Extensions.CalculateMD5Hash(rptPath);
+
+                    XElement xelement;
+                    try
+                    {
+                        xelement = XElement.Load(db.FileStorage.OpenRead(rptPathId));
+                    }
+                    catch (XmlException ex)
+                    {
+                        Logs.Instance.log.Error(ex.Message, ex);
+                        continue;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logs.Instance.log.Error(ex.Message, ex);
+                        continue;
+                    }
+
+                    Xroot.Add(xelement);
+                }
             }
         }
 
