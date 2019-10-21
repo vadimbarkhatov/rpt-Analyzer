@@ -85,8 +85,8 @@
                 ResultFilter = x => x.Where(y => y.Name == "DataDefinition").Elements("ParameterFieldDefinitions").Elements("ParameterFieldDefinition"),
 
                 ResultFormat = s => //TODO: Could definately be better...
-                 s.Where(x => x.Attribute("IsLinkedToSubreport") != null).Select(y => y.Attribute("Name").Value + " -> " + y.Attribute("ReportName").Value).Concat(
-                s.Where(y => y.Attribute("IsLinkedToSubreport") == null && ).Select(y => y.Attribute("Name").Value)).Combine("\r\n" + "\r\n")
+                s.Where(x => x.Attribute("IsLinkedToSubreport") != null).Select(y => y.Attribute("Name").Value + " -> " + y.Attribute("ReportName").Value).Concat(
+                s.Where(y => y.Attribute("IsLinkedToSubreport") == null && true).Select(y => y.Attribute("Name").Value)).Combine("\r\n" + "\r\n")
 
 
 
