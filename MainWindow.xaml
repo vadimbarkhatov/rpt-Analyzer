@@ -37,7 +37,7 @@
                     <MenuItem Header="_Exit" />
                 </MenuItem>
                 <MenuItem Header="_Report" >
-                    <MenuItem Header="_Preview" Click="PreviewReport"/>
+                    <MenuItem Header="_Preview (Experimental)" Click="PreviewReport"/>
                     <MenuItem Header="_Open in Designer" Click="OpenReportDesigner"/>
                 </MenuItem>
                 <MenuItem Header="_Help" >
@@ -49,18 +49,18 @@
         <DockPanel Grid.Row="1" Margin="0,0,0,0" LastChildFill="True">
             <StackPanel HorizontalAlignment="Left"  VerticalAlignment="Top"  DockPanel.Dock="Top" Orientation="Horizontal" Margin="3,2,0,0">
                 <Label Content="Report List" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                <Label Content="{Binding Items.Count, ElementName=lbReports, Mode=OneWay}" ContentStringFormat="({0})" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50"/>
+                <Label Content="{Binding Items.Count, ElementName=tvReports, Mode=OneWay}" ContentStringFormat="({0})" HorizontalAlignment="Left" VerticalAlignment="Top" Width="50" Margin="-5,0,0,0"/>
             </StackPanel>
 
             <StackPanel Margin="10,0,0,10" Orientation="Horizontal" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
-                <GroupBox Header="Report Info" BorderThickness="0" >
-                    <TextBlock VerticalAlignment="Top" Margin="5,5,0,0" MinWidth="250" ><Run Text="Path: "/><LineBreak/><Run Text="Author:"/><LineBreak/><Run Text="Last Saved:"/><LineBreak/><Run Text="Has Saved Data:"/><LineBreak/><Run Text="Summary Info:"/></TextBlock>
+                <GroupBox Header="Report Info" BorderThickness="0" MinWidth="250">
+                    <Label Name="lbReportInfo" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-5,0,0,0" />
                 </GroupBox>
 
                 <GroupBox Header="Search" VerticalAlignment="Top" BorderThickness="0">
                     <StackPanel>
                         <StackPanel HorizontalAlignment="Left" Height="52" VerticalAlignment="Top" Width="147" Margin="0,3,0,0">
-                            <CheckBox Content="Crystal Fields" IsChecked="{Binding SearchFields}"/>
+                            <CheckBox Content="Columns" IsChecked="{Binding SearchFields}"/>
                             <CheckBox Content="Record Select Formula" Height="15" IsChecked="{Binding SearchRF}"/>
                             <CheckBox Content="Command Objects" Height="15" IsChecked="{Binding SearchCommand}"/>
                         </StackPanel>

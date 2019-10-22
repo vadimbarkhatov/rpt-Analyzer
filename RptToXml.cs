@@ -46,7 +46,7 @@ namespace RptToXml
                     catch (Exception ex)
                     {
                         Logs.Instance.log.Error(ex.Message, ex);
-                        System.Windows.Forms.MessageBox.Show(ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+                        System.Windows.Forms.MessageBox.Show("Exception with report: " + "\r\n" + rptPath + "\r\n"  + ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
                     }
                 }
             }

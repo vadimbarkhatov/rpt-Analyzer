@@ -48,6 +48,16 @@ namespace CHEORptAnalyzer
             return this;
         }
 
+        public string GetInfo()
+        {
+            return
+                    "Path: " + FilePath + "\r\n" +
+                    "Author:" + Author + "\r\n" +
+                    //"Last Saved:"
+                    "Has Saved Data:" + HasSavedData + "\r\n" +
+                    "Comments:" + ReportComment + "\r\n"
+                    ;
+        }
 
         public override string ToString()
         {

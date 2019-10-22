@@ -62,7 +62,7 @@
                 ResultFilter = x => x.Where(y => y.Name == "DataDefinition").Elements("FormulaFieldDefinitions").Elements("FormulaFieldDefinition"),
                 ResultFormat = s =>
                     s.Select(x =>
-                        x.Attribute("FormulaName").Value +
+                        x.Attribute("FormulaName").Value + " : " + x.Attribute("ValueType").Value.Replace("Field", "") +
                         "\r\n" + "{" +
                         "\r\n" + x.Value.AppendToNewLine("\t") +
                         "\r\n" + "}")
@@ -84,27 +84,12 @@
                 Language = FastColoredTextBoxNS.Language.Custom,
                 ResultFilter = x => x.Where(y => y.Name == "DataDefinition").Elements("ParameterFieldDefinitions").Elements("ParameterFieldDefinition"),
 
-                ResultFormat = s => //TODO: Could definately be better...
-                s.Where(x => x.Attribute("IsLinkedToSubreport") != null).Select(y => y.Attribute("Name").Value + " -> " + y.Attribute("ReportName").Value).Concat(
-                s.Where(y => y.Attribute("IsLinkedToSubreport") == null && true).Select(y => y.Attribute("Name").Value)).Combine("\r\n" + "\r\n")
-
-
-
-                //Where(x => false)
-                //    .Select(x => //Parameters that are linked to a subreport have a different schema and need to be handled seperately
-                //        x.Attribute("IsLinkedToSubreport") != null ? "{" + x.Attribute("Name").Value + "} : " + x.Attribute("ReportName").Value
-                //        : //""
-                //        x.Attribute("ReportName").Value == "" ? x.Attribute("FormulaName").Value + " : " + x.Attribute("ReportName").Value : ""
-                //    )
-
-
-
-                //ResultFormat = s =>
-                //    s.Select(x =>
-                //        x.Attribute("JoinType").Value + " "
-                //        + x.Elements("SourceFields").Elements("Field").First().Attribute("FormulaName").Value + " ON "
-                //        + x.Elements("DestinationFields").Elements("Field").First().Attribute("FormulaName").Value)
-                //     .Combine("\r\n" + "\r\n"),
+                ResultFormat = s =>
+                    s.Select(x => //Parameters that are linked to a subreport have a different schema and need to be handled seperately
+                        x.Attribute("IsLinkedToSubreport") != null ?
+                        "{" + x.Attribute("Name").Value + "} -> \"" + x.Attribute("ReportName").Value + "\"" : 
+                        (x.Attribute("ParameterFieldUsage").Value == "NotInUse" ? "//":"") + x.Attribute("FormulaName").Value + " : " + x.Attribute("ValueType").Value.Replace("Field", "")
+                    ).Combine("\r\n"),
             },
         };
 
@@ -117,6 +102,8 @@
         public bool SearchCommand { get; set; } = true;
         public bool ContainsSeach { get; set; } = true;
         public string SearchString { get; set; } = string.Empty;
+
+        public string ReportInfo { get; set; } = string.Empty;
         public CRElement PreviewElement { get; set; } = CRElement.Field;
         public BindingList<ReportItem> ReportItems { get; set; } = new BindingList<ReportItem>();
         public IEnumerable<ReportItem> SelectedReportItems
@@ -219,9 +206,14 @@
         {
             var selectedResults = "";
 
+
             if (SelectedReportItems != null)
             {
-                selectedResults = SelectedReportItems.First().DisplayResults[PreviewElement];
+                var SelectedReportItem = SelectedReportItems.First();
+
+                selectedResults = SelectedReportItem.DisplayResults[PreviewElement];
+
+                lbReportInfo.Content = SelectedReportItem.GetInfo();
             }
 
             textBox.ClearStylesBuffer();
@@ -240,7 +232,7 @@
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog
             {
-                InitialDirectory = @"C:\test\",
+                //InitialDirectory = @"C:\test\",
                 IsFolderPicker = true,
                 Multiselect = true,
             };
@@ -261,11 +253,6 @@
         private IEnumerable<string> ParseRPT(IEnumerable<string> directories)
         {
             string dbLoc = localDBPath;
-
-            //if (new Uri(directories.First()).Host == "") //if path is non UNC
-            //{
-            //dbLoc = localDBPath;
-            //}
 
             List<string> rptPaths = new List<string>();
 

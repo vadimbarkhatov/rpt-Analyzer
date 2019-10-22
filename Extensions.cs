@@ -44,18 +44,24 @@ namespace CHEORptAnalyzer
         {
             TextStyle StringStyle = new TextStyle(System.Drawing.Brushes.Black, null, System.Drawing.FontStyle.Regular);
             TextStyle FuncStyle = new TextStyle(System.Drawing.Brushes.Blue, null, System.Drawing.FontStyle.Regular);
+            TextStyle TypeStyle = new TextStyle(System.Drawing.Brushes.DarkRed, null, System.Drawing.FontStyle.Regular);
             TextStyle CommentStyle = new TextStyle(System.Drawing.Brushes.Green, null, System.Drawing.FontStyle.Regular);
             TextStyle FieldStyle = new TextStyle(System.Drawing.Brushes.Black, null, System.Drawing.FontStyle.Regular);
+
+
 
             textBox.AddStyle(CommentStyle);
             textBox.AddStyle(FieldStyle);
             textBox.AddStyle(StringStyle);
+            textBox.AddStyle(TypeStyle);
             textBox.AddStyle(FuncStyle);
 
-            string crystalFuncs = "(in|and|or|if|then|else|like|not|LeftOuter|Equal)"; //Crystal Functions
+            string crystalFuncs = "(in|and|or|if|then|else|like|not|LeftOuter|Equal|On)"; //Crystal Functions
+            //string crystalTypes = "(String|Number|Unknown|Date|DateTime|Boolean)"; //Crystal Functions
 
             textBox.Range.SetStyle(CommentStyle, @"(\/\/).*", RegexOptions.IgnoreCase);
-            textBox.Range.SetStyle(StringStyle, @"""(.*?)""", RegexOptions.IgnoreCase);
+            textBox.Range.SetStyle(StringStyle, @"(""(.*?)""|'(.*?)')", RegexOptions.IgnoreCase);
+            textBox.Range.SetStyle(TypeStyle, @"(?<=} : )(.*)", RegexOptions.IgnoreCase);
             textBox.Range.SetStyle(FuncStyle, crystalFuncs, RegexOptions.IgnoreCase);
             textBox.Range.SetStyle(FieldStyle, @"{(.*?)}", RegexOptions.IgnoreCase);
         }
@@ -79,23 +85,6 @@ namespace CHEORptAnalyzer
         [DllImport("mpr.dll")]
         static extern int WNetGetUniversalNameA(string lpLocalPath, int dwInfoLevel, IntPtr lpBuffer, ref int lpBufferSize);
 
-        public static string ToLiteDBID(string path)
-        {
-            return "$/" + path
-                        .Replace("\\\\", string.Empty)
-                        .Replace("\\", "/")
-                        .Replace(":", string.Empty)
-                        .Replace(" ", "_")
-                        .Replace("(", "@")
-                        .Replace("[", "@")
-                        .Replace("&", ";")
-                        .Replace("~", ";")
-                        .Replace(",", "%")
-                        .Replace(")", "!")
-                        .Replace("]", "!")
-                        .Replace("#", "-")
-                        ;
-        }
 
         // I think max length for UNC is actually 32,767
         public static string LocalToUNC(string localPath, int maxLen = 2000)

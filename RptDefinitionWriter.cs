@@ -429,7 +429,9 @@ namespace RptToXml
 				writer.WriteAttributeString("TableName", df.TableName);
 				writer.WriteAttributeString("ValueType", df.ValueType.ToString());
 
-			}
+                writer.WriteEndElement();
+
+            }
 			else if (fo is FormulaFieldDefinition)
 			{
 				var ff = (FormulaFieldDefinition)fo;
@@ -443,7 +445,9 @@ namespace RptToXml
 				writer.WriteAttributeString("ValueType", ff.ValueType.ToString());
 				writer.WriteString(ff.Text);
 
-			}
+                writer.WriteEndElement();
+
+            }
 			else if (fo is GroupNameFieldDefinition)
 			{
 				var gnf = (GroupNameFieldDefinition)fo;
@@ -458,7 +462,9 @@ namespace RptToXml
 				writer.WriteAttributeString("NumberOfBytes", gnf.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
 				writer.WriteAttributeString("ValueType", gnf.ValueType.ToString());
 
-			}
+                writer.WriteEndElement();
+
+            }
 			else if (fo is ParameterFieldDefinition)
 			{
 				var pf = (ParameterFieldDefinition)fo;
@@ -467,18 +473,23 @@ namespace RptToXml
 				// The parameter will be reported in full when the subreport is exported.  
 				var parameterIsLinked = (!report.IsSubreport && pf.IsLinked());
 
-				writer.WriteStartElement("ParameterFieldDefinition");
+				
 
 				if (parameterIsLinked)
 				{
-					writer.WriteAttributeString("Name", pf.Name);
+                    writer.WriteStartElement("ParameterFieldDefinition");
+
+                    writer.WriteAttributeString("Name", pf.Name);
 					writer.WriteAttributeString("IsLinkedToSubreport", pf.IsLinked().ToString());
 					writer.WriteAttributeString("ReportName", pf.ReportName);
-				}
+
+                    writer.WriteEndElement();
+                }
 				else
 				{
                     if (report.Name == pf.ReportName)
                     {
+                        writer.WriteStartElement("ParameterFieldDefinition");
                         var ddm_pf = GetRASDDMParameterFieldObject(pf.Name, report);
 
                         writer.WriteAttributeString("AllowCustomCurrentValues", (ddm_pf == null ? false : ddm_pf.AllowCustomCurrentValues).ToString());
@@ -553,6 +564,7 @@ namespace RptToXml
                             }
                         }
                         writer.WriteEndElement();
+                        writer.WriteEndElement();
                     }
 				}
 
@@ -579,7 +591,9 @@ namespace RptToXml
 				writer.WriteAttributeString("SummarizedField", rtf.SummarizedField.FormulaName);
 				writer.WriteAttributeString("ValueType", rtf.ValueType.ToString());
 
-			}
+                writer.WriteEndElement();
+
+            }
 			else if (fo is SpecialVarFieldDefinition)
 			{
 				writer.WriteStartElement("SpecialVarFieldDefinition");
@@ -591,7 +605,9 @@ namespace RptToXml
 				writer.WriteAttributeString("SpecialVarType", svf.SpecialVarType.ToString());
 				writer.WriteAttributeString("ValueType", svf.ValueType.ToString());
 
-			}
+                writer.WriteEndElement();
+
+            }
 			else if (fo is SQLExpressionFieldDefinition)
 			{
 				writer.WriteStartElement("SQLExpressionFieldDefinition");
@@ -604,7 +620,9 @@ namespace RptToXml
 				writer.WriteAttributeString("Text", sef.Text);
 				writer.WriteAttributeString("ValueType", sef.ValueType.ToString());
 
-			}
+                writer.WriteEndElement();
+
+            }
 			else if (fo is SummaryFieldDefinition)
 			{
 				writer.WriteStartElement("SummaryFieldDefinition");
@@ -625,8 +643,10 @@ namespace RptToXml
 				writer.WriteAttributeString("SummarizedField", sf.SummarizedField.ToString());
 				writer.WriteAttributeString("ValueType", sf.ValueType.ToString());
 
-			}
-			writer.WriteEndElement();
+                writer.WriteEndElement();
+
+            }
+			
 		}
 
 		private CRDataDefModel.ParameterField GetRASDDMParameterFieldObject(string fieldName, ReportDocument report)
