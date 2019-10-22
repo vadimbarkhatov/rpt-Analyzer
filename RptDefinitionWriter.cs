@@ -387,8 +387,10 @@ namespace RptToXml
 			writer.WriteEndElement();
 
 			writer.WriteStartElement("GroupNameFieldDefinitions");
-			foreach (var field in report.DataDefinition.GroupNameFields)
-				GetFieldObject(field, report, writer);
+            foreach (var field in report.DataDefinition.GroupNameFields)
+            {
+                    GetFieldObject(field, report, writer);
+            }
 			writer.WriteEndElement();
 
 			writer.WriteStartElement("ParameterFieldDefinitions");
@@ -416,238 +418,245 @@ namespace RptToXml
 
 		private void GetFieldObject(Object fo, ReportDocument report, XmlWriter writer)
 		{
-			if (fo is DatabaseFieldDefinition)
-			{
-				var df = (DatabaseFieldDefinition)fo;
+            try
+            {
+                if (fo is DatabaseFieldDefinition)
+                {
+                    var df = (DatabaseFieldDefinition)fo;
 
-				writer.WriteStartElement("DatabaseFieldDefinition");
+                    writer.WriteStartElement("DatabaseFieldDefinition");
 
-				writer.WriteAttributeString("FormulaName", df.FormulaName);
-				writer.WriteAttributeString("Kind", df.Kind.ToString());
-				writer.WriteAttributeString("Name", df.Name);
-				writer.WriteAttributeString("NumberOfBytes", df.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
-				writer.WriteAttributeString("TableName", df.TableName);
-				writer.WriteAttributeString("ValueType", df.ValueType.ToString());
-
-                writer.WriteEndElement();
-
-            }
-			else if (fo is FormulaFieldDefinition)
-			{
-				var ff = (FormulaFieldDefinition)fo;
-
-				writer.WriteStartElement("FormulaFieldDefinition");
-
-				writer.WriteAttributeString("FormulaName", ff.FormulaName);
-				writer.WriteAttributeString("Kind", ff.Kind.ToString());
-				writer.WriteAttributeString("Name", ff.Name);
-				writer.WriteAttributeString("NumberOfBytes", ff.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
-				writer.WriteAttributeString("ValueType", ff.ValueType.ToString());
-				writer.WriteString(ff.Text);
-
-                writer.WriteEndElement();
-
-            }
-			else if (fo is GroupNameFieldDefinition)
-			{
-				var gnf = (GroupNameFieldDefinition)fo;
-
-				writer.WriteStartElement("GroupNameFieldDefinition");
-
-				writer.WriteAttributeString("FormulaName", gnf.FormulaName);
-				writer.WriteAttributeString("Group", gnf.Group.ToString());
-				writer.WriteAttributeString("GroupNameFieldName", gnf.GroupNameFieldName);
-				writer.WriteAttributeString("Kind", gnf.Kind.ToString());
-				writer.WriteAttributeString("Name", gnf.Name);
-				writer.WriteAttributeString("NumberOfBytes", gnf.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
-				writer.WriteAttributeString("ValueType", gnf.ValueType.ToString());
-
-                writer.WriteEndElement();
-
-            }
-			else if (fo is ParameterFieldDefinition)
-			{
-				var pf = (ParameterFieldDefinition)fo;
-
-				// if it is a linked parameter, it is passed into a subreport. Just record the actual linkage in the main report.
-				// The parameter will be reported in full when the subreport is exported.  
-				var parameterIsLinked = (!report.IsSubreport && pf.IsLinked());
-
-				
-
-				if (parameterIsLinked)
-				{
-                    writer.WriteStartElement("ParameterFieldDefinition");
-
-                    writer.WriteAttributeString("Name", pf.Name);
-					writer.WriteAttributeString("IsLinkedToSubreport", pf.IsLinked().ToString());
-					writer.WriteAttributeString("ReportName", pf.ReportName);
+                    writer.WriteAttributeString("FormulaName", df.FormulaName);
+                    writer.WriteAttributeString("Kind", df.Kind.ToString());
+                    writer.WriteAttributeString("Name", df.Name);
+                    writer.WriteAttributeString("NumberOfBytes", df.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
+                    writer.WriteAttributeString("TableName", df.TableName);
+                    writer.WriteAttributeString("ValueType", df.ValueType.ToString());
 
                     writer.WriteEndElement();
+
                 }
-				else
-				{
-                    if (report.Name == pf.ReportName)
+                else if (fo is FormulaFieldDefinition)
+                {
+                    var ff = (FormulaFieldDefinition)fo;
+
+                    writer.WriteStartElement("FormulaFieldDefinition");
+
+                    writer.WriteAttributeString("FormulaName", ff.FormulaName);
+                    writer.WriteAttributeString("Kind", ff.Kind.ToString());
+                    writer.WriteAttributeString("Name", ff.Name);
+                    writer.WriteAttributeString("NumberOfBytes", ff.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
+                    writer.WriteAttributeString("ValueType", ff.ValueType.ToString());
+                    writer.WriteString(ff.Text);
+
+                    writer.WriteEndElement();
+
+                }
+                else if (fo is GroupNameFieldDefinition)
+                {
+                    var gnf = (GroupNameFieldDefinition)fo;
+
+                    writer.WriteStartElement("GroupNameFieldDefinition");
+
+                    writer.WriteAttributeString("FormulaName", gnf.FormulaName);
+                    writer.WriteAttributeString("Group", gnf.Group.ToString());
+                    writer.WriteAttributeString("GroupNameFieldName", gnf.GroupNameFieldName);
+                    writer.WriteAttributeString("Kind", gnf.Kind.ToString());
+                    writer.WriteAttributeString("Name", gnf.Name);
+                    writer.WriteAttributeString("NumberOfBytes", gnf.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
+                    writer.WriteAttributeString("ValueType", gnf.ValueType.ToString());
+
+                    writer.WriteEndElement();
+
+                }
+                else if (fo is ParameterFieldDefinition)
+                {
+                    var pf = (ParameterFieldDefinition)fo;
+
+                    // if it is a linked parameter, it is passed into a subreport. Just record the actual linkage in the main report.
+                    // The parameter will be reported in full when the subreport is exported.  
+                    var parameterIsLinked = (!report.IsSubreport && pf.IsLinked());
+
+
+
+                    if (parameterIsLinked)
                     {
                         writer.WriteStartElement("ParameterFieldDefinition");
-                        var ddm_pf = GetRASDDMParameterFieldObject(pf.Name, report);
 
-                        writer.WriteAttributeString("AllowCustomCurrentValues", (ddm_pf == null ? false : ddm_pf.AllowCustomCurrentValues).ToString());
-                        writer.WriteAttributeString("EditMask", pf.EditMask);
-                        writer.WriteAttributeString("EnableAllowEditingDefaultValue", pf.EnableAllowEditingDefaultValue.ToString());
-                        writer.WriteAttributeString("EnableAllowMultipleValue", pf.EnableAllowMultipleValue.ToString());
-                        writer.WriteAttributeString("EnableNullValue", pf.EnableNullValue.ToString());
-                        writer.WriteAttributeString("FormulaName", pf.FormulaName);
-                        writer.WriteAttributeString("HasCurrentValue", pf.HasCurrentValue.ToString());
-                        writer.WriteAttributeString("IsOptionalPrompt", pf.IsOptionalPrompt.ToString());
-                        writer.WriteAttributeString("Kind", pf.Kind.ToString());
-                        //writer.WriteAttributeString("MaximumValue", (string) pf.MaximumValue);
-                        //writer.WriteAttributeString("MinimumValue", (string) pf.MinimumValue);
                         writer.WriteAttributeString("Name", pf.Name);
-                        writer.WriteAttributeString("NumberOfBytes", pf.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
-                        writer.WriteAttributeString("ParameterFieldName", pf.ParameterFieldName);
-                        writer.WriteAttributeString("ParameterFieldUsage", pf.ParameterFieldUsage2.ToString());
-                        writer.WriteAttributeString("ParameterType", pf.ParameterType.ToString());
-                        writer.WriteAttributeString("ParameterValueKind", pf.ParameterValueKind.ToString());
-                        writer.WriteAttributeString("PromptText", pf.PromptText);
+                        writer.WriteAttributeString("IsLinkedToSubreport", pf.IsLinked().ToString());
                         writer.WriteAttributeString("ReportName", pf.ReportName);
-                        writer.WriteAttributeString("ValueType", pf.ValueType.ToString());
 
-                        writer.WriteStartElement("ParameterDefaultValues");
-                        if (pf.DefaultValues.Count > 0)
-                        {
-                            foreach (ParameterValue pv in pf.DefaultValues)
-                            {
-                                writer.WriteStartElement("ParameterDefaultValue");
-                                writer.WriteAttributeString("Description", pv.Description);
-                                // TODO: document dynamic parameters
-                                if (!pv.IsRange)
-                                {
-                                    ParameterDiscreteValue pdv = (ParameterDiscreteValue)pv;
-                                    writer.WriteAttributeString("Value", pdv.Value.ToString());
-                                }
-                                writer.WriteEndElement();
-                            }
-                        }
                         writer.WriteEndElement();
-
-                        writer.WriteStartElement("ParameterInitialValues");
-                        if (ddm_pf != null)
+                    }
+                    else
+                    {
+                        if (report.Name == pf.ReportName)
                         {
-                            if (ddm_pf.InitialValues.Count > 0)
+                            writer.WriteStartElement("ParameterFieldDefinition");
+                            var ddm_pf = GetRASDDMParameterFieldObject(pf.Name, report);
+
+                            writer.WriteAttributeString("AllowCustomCurrentValues", (ddm_pf == null ? false : ddm_pf.AllowCustomCurrentValues).ToString());
+                            writer.WriteAttributeString("EditMask", pf.EditMask);
+                            writer.WriteAttributeString("EnableAllowEditingDefaultValue", pf.EnableAllowEditingDefaultValue.ToString());
+                            writer.WriteAttributeString("EnableAllowMultipleValue", pf.EnableAllowMultipleValue.ToString());
+                            writer.WriteAttributeString("EnableNullValue", pf.EnableNullValue.ToString());
+                            writer.WriteAttributeString("FormulaName", pf.FormulaName);
+                            writer.WriteAttributeString("HasCurrentValue", pf.HasCurrentValue.ToString());
+                            writer.WriteAttributeString("IsOptionalPrompt", pf.IsOptionalPrompt.ToString());
+                            writer.WriteAttributeString("Kind", pf.Kind.ToString());
+                            //writer.WriteAttributeString("MaximumValue", (string) pf.MaximumValue);
+                            //writer.WriteAttributeString("MinimumValue", (string) pf.MinimumValue);
+                            writer.WriteAttributeString("Name", pf.Name);
+                            writer.WriteAttributeString("NumberOfBytes", pf.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
+                            writer.WriteAttributeString("ParameterFieldName", pf.ParameterFieldName);
+                            writer.WriteAttributeString("ParameterFieldUsage", pf.ParameterFieldUsage2.ToString());
+                            writer.WriteAttributeString("ParameterType", pf.ParameterType.ToString());
+                            writer.WriteAttributeString("ParameterValueKind", pf.ParameterValueKind.ToString());
+                            writer.WriteAttributeString("PromptText", pf.PromptText);
+                            writer.WriteAttributeString("ReportName", pf.ReportName);
+                            writer.WriteAttributeString("ValueType", pf.ValueType.ToString());
+
+                            writer.WriteStartElement("ParameterDefaultValues");
+                            if (pf.DefaultValues.Count > 0)
                             {
-                                foreach (CRDataDefModel.ParameterFieldValue pv in ddm_pf.InitialValues)
+                                foreach (ParameterValue pv in pf.DefaultValues)
                                 {
-                                    writer.WriteStartElement("ParameterInitialValue");
-                                    CRDataDefModel.ParameterFieldDiscreteValue pdv = (CRDataDefModel.ParameterFieldDiscreteValue)pv;
-                                    writer.WriteAttributeString("Value", pdv.Value.ToString());
+                                    writer.WriteStartElement("ParameterDefaultValue");
+                                    writer.WriteAttributeString("Description", pv.Description);
+                                    // TODO: document dynamic parameters
+                                    if (!pv.IsRange)
+                                    {
+                                        ParameterDiscreteValue pdv = (ParameterDiscreteValue)pv;
+                                        writer.WriteAttributeString("Value", pdv.Value.ToString());
+                                    }
                                     writer.WriteEndElement();
                                 }
                             }
-                        }
-                        writer.WriteEndElement();
+                            writer.WriteEndElement();
 
-                        writer.WriteStartElement("ParameterCurrentValues");
-                        if (pf.CurrentValues.Count > 0)
-                        {
-                            foreach (ParameterValue pv in pf.CurrentValues)
+                            writer.WriteStartElement("ParameterInitialValues");
+                            if (ddm_pf != null)
                             {
-                                writer.WriteStartElement("ParameterCurrentValue");
-                                writer.WriteAttributeString("Description", pv.Description);
-                                // TODO: document dynamic parameters
-                                if (!pv.IsRange)
+                                if (ddm_pf.InitialValues.Count > 0)
                                 {
-                                    ParameterDiscreteValue pdv = (ParameterDiscreteValue)pv;
-                                    writer.WriteAttributeString("Value", pdv.Value.ToString());
+                                    foreach (CRDataDefModel.ParameterFieldValue pv in ddm_pf.InitialValues)
+                                    {
+                                        writer.WriteStartElement("ParameterInitialValue");
+                                        CRDataDefModel.ParameterFieldDiscreteValue pdv = (CRDataDefModel.ParameterFieldDiscreteValue)pv;
+                                        writer.WriteAttributeString("Value", pdv.Value.ToString());
+                                        writer.WriteEndElement();
+                                    }
                                 }
-                                writer.WriteEndElement();
                             }
+                            writer.WriteEndElement();
+
+                            writer.WriteStartElement("ParameterCurrentValues");
+                            if (pf.CurrentValues.Count > 0)
+                            {
+                                foreach (ParameterValue pv in pf.CurrentValues)
+                                {
+                                    writer.WriteStartElement("ParameterCurrentValue");
+                                    writer.WriteAttributeString("Description", pv.Description);
+                                    // TODO: document dynamic parameters
+                                    if (!pv.IsRange)
+                                    {
+                                        ParameterDiscreteValue pdv = (ParameterDiscreteValue)pv;
+                                        writer.WriteAttributeString("Value", pdv.Value.ToString());
+                                    }
+                                    writer.WriteEndElement();
+                                }
+                            }
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
                         }
-                        writer.WriteEndElement();
-                        writer.WriteEndElement();
                     }
-				}
 
-			}
-			else if (fo is RunningTotalFieldDefinition)
-			{
-				var rtf = (RunningTotalFieldDefinition)fo;
+                }
+                else if (fo is RunningTotalFieldDefinition)
+                {
+                    var rtf = (RunningTotalFieldDefinition)fo;
 
-				writer.WriteStartElement("RunningTotalFieldDefinition");
-				//writer.WriteAttributeString("EvaluationConditionType", rtf.EvaluationCondition);
-				writer.WriteAttributeString("EvaluationConditionType", rtf.EvaluationConditionType.ToString());
-				writer.WriteAttributeString("FormulaName", rtf.FormulaName);
-				if (rtf.Group != null) writer.WriteAttributeString("Group", rtf.Group.ToString());
-				writer.WriteAttributeString("Kind", rtf.Kind.ToString());
-				writer.WriteAttributeString("Name", rtf.Name);
-				writer.WriteAttributeString("NumberOfBytes", rtf.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
-				writer.WriteAttributeString("Operation", rtf.Operation.ToString());
-				writer.WriteAttributeString("OperationParameter", rtf.OperationParameter.ToString(CultureInfo.InvariantCulture));
-				writer.WriteAttributeString("ResetConditionType", rtf.ResetConditionType.ToString());
+                    writer.WriteStartElement("RunningTotalFieldDefinition");
+                    //writer.WriteAttributeString("EvaluationConditionType", rtf.EvaluationCondition);
+                    writer.WriteAttributeString("EvaluationConditionType", rtf.EvaluationConditionType.ToString());
+                    writer.WriteAttributeString("FormulaName", rtf.FormulaName);
+                    if (rtf.Group != null) writer.WriteAttributeString("Group", rtf.Group.ToString());
+                    writer.WriteAttributeString("Kind", rtf.Kind.ToString());
+                    writer.WriteAttributeString("Name", rtf.Name);
+                    writer.WriteAttributeString("NumberOfBytes", rtf.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
+                    writer.WriteAttributeString("Operation", rtf.Operation.ToString());
+                    writer.WriteAttributeString("OperationParameter", rtf.OperationParameter.ToString(CultureInfo.InvariantCulture));
+                    writer.WriteAttributeString("ResetConditionType", rtf.ResetConditionType.ToString());
 
-				if (rtf.SecondarySummarizedField != null)
-					writer.WriteAttributeString("SecondarySummarizedField", rtf.SecondarySummarizedField.FormulaName);
+                    if (rtf.SecondarySummarizedField != null)
+                        writer.WriteAttributeString("SecondarySummarizedField", rtf.SecondarySummarizedField.FormulaName);
 
-				writer.WriteAttributeString("SummarizedField", rtf.SummarizedField.FormulaName);
-				writer.WriteAttributeString("ValueType", rtf.ValueType.ToString());
+                    writer.WriteAttributeString("SummarizedField", rtf.SummarizedField.FormulaName);
+                    writer.WriteAttributeString("ValueType", rtf.ValueType.ToString());
 
-                writer.WriteEndElement();
+                    writer.WriteEndElement();
 
+                }
+                else if (fo is SpecialVarFieldDefinition)
+                {
+                    writer.WriteStartElement("SpecialVarFieldDefinition");
+                    var svf = (SpecialVarFieldDefinition)fo;
+                    writer.WriteAttributeString("FormulaName", svf.FormulaName);
+                    writer.WriteAttributeString("Kind", svf.Kind.ToString());
+                    writer.WriteAttributeString("Name", svf.Name);
+                    writer.WriteAttributeString("NumberOfBytes", svf.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
+                    writer.WriteAttributeString("SpecialVarType", svf.SpecialVarType.ToString());
+                    writer.WriteAttributeString("ValueType", svf.ValueType.ToString());
+
+                    writer.WriteEndElement();
+
+                }
+                else if (fo is SQLExpressionFieldDefinition)
+                {
+                    writer.WriteStartElement("SQLExpressionFieldDefinition");
+                    var sef = (SQLExpressionFieldDefinition)fo;
+
+                    writer.WriteAttributeString("FormulaName", sef.FormulaName);
+                    writer.WriteAttributeString("Kind", sef.Kind.ToString());
+                    writer.WriteAttributeString("Name", sef.Name);
+                    writer.WriteAttributeString("NumberOfBytes", sef.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
+                    writer.WriteAttributeString("Text", sef.Text);
+                    writer.WriteAttributeString("ValueType", sef.ValueType.ToString());
+
+                    writer.WriteEndElement();
+
+                }
+                else if (fo is SummaryFieldDefinition)
+                {
+                    writer.WriteStartElement("SummaryFieldDefinition");
+
+                    var sf = (SummaryFieldDefinition)fo;
+
+                    writer.WriteAttributeString("FormulaName", sf.FormulaName);
+
+                    if (sf.Group != null)
+                        writer.WriteAttributeString("Group", sf.Group.ToString());
+
+                    writer.WriteAttributeString("Kind", sf.Kind.ToString());
+                    writer.WriteAttributeString("Name", sf.Name);
+                    writer.WriteAttributeString("NumberOfBytes", sf.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
+                    writer.WriteAttributeString("Operation", sf.Operation.ToString());
+                    writer.WriteAttributeString("OperationParameter", sf.OperationParameter.ToString(CultureInfo.InvariantCulture));
+                    if (sf.SecondarySummarizedField != null) writer.WriteAttributeString("SecondarySummarizedField", sf.SecondarySummarizedField.ToString());
+                    writer.WriteAttributeString("SummarizedField", sf.SummarizedField.ToString());
+                    writer.WriteAttributeString("ValueType", sf.ValueType.ToString());
+
+                    writer.WriteEndElement();
+
+                }
             }
-			else if (fo is SpecialVarFieldDefinition)
-			{
-				writer.WriteStartElement("SpecialVarFieldDefinition");
-				var svf = (SpecialVarFieldDefinition)fo;
-				writer.WriteAttributeString("FormulaName", svf.FormulaName);
-				writer.WriteAttributeString("Kind", svf.Kind.ToString());
-				writer.WriteAttributeString("Name", svf.Name);
-				writer.WriteAttributeString("NumberOfBytes", svf.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
-				writer.WriteAttributeString("SpecialVarType", svf.SpecialVarType.ToString());
-				writer.WriteAttributeString("ValueType", svf.ValueType.ToString());
-
-                writer.WriteEndElement();
-
+            catch (Exception ex)
+            {
+                throw (ex);
             }
-			else if (fo is SQLExpressionFieldDefinition)
-			{
-				writer.WriteStartElement("SQLExpressionFieldDefinition");
-				var sef = (SQLExpressionFieldDefinition)fo;
 
-				writer.WriteAttributeString("FormulaName", sef.FormulaName);
-				writer.WriteAttributeString("Kind", sef.Kind.ToString());
-				writer.WriteAttributeString("Name", sef.Name);
-				writer.WriteAttributeString("NumberOfBytes", sef.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
-				writer.WriteAttributeString("Text", sef.Text);
-				writer.WriteAttributeString("ValueType", sef.ValueType.ToString());
-
-                writer.WriteEndElement();
-
-            }
-			else if (fo is SummaryFieldDefinition)
-			{
-				writer.WriteStartElement("SummaryFieldDefinition");
-
-				var sf = (SummaryFieldDefinition)fo;
-
-				writer.WriteAttributeString("FormulaName", sf.FormulaName);
-
-				if (sf.Group != null)
-					writer.WriteAttributeString("Group", sf.Group.ToString());
-
-				writer.WriteAttributeString("Kind", sf.Kind.ToString());
-				writer.WriteAttributeString("Name", sf.Name);
-				writer.WriteAttributeString("NumberOfBytes", sf.NumberOfBytes.ToString(CultureInfo.InvariantCulture));
-				writer.WriteAttributeString("Operation", sf.Operation.ToString());
-				writer.WriteAttributeString("OperationParameter", sf.OperationParameter.ToString(CultureInfo.InvariantCulture));
-				if (sf.SecondarySummarizedField != null) writer.WriteAttributeString("SecondarySummarizedField", sf.SecondarySummarizedField.ToString());
-				writer.WriteAttributeString("SummarizedField", sf.SummarizedField.ToString());
-				writer.WriteAttributeString("ValueType", sf.ValueType.ToString());
-
-                writer.WriteEndElement();
-
-            }
-			
-		}
+        }
 
 		private CRDataDefModel.ParameterField GetRASDDMParameterFieldObject(string fieldName, ReportDocument report)
 		{

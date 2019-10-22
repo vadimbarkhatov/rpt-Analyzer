@@ -54,7 +54,7 @@
 
             <StackPanel Margin="10,0,0,10" Orientation="Horizontal" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
                 <GroupBox Header="Report Info" BorderThickness="0" MinWidth="250">
-                    <Label Name="lbReportInfo" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-5,0,0,0" />
+                    <TextBlock Width="250" TextWrapping="Wrap" Name="lbReportInfo" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-5,0,0,0" />
                 </GroupBox>
 
                 <GroupBox Header="Search" VerticalAlignment="Top" BorderThickness="0">

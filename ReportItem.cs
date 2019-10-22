@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,13 +51,18 @@ namespace CHEORptAnalyzer
 
         public string GetInfo()
         {
-            return
-                    "Path: " + FilePath + "\r\n" +
-                    "Author:" + Author + "\r\n" +
-                    //"Last Saved:"
-                    "Has Saved Data:" + HasSavedData + "\r\n" +
-                    "Comments:" + ReportComment + "\r\n"
-                    ;
+            if (BaseReport == null)
+            {
+                return "Path: " + Directory.GetParent(FilePath) + "\r\n" +
+                        "Author: " + Author + "\r\n" +
+                        //"Last Saved:"
+                        "Has Saved Data: " + HasSavedData + "\r\n" +
+                        "Comments: " + ReportComment + "\r\n";
+            }
+            else
+            {
+                return BaseReport.GetInfo();
+            } 
         }
 
         public override string ToString()

@@ -213,7 +213,7 @@
 
                 selectedResults = SelectedReportItem.DisplayResults[PreviewElement];
 
-                lbReportInfo.Content = SelectedReportItem.GetInfo();
+                lbReportInfo.Text = SelectedReportItem.GetInfo();
             }
 
             textBox.ClearStylesBuffer();
