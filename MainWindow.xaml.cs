@@ -25,6 +25,7 @@
         Formula,
         Command,
         FormulaField,
+        GroupFormula,
         TableLinks,
         Parameters,
     }
@@ -35,7 +36,8 @@
     /// 
     public partial class MainWindow : Window
     {
-        static readonly string localDBPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\CRPTApp.db";
+        static readonly string localSaveDir = Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\CHEORptAnalyzer").FullName;
+        static readonly string localDBPath = localSaveDir + "\\CRPTApp.db";
 
         #region CR Section Definitions
 
@@ -55,6 +57,11 @@
             {
                 Language = FastColoredTextBoxNS.Language.Custom,
                 ResultFilter = x => x.Where(y => y.Name == "DataDefinition").Elements("RecordSelectionFormula"),
+            },
+            [CRElement.GroupFormula] = new CRSection
+            {
+                Language = FastColoredTextBoxNS.Language.Custom,
+                ResultFilter = x => x.Where(y => y.Name == "DataDefinition").Elements("GroupSelectionFormula"),
             },
             [CRElement.FormulaField] = new CRSection
             {
@@ -232,7 +239,6 @@
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog
             {
-                //InitialDirectory = @"C:\test\",
                 IsFolderPicker = true,
                 Multiselect = true,
             };

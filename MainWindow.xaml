@@ -54,7 +54,7 @@
 
             <StackPanel Margin="10,0,0,10" Orientation="Horizontal" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
                 <GroupBox Header="Report Info" BorderThickness="0" MinWidth="250">
-                    <TextBlock Width="250" TextWrapping="Wrap" Name="lbReportInfo" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-5,0,0,0" />
+                    <TextBlock Width="250" TextWrapping="Wrap" Name="lbReportInfo" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-5,2,0,0" />
                 </GroupBox>
 
                 <GroupBox Header="Search" VerticalAlignment="Top" BorderThickness="0">
@@ -115,6 +115,7 @@
                     <TabItem Header="Table Links" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.TableLinks}, Converter={StaticResource ComparisonConverter}}"  />
                     <TabItem Header="Formula Fields" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.FormulaField}, Converter={StaticResource ComparisonConverter}}"/>
                     <TabItem Header="Record Selection Formula" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Formula}, Converter={StaticResource ComparisonConverter}}"/>
+                    <TabItem Header="Group Selection Formula" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.GroupFormula}, Converter={StaticResource ComparisonConverter}}"/>
                     <TabItem Header="Command" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Command}, Converter={StaticResource ComparisonConverter}}"/>
                     <TabItem Header="Parameters" IsSelected="{Binding PreviewElement, ConverterParameter={x:Static local:CRElement.Parameters}, Converter={StaticResource ComparisonConverter}}"/>
                 </TabControl>
