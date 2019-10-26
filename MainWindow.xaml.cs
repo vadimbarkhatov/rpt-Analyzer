@@ -63,13 +63,12 @@
         private void SearchReports()
         {
             Func<IEnumerable<XElement>, IEnumerable<XElement>> reportFilter =
-                         x => ReportItem.CRSections[CRElement.Field].ResultFilter(x).Gate(SearchFields)
-                                .Concat(ReportItem.CRSections[CRElement.Formula].ResultFilter(x).Gate(SearchRF))
-                                .Concat(ReportItem.CRSections[CRElement.Command].ResultFilter(x).Gate(SearchCommand))
+                         x => CRSection.Field.ResultFilter(x).Gate(SearchFields)
+                                .Concat(CRSection.RecordFormula.ResultFilter(x).Gate(SearchRF))
+                                .Concat(CRSection.Command.ResultFilter(x).Gate(SearchCommand))
                                 .Where(s => TextFilter(s.Value));
 
             IEnumerable<XElement> foundReports = Xroot.Elements("Report").Where(x => ContainsSeach == reportFilter(x.Descendants()).Count() > 0);
-
 
             ReportItems.Clear();
 
@@ -91,7 +90,6 @@
                 {
                     baseReportItem.SubReports.Add(new ReportItem(subReport, baseReportItem));
                 }
-
                 ReportItems.Add(baseReportItem);
             }
 
