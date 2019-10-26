@@ -7,7 +7,7 @@ using System.Xml.Linq;
 
 namespace CHEORptAnalyzer
 {
-    class CRSection
+    public class CRSection
     {
         public FastColoredTextBoxNS.Language Language;
         public Func<IEnumerable<XElement>, IEnumerable<XElement>> ResultFilter;

@@ -19,17 +19,6 @@
     using LiteDB;
     using Microsoft.WindowsAPICodePack.Dialogs;
 
-    public enum CRElement
-    {
-        Field,
-        Formula,
-        Command,
-        FormulaField,
-        GroupFormula,
-        TableLinks,
-        Parameters,
-    }
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -38,69 +27,6 @@
     {
         static readonly string localSaveDir = Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\CHEORptAnalyzer").FullName;
         static readonly string localDBPath = localSaveDir + "\\CRPTApp.db";
-
-        #region CR Section Definitions
-
-        static readonly Dictionary<CRElement, CRSection> CRSections = new Dictionary<CRElement, CRSection>
-        {
-            [CRElement.Field] = new CRSection
-            {
-                Language = FastColoredTextBoxNS.Language.Custom,
-                ResultFilter = x => x.Descendants("Tables").Descendants("Field"),
-            },
-            [CRElement.Command] = new CRSection
-            {
-                Language = FastColoredTextBoxNS.Language.SQL,
-                ResultFilter = x => x.Descendants("Command"),
-            },
-            [CRElement.Formula] = new CRSection
-            {
-                Language = FastColoredTextBoxNS.Language.Custom,
-                ResultFilter = x => x.Where(y => y.Name == "DataDefinition").Elements("RecordSelectionFormula"),
-            },
-            [CRElement.GroupFormula] = new CRSection
-            {
-                Language = FastColoredTextBoxNS.Language.Custom,
-                ResultFilter = x => x.Where(y => y.Name == "DataDefinition").Elements("GroupSelectionFormula"),
-            },
-            [CRElement.FormulaField] = new CRSection
-            {
-                Language = FastColoredTextBoxNS.Language.Custom,
-                ResultFilter = x => x.Where(y => y.Name == "DataDefinition").Elements("FormulaFieldDefinitions").Elements("FormulaFieldDefinition"),
-                ResultFormat = s =>
-                    s.Select(x =>
-                        x.Attribute("FormulaName").Value + " : " + x.Attribute("ValueType").Value.Replace("Field", "") +
-                        "\r\n" + "{" +
-                        "\r\n" + x.Value.AppendToNewLine("\t") +
-                        "\r\n" + "}")
-                     .Combine("\r\n" + "\r\n"),
-            },
-            [CRElement.TableLinks] = new CRSection
-            {
-                Language = FastColoredTextBoxNS.Language.Custom,
-                ResultFilter = x => x.Descendants("TableLinks").Elements("TableLink"),
-                ResultFormat = s =>
-                    s.Select(x =>
-                        x.Attribute("JoinType").Value + " "
-                        + x.Elements("SourceFields").Elements("Field").First().Attribute("FormulaName").Value + " On "
-                        + x.Elements("DestinationFields").Elements("Field").First().Attribute("FormulaName").Value)
-                     .Combine("\r\n" + "\r\n"),
-            },
-            [CRElement.Parameters] = new CRSection
-            {
-                Language = FastColoredTextBoxNS.Language.Custom,
-                ResultFilter = x => x.Where(y => y.Name == "DataDefinition").Elements("ParameterFieldDefinitions").Elements("ParameterFieldDefinition"),
-
-                ResultFormat = s =>
-                    s.Select(x => //Parameters that are linked to a subreport have a different schema and need to be handled seperately
-                        x.Attribute("IsLinkedToSubreport") != null ?
-                        "{" + x.Attribute("Name").Value + "} -> \"" + x.Attribute("ReportName").Value + "\"" : 
-                        (x.Attribute("ParameterFieldUsage").Value == "NotInUse" ? "//":"") + x.Attribute("FormulaName").Value + " : " + x.Attribute("ValueType").Value.Replace("Field", "")
-                    ).Combine("\r\n"),
-            },
-        };
-
-        #endregion CR Section Definitions
 
         #region GUI Bound Properties
 
@@ -137,12 +63,13 @@
         private void SearchReports()
         {
             Func<IEnumerable<XElement>, IEnumerable<XElement>> reportFilter =
-                         x => CRSections[CRElement.Field].ResultFilter(x).Gate(SearchFields)
-                                .Concat(CRSections[CRElement.Formula].ResultFilter(x).Gate(SearchRF))
-                                .Concat(CRSections[CRElement.Command].ResultFilter(x).Gate(SearchCommand))
+                         x => ReportItem.CRSections[CRElement.Field].ResultFilter(x).Gate(SearchFields)
+                                .Concat(ReportItem.CRSections[CRElement.Formula].ResultFilter(x).Gate(SearchRF))
+                                .Concat(ReportItem.CRSections[CRElement.Command].ResultFilter(x).Gate(SearchCommand))
                                 .Where(s => TextFilter(s.Value));
 
             IEnumerable<XElement> foundReports = Xroot.Elements("Report").Where(x => ContainsSeach == reportFilter(x.Descendants()).Count() > 0);
+
 
             ReportItems.Clear();
 
@@ -150,28 +77,22 @@
             {
                 IEnumerable<XElement> flattenedReport = FlattenReport(report);
 
-                var baseReport = flattenedReport.First();
-                var reportItem =
-                    new ReportItem
-                    {
-                        Text = baseReport.Attribute("Name").Value,
-                        DisplayResults = ReportResults(baseReport),
-                        XMLView = report,
-                        FilePath = report.Attribute("FileName").Value,
-                        Author = report.Element("Summaryinfo").Attribute("ReportAuthor").Value,
-                        //TODO: LastSaved 
-                        HasSavedData = report.Attribute("HasSavedData").Value == "True" ? true : false,
-                        ReportComment = report.Element("Summaryinfo").Attribute("ReportComments").Value,
-                    };
-
-                foreach (var subReport in flattenedReport.Skip(1))
+                XElement baseReport = flattenedReport.First();
+                var baseReportItem = new ReportItem(baseReport, null)
                 {
-                    Dictionary<CRElement, string> results = ReportResults(subReport);
+                    XMLView = report,
+                    FilePath = report.Attribute("FileName").Value,
+                    Author = report.Element("Summaryinfo").Attribute("ReportAuthor").Value,
+                    HasSavedData = report.Attribute("HasSavedData").Value == "True" ? true : false,
+                    ReportComment = report.Element("Summaryinfo").Attribute("ReportComments").Value
+                };
 
-                    reportItem.SubReports.Add(new ReportItem { Text = subReport.Attribute("Name").Value, DisplayResults = results, BaseReport = reportItem });
+                foreach (XElement subReport in flattenedReport.Skip(1))
+                {
+                    baseReportItem.SubReports.Add(new ReportItem(subReport, baseReportItem));
                 }
 
-                ReportItems.Add(reportItem);
+                ReportItems.Add(baseReportItem);
             }
 
         }
@@ -187,20 +108,6 @@
             return flattenedReports;
         }
 
-
-        private static Dictionary<CRElement, string> ReportResults(XElement report)
-        {
-            var results = new Dictionary<CRElement, string>();
-
-            foreach (CRElement crElement in CRSections.Keys)
-            {
-                results[crElement] = report.Descendants()
-                    .Apply(CRSections[crElement].ResultFilter)
-                    .Apply(CRSections[crElement].ResultFormat);
-            }
-
-            return results;
-        }
 
         private void TvReports_SelectionChanged(object sender, EventArgs e)
         {
@@ -218,13 +125,13 @@
             {
                 var SelectedReportItem = SelectedReportItems.First();
 
-                selectedResults = SelectedReportItem.DisplayResults[PreviewElement];
+                selectedResults = SelectedReportItem.GetSection(PreviewElement);
 
                 lbReportInfo.Text = SelectedReportItem.GetInfo();
             }
 
             textBox.ClearStylesBuffer();
-            textBox.Language = CRSections[PreviewElement].Language;
+            textBox.Language = ReportItem.CRSections[PreviewElement].Language;
             textBox.Text = selectedResults;
 
             TextStyle searchStyle = new TextStyle(null, System.Drawing.Brushes.Yellow, System.Drawing.FontStyle.Regular);
@@ -232,7 +139,7 @@
             textBox.Range.ClearStyle(searchStyle);
             textBox.Range.SetStyle(searchStyle, Regex.Escape(SearchString.Trim()), RegexOptions.Multiline | RegexOptions.IgnoreCase);
 
-            if (CRSections[PreviewElement].Language == FastColoredTextBoxNS.Language.Custom) Extensions.CrystalSyntaxHighlight(textBox);
+            if (ReportItem.CRSections[PreviewElement].Language == FastColoredTextBoxNS.Language.Custom) Extensions.CrystalSyntaxHighlight(textBox);
         }
 
         private void OpenFolder(object sender, RoutedEventArgs e)
