@@ -8,7 +8,7 @@
         xmlns:FastColoredTextBoxNS="clr-namespace:FastColoredTextBoxNS;assembly=FastColoredTextBox"
     xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:Viewer="clr-namespace:SAPBusinessObjects.WPF.Viewer;assembly=SAPBusinessObjects.WPF.Viewer" x:Class="CHEORptAnalyzer.MainWindow"  
         mc:Ignorable="d"
-        Title="CHEO RPT Analyzer" Height="768" Width="1366" Icon="TextTemplate.ico" WindowStyle="ThreeDBorderWindow"  >
+        Title="CHEO RPT Analyzer v0.9" Height="768" Width="1366" Icon="TextTemplate.ico" WindowStyle="ThreeDBorderWindow"  >
 
     <Grid Margin="0,0,0,0" >
         <Grid.Resources>
