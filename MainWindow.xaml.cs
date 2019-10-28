@@ -242,5 +242,10 @@
                 System.Windows.Forms.MessageBox.Show(ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
             }
         }
+
+        private void OpenInfovew(object sender, RoutedEventArgs e)
+        {
+            BOEExporter.RetrieveReport();
+        }
     }
 }

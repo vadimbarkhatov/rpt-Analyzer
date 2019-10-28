@@ -31,7 +31,9 @@
         <DockPanel Grid.ColumnSpan="3">
             <Menu DockPanel.Dock="Top" >
                 <MenuItem Header="_File" >
-                    <MenuItem Header="_Load Folder" Click="OpenFolder"/>
+                    <MenuItem Header="_Open Folder" Click="OpenFolder"/>
+                    <MenuItem Header="_Open InfoView Folder (Test)" Click="OpenInfovew"/>
+                    <Separator />
                     <MenuItem Header="_Export to XML" Click="ExportToXML"/>
                     <Separator />
                     <MenuItem Header="_Exit" />

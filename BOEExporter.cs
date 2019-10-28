@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CrystalDecisions.ReportAppServer.Utilities;
+using RptToXml;
 
 namespace CHEORptAnalyzer
 {
@@ -50,6 +51,15 @@ namespace CHEORptAnalyzer
             boReportAppFactory = (ReportAppFactory)boEnterpriseService.Interface;
             //Open the report from Enterprise
             boReportClientDocument = boReportAppFactory.OpenDocument(boInfoObject.ID, 0);
+            var reportDoc = boReportClientDocument.ReportDocument as ReportDocument;
+
+            reportDoc.subrepo
+
+            using (var writer = new RptDefinitionWriter(boReportClientDocument.ReportDocument.ReportDefinition))
+            {
+                writer.WriteToXml(@"C:\test\testreport.xml");
+
+            }
 
             //boReportClientDocument.ReportDocument
 

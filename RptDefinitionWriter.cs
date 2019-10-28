@@ -72,14 +72,16 @@ namespace RptToXml
 			Trace.WriteLine("Writing to XML");
 
 			writer.WriteStartDocument();
-			ProcessReport(_report, writer);
+			ProcessReport(_report., writer);
 			writer.WriteEndDocument();
 			writer.Flush();
 		}
 
 		//This is a recursive method.  GetSubreports() calls it.
-		private void ProcessReport(ReportDocument report, XmlWriter writer)
+		private void ProcessReport(ISCDReportClientDocument rcd, XmlWriter writer)
 		{
+            var report = rcd.ReportDocument;
+
 			writer.WriteStartElement("Report");
 
 			writer.WriteAttributeString("Name", report.Name);
@@ -134,8 +136,10 @@ namespace RptToXml
 			writer.WriteEndElement();
 		}
 
-		private static void GetSummaryinfo(ReportDocument report, XmlWriter writer)
+		private static void GetSummaryinfo(ISCDReportClientDocument report, XmlWriter writer)
 		{
+
+
 			writer.WriteStartElement("Summaryinfo");
 
 			writer.WriteAttributeString("KeywordsinReport", report.SummaryInfo.KeywordsInReport);
