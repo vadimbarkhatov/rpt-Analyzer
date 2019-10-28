@@ -352,7 +352,7 @@ namespace RptToXml
 		{
 			writer.WriteStartElement("DataDefinition");
 
-			writer.WriteElementString("GroupSelectionFormula", report.DataDefinition.GroupSelectionFormulaRaw);
+			writer.WriteElementString("GroupSelectionFormula", report.DataDefinition.GroupSelectionFormula);
 			writer.WriteElementString("RecordSelectionFormula", report.DataDefinition.RecordSelectionFormulaRaw);
 
 			writer.WriteStartElement("Groups");

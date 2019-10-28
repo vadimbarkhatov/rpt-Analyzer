@@ -29,12 +29,10 @@ namespace CHEORptAnalyzer
 
             //Log on to the Enterprise CMS
             boSessionMgr = new SessionMgr();
-            //boEnterpriseSession = boSessionMgr.Logon(Request.QueryString["username"], Request.QueryString["password"], Request.QueryString["cms"], Request.QueryString["authtype"]);
             boEnterpriseSession = boSessionMgr.Logon("vbarkhatov", "Friday67", "boeappprd", "Enterprise");
-            //boEnterpriseSession = boSessionMgr.
-            //Session.Add("boEnterpriseSession", boEnterpriseSession);
             boEnterpriseService = boEnterpriseSession.GetService("", "InfoStore");
             boInfoStore = new InfoStore(boEnterpriseService);
+
 
             boReportName = "Daily Non Violent Crisis Intervention Skill (NVC3).rpt";
 
@@ -44,6 +42,8 @@ namespace CHEORptAnalyzer
             boInfoObjects = boInfoStore.Query(boQuery);
             boInfoObject = boInfoObjects[1];
 
+            //boInfoObject.
+
             boEnterpriseService = null;
 
             //Retrieve the RASReportFactory
@@ -51,15 +51,15 @@ namespace CHEORptAnalyzer
             boReportAppFactory = (ReportAppFactory)boEnterpriseService.Interface;
             //Open the report from Enterprise
             boReportClientDocument = boReportAppFactory.OpenDocument(boInfoObject.ID, 0);
-            var reportDoc = boReportClientDocument.ReportDocument as ReportDocument;
+            var reportDoc = boReportClientDocument.ReportDocument;
 
-            reportDoc.subrepo
+            //reportDoc.
 
-            using (var writer = new RptDefinitionWriter(boReportClientDocument.ReportDocument.ReportDefinition))
-            {
-                writer.WriteToXml(@"C:\test\testreport.xml");
+            //using (var writer = new RptDefinitionWriter(boReportClientDocument.ReportDocument.ReportDefinition))
+            //{
+            //    writer.WriteToXml(@"C:\test\testreport.xml");
 
-            }
+            //}
 
             //boReportClientDocument.ReportDocument
 
@@ -80,10 +80,9 @@ namespace CHEORptAnalyzer
              * CrReportExportFormatEnum.crReportExportFormatText
              * CrReportExportFormatEnum.crReportExportFormatXML
             */
-            CrystalDecisions.ReportAppServer.CommonObjectModel.ByteArray boByteArray = boReportClientDocument.PrintOutputController.Export(CrReportExportFormatEnum.crReportExportFormatCrystalReports, 1);
+            //CrystalDecisions.ReportAppServer.CommonObjectModel.ByteArray boByteArray = boReportClientDocument.PrintOutputController.Export(CrReportExportFormatEnum.crReportExportFormatCrystalReports, 1);
 
 
-            CrystalDecisions.ReportAppServer.Utilities.Conversion boConversion = new CrystalDecisions.ReportAppServer.Utilities.Conversion();
 
             //boReportClientDocument.ReportDocument.
 
@@ -93,7 +92,7 @@ namespace CHEORptAnalyzer
 
             //var test = boReportClientDocument.PrintOutputController.ExportEx()
             //Save the ByteArray to disk, overwriting any existing file with the same name.
-            boByteArray.Save(@"c:\test\myExport.rpt", true);
+            //boByteArray.Save(@"c:\test\myExport.rpt", true);
 
             //Response.Write(@"File successfully saved to C:\Windows\Temp\myExport.pdf");
 
