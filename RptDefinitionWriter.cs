@@ -34,6 +34,8 @@ namespace RptToXml
 			_createdReport = true;
 			_report = new ReportDocument();
 
+            _report.Load()
+
             try { _report.Load(filename, OpenReportMethod.OpenReportByTempCopy); }
             catch (Exception ex)
             {

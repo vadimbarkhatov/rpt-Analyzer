@@ -8,7 +8,7 @@
         xmlns:FastColoredTextBoxNS="clr-namespace:FastColoredTextBoxNS;assembly=FastColoredTextBox"
     xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:Viewer="clr-namespace:SAPBusinessObjects.WPF.Viewer;assembly=SAPBusinessObjects.WPF.Viewer" x:Class="CHEORptAnalyzer.MainWindow"  
         mc:Ignorable="d"
-        Title="CHEO RPT Analyzer v0.9" Height="768" Width="1366" Icon="TextTemplate.ico" WindowStyle="ThreeDBorderWindow"  >
+        Title="CHEO RPT Analyzer v0.9" Height="768" Width="1366" Icon="TextTemplate.ico"  >
 
     <Grid Margin="0,0,0,0" >
         <Grid.Resources>
@@ -31,7 +31,8 @@
         <DockPanel Grid.ColumnSpan="3">
             <Menu DockPanel.Dock="Top" >
                 <MenuItem Header="_File" >
-                    <MenuItem Header="_Load Folder" Click="OpenFolder"/>
+                    <MenuItem Header="_Open Folder" Click="OpenFolder"/>
+                    <MenuItem Header="_Open InfoView Folder (Test)" Click="OpenBOE"/>
                     <MenuItem Header="_Export to XML" Click="ExportToXML"/>
                     <Separator />
                     <MenuItem Header="_Exit" />
@@ -67,12 +68,6 @@
 
                         <StackPanel HorizontalAlignment="Center" Margin="0,0,0,3" VerticalAlignment="Top" >
                             <ComboBox x:Name="cbSearchMod" Width="125" SelectedIndex="0">
-                                <ComboBox.Background>
-                                    <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                        <GradientStop Color="#FFF0F0F0" Offset="0"/>
-                                        <GradientStop Color="#FF553030" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </ComboBox.Background>
                                 <ComboBoxItem x:Name="Contains"  IsSelected="{Binding ContainsSeach, Mode=OneWayToSource}" Background="#FFCF8B8B" Content="Contains"/>
                                 <ComboBoxItem x:Name="DNContain" Content="Does Not Contain"/>
                             </ComboBox>
@@ -98,7 +93,7 @@
         <GridSplitter Grid.Column="1" Grid.Row="1"  Width="7" HorizontalAlignment="Stretch" />
 
         <DockPanel Grid.Column="2" Grid.Row="1" Margin="0,0,5,5">
-            <StackPanel Margin="0,5,0,0" Panel.ZIndex="999" Orientation="Horizontal" Width="790" HorizontalAlignment="Left" VerticalAlignment="Top" DockPanel.Dock="Top" RenderTransformOrigin="0.5,0.5">
+            <StackPanel Margin="0,5,0,0" Panel.ZIndex="999" Orientation="Horizontal" Width="920" HorizontalAlignment="Left" VerticalAlignment="Top" DockPanel.Dock="Top" RenderTransformOrigin="0.5,0.5">
                 <StackPanel.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform/>
@@ -107,7 +102,7 @@
                         <TranslateTransform Y="2"/>
                     </TransformGroup>
                 </StackPanel.RenderTransform>
-                <TabControl Height="22" Width="700" SelectionChanged="RadioButton_Checked" >
+                <TabControl Height="22" Width="914" SelectionChanged="RadioButton_Checked" >
                     <TabControl.Resources>
                         <local:ComparisonConverter x:Key="ComparisonConverter" />
                     </TabControl.Resources>

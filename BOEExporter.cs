@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CrystalDecisions.ReportAppServer.Utilities;
+using System.IO;
+using RptToXml;
 
 namespace CHEORptAnalyzer
 {
@@ -35,21 +37,17 @@ namespace CHEORptAnalyzer
             boEnterpriseService = boEnterpriseSession.GetService("", "InfoStore");
             boInfoStore = new InfoStore(boEnterpriseService);
 
-            boReportName = "Daily Non Violent Crisis Intervention Skill (NVC3).rpt";
+            //boReportName = "Daily Non Violent Crisis Intervention Skill (NVC3).rpt";
 
             //Retrieve the report object from the InfoStore, only need the SI_ID for RAS
-            boQuery = "Select SI_ID From CI_INFOOBJECTS Where SI_NAME = '" + boReportName +
-                "' AND SI_Instance=0";
-            boInfoObjects = boInfoStore.Query(boQuery);
-            boInfoObject = boInfoObjects[1];
+            //boQuery = "Select SI_FILES From CI_INFOOBJECTS Where SI_NAME = '" + boReportName +
+            //"' AND SI_Instance=0";
+            //boInfoObjects = boInfoStore.Query(boQuery);
+            //boInfoObject = boInfoObjects[1];
+
+            SaveFiles(boInfoStore);
 
             boEnterpriseService = null;
-
-            //Retrieve the RASReportFactory
-            boEnterpriseService = boEnterpriseSession.GetService("RASReportFactory");
-            boReportAppFactory = (ReportAppFactory)boEnterpriseService.Interface;
-            //Open the report from Enterprise
-            boReportClientDocument = boReportAppFactory.OpenDocument(boInfoObject.ID, 0);
 
             //boReportClientDocument.ReportDocument
 
@@ -70,10 +68,10 @@ namespace CHEORptAnalyzer
              * CrReportExportFormatEnum.crReportExportFormatText
              * CrReportExportFormatEnum.crReportExportFormatXML
             */
-            CrystalDecisions.ReportAppServer.CommonObjectModel.ByteArray boByteArray = boReportClientDocument.PrintOutputController.Export(CrReportExportFormatEnum.crReportExportFormatCrystalReports, 1);
+            //CrystalDecisions.ReportAppServer.CommonObjectModel.ByteArray boByteArray = boReportClientDocument.PrintOutputController.Export(CrReportExportFormatEnum.crReportExportFormatCrystalReports, 1);
 
 
-            CrystalDecisions.ReportAppServer.Utilities.Conversion boConversion = new CrystalDecisions.ReportAppServer.Utilities.Conversion();
+            //CrystalDecisions.ReportAppServer.Utilities.Conversion boConversion = new CrystalDecisions.ReportAppServer.Utilities.Conversion();
 
             //boReportClientDocument.ReportDocument.
 
@@ -83,12 +81,56 @@ namespace CHEORptAnalyzer
 
             //var test = boReportClientDocument.PrintOutputController.ExportEx()
             //Save the ByteArray to disk, overwriting any existing file with the same name.
-            boByteArray.Save(@"c:\test\myExport.rpt", true);
+            //boByteArray.Save(@"c:\test\myExport.rpt", true);
 
             //Response.Write(@"File successfully saved to C:\Windows\Temp\myExport.pdf");
 
-            boReportClientDocument.Close();
+            //boReportClientDocument.Close();
             boEnterpriseSession.Logoff();
         }
+
+        static void SaveFiles(InfoStore boInfoStore)
+        {
+            //try
+            //{
+                // compose query
+                //string query = String.Format("SELECT * FROM ci_infoobjects WHERE si_id={0}", ObjectId);
+                string boReportName = "Daily Non Violent Crisis Intervention Skill (NVC3).rpt";
+                //Retrieve the report object from the InfoStore, only need the SI_ID for RAS
+                string boQuery = "Select SI_FILES From CI_INFOOBJECTS Where SI_NAME = '" + boReportName +
+                    "' AND SI_Instance=0";
+
+                // retrieve InfoObject from repository
+                InfoObject infoObject = boInfoStore.Query(boQuery)[1];
+
+                CrystalDecisions.Enterprise.File file = infoObject.Files[1];
+
+
+                Object bufferObject = (Object)new Byte[file.Size];
+                // copy the file to the buffer object
+                file.CopyTo(ref bufferObject);
+
+                // cast the object to a byte array
+                Byte[] buffer = (Byte[])bufferObject;
+
+                MemoryStream stream = new MemoryStream(buffer);
+
+                //using (var writer = new RptDefinitionWriter(stream))
+                //{
+                //    writer.WriteToXml(stream);
+                //    stream.Position = 0;
+                //    db.FileStorage.Upload(id, "empty", stream);
+
+                //    var filePathMeta = new BsonDocument();
+                //    filePathMeta["fullPath"] = rptPath;
+                //    db.FileStorage.SetMetadata(id, filePathMeta);
+                //}
+            //}
+            //catch (Exception e)
+            //{
+            //throw e;
+            //}
+
+        } // getfile
     }
 }
