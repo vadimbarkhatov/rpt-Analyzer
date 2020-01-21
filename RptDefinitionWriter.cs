@@ -390,7 +390,7 @@ namespace RptToXml
 			writer.WriteStartElement("GroupNameFieldDefinitions");
             foreach (var field in report.DataDefinition.GroupNameFields)
             {
-                    GetFieldObject(field, report, writer);
+                    //GetFieldObject(field, report, writer);
             }
 			writer.WriteEndElement();
 
