@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("CHEORptAnalyzer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("CHEO")]
 [assembly: AssemblyProduct("CHEORptAnalyzer")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]

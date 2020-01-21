@@ -27,6 +27,7 @@
     {
         static readonly string localSaveDir = Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\CHEORptAnalyzer").FullName;
         static readonly string localDBPath = localSaveDir + "\\CRPTApp.db";
+        public string Version { get; } = "0.9.1";
 
         #region GUI Bound Properties
 
