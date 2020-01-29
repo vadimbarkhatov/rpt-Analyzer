@@ -9,14 +9,19 @@ namespace RptToXml
 {
 	public class RptToXml
 	{
-		public static void Convert(IEnumerable<string> rptPaths, string liteDBPath, bool forceRefresh = false)
+		public static void Convert(IEnumerable<string> rptPaths, string liteDBPath, IProgress<int> progress, bool forceRefresh = false)
 		{
 			Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 
             using (var db = new LiteDatabase(liteDBPath))
             {
+                int i = 0;
+
                 foreach (string rptPath in rptPaths)
                 {
+                    i++;
+                    progress.Report((i / rptPaths.Count()) * 100);
+
                     string id = CHEORptAnalyzer.Extensions.CalculateMD5Hash(rptPath);
 
                     Trace.WriteLine("Dumping " + rptPath);

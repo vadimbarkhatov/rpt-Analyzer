@@ -8,6 +8,7 @@
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Data;
@@ -141,7 +142,7 @@
             if (ReportItem.CRSections[PreviewElement].Language == FastColoredTextBoxNS.Language.Custom) Extensions.CrystalSyntaxHighlight(textBox);
         }
 
-        private void OpenFolder(object sender, RoutedEventArgs e)
+        private async void OpenFolder(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog
             {
@@ -152,17 +153,33 @@
 
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
+                LoadingProgress loadingProgress = new LoadingProgress();
+
+                loadingProgress.Owner = this;
+                loadingProgress.Show();
+                loadingProgress.Cursor = System.Windows.Input.Cursors.Wait;
+                this.IsEnabled = false;
+
+                loadingProgress.lblLoadingText.Content = "Searching folders...";
+                var progress = new Progress<int>(val =>
+                {
+                    loadingProgress.loadingBar.Value = val;
+                });
+
                 IEnumerable<string> directories = dialog.FileNames.SelectMany(x => Directory.GetDirectories(x, "*.*", SearchOption.AllDirectories)).Concat(dialog.FileNames);
 
+                IEnumerable<string> rptPaths = await Task.Run(() => ParseRPT(directories, progress));
 
-                IEnumerable<string> rptPaths = ParseRPT(directories);
 
-                LoadXMLFromDb(rptPaths, localDBPath);
+                Xroot = await Task.Run(() => LoadXMLFromDb(rptPaths, localDBPath));
                 SearchReports();
+
+                loadingProgress.Close();
+                this.IsEnabled = true;
             }
         }
 
-        private IEnumerable<string> ParseRPT(IEnumerable<string> directories)
+        private static IEnumerable<string> ParseRPT(IEnumerable<string> directories, IProgress<int> progress)
         {
             string dbLoc = localDBPath;
 
@@ -174,14 +191,14 @@
                 rptPaths.AddRange(matchingFiles);
             }
 
-            RptToXml.RptToXml.Convert(rptPaths, dbLoc, false);
+            RptToXml.RptToXml.Convert(rptPaths, dbLoc, progress, true);
 
             return rptPaths;
         }
 
-        private void LoadXMLFromDb(IEnumerable<string> rptPaths, string dbPath)
+        private static XElement LoadXMLFromDb(IEnumerable<string> rptPaths, string dbPath)
         {
-            Xroot = new XElement("Reports");
+            XElement root = new XElement("Reports");
 
             using (var db = new LiteDatabase(dbPath))
             {
@@ -205,9 +222,11 @@
                         continue;
                     }
 
-                    Xroot.Add(xelement);
+                    root.Add(xelement);
                 }
             }
+
+            return root;
         }
 
 

@@ -199,12 +199,19 @@
       <DependentUpon>CRViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Extensions.cs" />
+    <Compile Include="LoadingProgress.xaml.cs">
+      <DependentUpon>LoadingProgress.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Logger.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ReportItem.cs" />
     <Compile Include="RptToXml.cs" />
     <Compile Include="RptDefinitionWriter.cs" />
     <Page Include="CRViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LoadingProgress.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
