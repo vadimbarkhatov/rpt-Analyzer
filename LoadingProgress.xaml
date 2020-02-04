@@ -5,17 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CHEORptAnalyzer"
         mc:Ignorable="d"
-        Title="Please Wait" Height="100.137" Width="320.182" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Icon="TextTemplate.ico">
+        Title="Please Wait" Height="70" Width="434" WindowStartupLocation="CenterOwner" Icon="TextTemplate.ico" WindowStyle="None" MinWidth="434" MinHeight="70" MaxWidth="434" MaxHeight="70">
+
     <Grid Margin="0,0,2,3">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="163*"/>
         </Grid.ColumnDefinitions>
-        <Label Name="lblLoadingText" Content="Loading reports...." Margin="10,0,0,0" HorizontalAlignment="Left" Height="30" Width="104" />
-        <ProgressBar Name="loadingBar" Grid.Row="2" HorizontalAlignment="Center" Height="28" Margin="0,0,0,5" Width="292" Value="15" />
+        <Label Name="lblLoadingLabel"  Margin="0" HorizontalAlignment="Center" Width="434" VerticalAlignment="Center" Height="61" HorizontalContentAlignment="Center" >
+            <TextBlock Name="txtLoadingText" TextAlignment="Center" TextWrapping="Wrap" >[ Loading text...]</TextBlock>
+        </Label>
 
     </Grid>
 </Window>

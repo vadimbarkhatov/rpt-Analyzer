@@ -9,7 +9,7 @@ namespace RptToXml
 {
 	public class RptToXml
 	{
-		public static void Convert(IEnumerable<string> rptPaths, string liteDBPath, IProgress<int> progress, bool forceRefresh = false)
+		public static void Convert(IEnumerable<string> rptPaths, string liteDBPath, IProgress<string> progress, bool forceRefresh = false)
 		{
 			Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 
@@ -20,7 +20,7 @@ namespace RptToXml
                 foreach (string rptPath in rptPaths)
                 {
                     i++;
-                    progress.Report((i / rptPaths.Count()) * 100);
+                    progress.Report("Parsing report \"" + Path.GetFileNameWithoutExtension(rptPath) + "\"\r\n" + i + "/" + rptPaths.Count());
 
                     string id = CHEORptAnalyzer.Extensions.CalculateMD5Hash(rptPath);
 

@@ -28,7 +28,7 @@
     {
         static readonly string localSaveDir = Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\CHEORptAnalyzer").FullName;
         static readonly string localDBPath = localSaveDir + "\\CRPTApp.db";
-        public string Version { get; } = "0.9.1";
+        public string Version { get; } = "0.9.2";
 
         #region GUI Bound Properties
 
@@ -160,26 +160,26 @@
                 loadingProgress.Cursor = System.Windows.Input.Cursors.Wait;
                 this.IsEnabled = false;
 
-                loadingProgress.lblLoadingText.Content = "Searching folders...";
-                var progress = new Progress<int>(val =>
+                loadingProgress.txtLoadingText.Text = "Searching folders...";
+                var progress = new Progress<string>(s =>
                 {
-                    loadingProgress.loadingBar.Value = val;
+                    loadingProgress.txtLoadingText.Text = s;
                 });
 
                 IEnumerable<string> directories = dialog.FileNames.SelectMany(x => Directory.GetDirectories(x, "*.*", SearchOption.AllDirectories)).Concat(dialog.FileNames);
 
                 IEnumerable<string> rptPaths = await Task.Run(() => ParseRPT(directories, progress));
-
-
                 Xroot = await Task.Run(() => LoadXMLFromDb(rptPaths, localDBPath));
+
                 SearchReports();
 
                 loadingProgress.Close();
                 this.IsEnabled = true;
+                this.Focus();
             }
         }
 
-        private static IEnumerable<string> ParseRPT(IEnumerable<string> directories, IProgress<int> progress)
+        private static IEnumerable<string> ParseRPT(IEnumerable<string> directories, IProgress<string> progress)
         {
             string dbLoc = localDBPath;
 
@@ -191,7 +191,7 @@
                 rptPaths.AddRange(matchingFiles);
             }
 
-            RptToXml.RptToXml.Convert(rptPaths, dbLoc, progress, true);
+            RptToXml.RptToXml.Convert(rptPaths, dbLoc, progress, false);
 
             return rptPaths;
         }
