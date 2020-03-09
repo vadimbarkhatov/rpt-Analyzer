@@ -69,7 +69,7 @@
 
                         <StackPanel HorizontalAlignment="Center" Margin="0,0,0,3" VerticalAlignment="Top" >
                             <ComboBox x:Name="cbSearchMod" Width="125" SelectedIndex="0">
-                                <ComboBoxItem x:Name="Contains"  IsSelected="{Binding ContainsSeach, Mode=OneWayToSource}" Background="#FFCF8B8B" Content="Contains"/>
+                                <ComboBoxItem x:Name="Contains"  IsSelected="{Binding ContainsSearch, Mode=OneWayToSource}" Background="#FFCF8B8B" Content="Contains"/>
                                 <ComboBoxItem x:Name="DNContain" Content="Does Not Contain"/>
                             </ComboBox>
                         </StackPanel>

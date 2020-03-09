@@ -35,8 +35,9 @@
         public bool SearchFields { get; set; } = true;
         public bool SearchRF { get; set; } = true;
         public bool SearchCommand { get; set; } = true;
-        public bool ContainsSeach { get; set; } = true;
+        public bool ContainsSearch { get; set; } = true;
         public string SearchString { get; set; } = string.Empty;
+        public string ResultCount { get; set; } = string.Empty;
 
         public string ReportInfo { get; set; } = string.Empty;
         public CRElement PreviewElement { get; set; } = CRElement.Field;
@@ -48,6 +49,11 @@
         #endregion GUI Bound Properties
 
         XElement Xroot = new XElement("null");
+
+        string GetResultCountDisplay()
+        {
+            return Xroot.Elements("Report").Count().ToString();
+        }
 
         public MainWindow()
         {
@@ -70,7 +76,7 @@
                                 .Concat(CRSection.Command.ResultFilter(x).Gate(SearchCommand))
                                 .Where(s => TextFilter(s.Value));
 
-            IEnumerable<XElement> foundReports = Xroot.Elements("Report").Where(x => ContainsSeach == reportFilter(x.Descendants()).Count() > 0);
+            IEnumerable<XElement> foundReports = Xroot.Elements("Report").Where(x => ContainsSearch == reportFilter(x.Descendants()).Count() > 0);
 
             ReportItems.Clear();
 

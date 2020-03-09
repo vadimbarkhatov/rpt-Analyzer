@@ -199,10 +199,7 @@ namespace CHEORptAnalyzer
 
         public string GetSection(CRElement crSection)
         {
-            //var results = new Dictionary<CRElement, string>();
-
-
-            return XMLData.Descendants()
+            return XMLData.Elements()
                     .Apply(CRSections[crSection].ResultFilter)
                     .Apply(CRSections[crSection].ResultFormat);
         }
