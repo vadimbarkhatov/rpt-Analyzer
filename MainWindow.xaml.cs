@@ -37,8 +37,9 @@
         public bool SearchCommand { get; set; } = true;
         public bool ContainsSearch { get; set; } = true;
         public string SearchString { get; set; } = string.Empty;
-        public string ResultCount { get; set; } = string.Empty;
-
+        public string ResultCount
+        { get => GetResultCountDisplay();  } //set; 
+        
         public string ReportInfo { get; set; } = string.Empty;
         public CRElement PreviewElement { get; set; } = CRElement.Field;
         public BindingList<ReportItem> ReportItems { get; set; } = new BindingList<ReportItem>();
@@ -101,6 +102,7 @@
                 ReportItems.Add(baseReportItem);
             }
 
+            lbResultCount.Content = ReportItems.Count().ToString() + "/" + Xroot.Elements("Report").Count().ToString();
         }
 
         private static IEnumerable<XElement> FlattenReport(XElement report)
