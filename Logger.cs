@@ -9,11 +9,11 @@ public sealed class Logs
 {
     private static Logs instance = null;
     private static readonly object padlock = new object();
-    public readonly log4net.ILog log;
+    //public readonly log4net.ILog log;
 
     Logs()
     {
-        log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        //log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
     }
 
     public static Logs Instance

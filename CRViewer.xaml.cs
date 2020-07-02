@@ -44,7 +44,7 @@ namespace CHEORptAnalyzer
             }
             catch (Exception ex)
             {
-                Logs.Instance.log.Error(ex.Message, ex);
+                //Logs.Instance.log.Error(ex.Message, ex);
                 System.Windows.Forms.MessageBox.Show(ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
             }
         }
