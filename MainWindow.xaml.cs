@@ -58,7 +58,10 @@
 
         public MainWindow()
         {
+
             InitializeComponent();
+
+
             DataContext = this;
         }
 
@@ -273,7 +276,7 @@
 
         private void OpenBOE(object sender, RoutedEventArgs e)
         {
-            BOEExporter.RetrieveReport();
+            //BOEExporter.RetrieveReport();
         }
     }
 }
