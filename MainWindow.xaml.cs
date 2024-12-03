@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
@@ -10,11 +9,7 @@
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Windows;
-    using System.Windows.Controls;
-    using System.Windows.Data;
     using System.Windows.Forms;
-    using System.Windows.Input;
-    using System.Xml;
     using System.Xml.Linq;
     using FastColoredTextBoxNS;
     using LiteDB;
@@ -218,20 +213,20 @@
                     string rptPathId = Extensions.CalculateMD5Hash(rptPath);
 
                     XElement xelement;
-                    try
-                    {
+                    //try
+                    //{
                         xelement = XElement.Load(db.FileStorage.OpenRead(rptPathId));
-                    }
-                    catch (XmlException ex)
-                    {
-                       // Logs.Instance.log.Error(ex.Message, ex);
-                        continue;
-                    }
-                    catch (Exception ex)
-                    {
-                        //Logs.Instance.log.Error(ex.Message, ex);
-                        continue;
-                    }
+                    //}
+                    //catch (XmlException ex)
+                    //{
+                    //   // Logs.Instance.log.Error(ex.Message, ex);
+                    //    continue;
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    //Logs.Instance.log.Error(ex.Message, ex);
+                    //    continue;
+                    //}
 
                     root.Add(xelement);
                 }

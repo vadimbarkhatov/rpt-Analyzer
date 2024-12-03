@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CHEORptAnalyzer"
         mc:Ignorable="d"
-        Title="Please Wait" Height="70" Width="434" WindowStartupLocation="CenterOwner" Icon="TextTemplate.ico" WindowStyle="None" MinWidth="434" MinHeight="70" MaxWidth="434" MaxHeight="70">
+        Title="Please Wait" Height="70" Width="434" WindowStartupLocation="CenterOwner"  WindowStyle="None" MinWidth="434" MinHeight="70" MaxWidth="434" MaxHeight="70">
 
     <Grid Margin="0,0,2,3">
         <Grid.RowDefinitions>

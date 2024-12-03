@@ -34,17 +34,17 @@ namespace RptToXml
 			_createdReport = true;
 			_report = new ReportDocument();
 
-
-            try { _report.Load(filename, OpenReportMethod.OpenReportByTempCopy); }
-            catch (Exception ex)
-            {
-                throw ex;
-            };
+            _report.Load(filename, OpenReportMethod.OpenReportByTempCopy);
+            //try { _report.Load(filename, OpenReportMethod.OpenReportByTempCopy); }
+            //catch (Exception ex)
+            //{
+            //    throw ex;
+            //};
 			_rcd = _report.ReportClientDocument;
 
 			_oleCompoundFile = new CompoundFile(filename);
 
-			Trace.WriteLine("Loaded report");
+			//Trace.WriteLine("Loaded report");
 
 		}
 
@@ -72,10 +72,10 @@ namespace RptToXml
 		{
 			Trace.WriteLine("Writing to XML");
 
-			writer.WriteStartDocument();
-			ProcessReport(_report, writer);
-			writer.WriteEndDocument();
-			writer.Flush();
+			//writer.WriteStartDocument();
+			//ProcessReport(_report, writer);
+			//writer.WriteEndDocument();
+			//writer.Flush();
 		}
 
 		//This is a recursive method.  GetSubreports() calls it.
@@ -369,13 +369,13 @@ namespace RptToXml
 				writer.WriteStartElement("SortField");
 
 				writer.WriteAttributeString("Field", sortField.Field.FormulaName);
-				try
-				{
+				//try
+				//{
 					string sortDirection = sortField.SortDirection.ToString();
 					writer.WriteAttributeString("SortDirection", sortDirection);
-				}
-				catch (NotSupportedException)
-				{ }
+				//}
+				//catch (NotSupportedException)
+				//{ }
 				writer.WriteAttributeString("SortType", sortField.SortType.ToString());
 
 				writer.WriteEndElement();
@@ -419,8 +419,8 @@ namespace RptToXml
 
 		private void GetFieldObject(Object fo, ReportDocument report, XmlWriter writer)
 		{
-            try
-            {
+            //try
+           // {
                 if (fo is DatabaseFieldDefinition)
                 {
                     var df = (DatabaseFieldDefinition)fo;
@@ -651,11 +651,11 @@ namespace RptToXml
                     writer.WriteEndElement();
 
                 }
-            }
-            catch (Exception ex)
-            {
-                throw (ex);
-            }
+            //}
+           // catch (Exception ex)
+            //{
+                //throw (ex);
+            //}
 
         }
 

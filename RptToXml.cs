@@ -35,10 +35,10 @@ namespace RptToXml
 
                     Stream stream = new MemoryStream();
 
-                    try
-                    {
-                        using (var writer = new RptDefinitionWriter(rptPath))
-                        {
+                    //try
+                    //{
+                     using (var writer = new RptDefinitionWriter(rptPath))
+                     {
                             writer.WriteToXml(stream);
                             stream.Position = 0;
                             db.FileStorage.Upload(id, "empty", stream);
@@ -46,13 +46,13 @@ namespace RptToXml
                             var filePathMeta = new BsonDocument();
                             filePathMeta["fullPath"] = rptPath;
                             db.FileStorage.SetMetadata(id, filePathMeta);
-                        }
                     }
-                    catch (Exception ex)
-                    {
-                        //Logs.Instance.log.Error(ex.Message, ex);
-                        System.Windows.Forms.MessageBox.Show("Exception with report: " + "\r\n" + rptPath + "\r\n"  + ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
-                    }
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    //Logs.Instance.log.Error(ex.Message, ex);
+                    //    System.Windows.Forms.MessageBox.Show("Exception with report: " + "\r\n" + rptPath + "\r\n"  + ex.Message, "Error", System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
+                    //}
                 }
             }
 		}
