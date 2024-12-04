@@ -35,17 +35,9 @@ namespace RptToXml
 			_report = new ReportDocument();
 
             _report.Load(filename, OpenReportMethod.OpenReportByTempCopy);
-            //try { _report.Load(filename, OpenReportMethod.OpenReportByTempCopy); }
-            //catch (Exception ex)
-            //{
-            //    throw ex;
-            //};
 			_rcd = _report.ReportClientDocument;
 
 			_oleCompoundFile = new CompoundFile(filename);
-
-			//Trace.WriteLine("Loaded report");
-
 		}
 
 		public RptDefinitionWriter(ReportDocument value)
@@ -72,10 +64,10 @@ namespace RptToXml
 		{
 			Trace.WriteLine("Writing to XML");
 
-			//writer.WriteStartDocument();
-			//ProcessReport(_report, writer);
-			//writer.WriteEndDocument();
-			//writer.Flush();
+			writer.WriteStartDocument();
+			ProcessReport(_report, writer);
+			writer.WriteEndDocument();
+			writer.Flush();
 		}
 
 		//This is a recursive method.  GetSubreports() calls it.
@@ -93,35 +85,6 @@ namespace RptToXml
 				writer.WriteAttributeString("FileName", report.FileName.Replace("rassdk://", ""));
 				writer.WriteAttributeString("HasSavedData", report.HasSavedData.ToString());
 
-				//if (_oleCompoundFile != null)
-				//{
-				//	writer.WriteStartElement("Embedinfo");
-				//	_oleCompoundFile.RootStorage.VisitEntries(fileItem =>
-				//	{
-				//		if (fileItem.Name.Contains("Ole"))
-				//		{
-				//			writer.WriteStartElement("Embed");
-				//			writer.WriteAttributeString("Name", fileItem.Name);
-
-				//			var cfStream = fileItem as CFStream;
-				//			if (cfStream != null)
-				//			{
-				//				var streamBytes = cfStream.GetData();
-
-				//				writer.WriteAttributeString("Size", cfStream.Size.ToString("0"));
-
-				//				using (var md5Provider = new MD5CryptoServiceProvider())
-				//				{
-				//					byte[] md5Hash = md5Provider.ComputeHash(streamBytes);
-				//					writer.WriteAttributeString("MD5Hash", Convert.ToBase64String(md5Hash));
-				//				}
-				//			}
-				//			writer.WriteEndElement();
-				//		}
-				//	}, true);
-				//	writer.WriteEndElement();
-				//}
-
 				GetSummaryinfo(report, writer);
 				GetReportOptions(report, writer);
 				GetPrintOptions(report, writer);
@@ -130,7 +93,6 @@ namespace RptToXml
 
 			GetDatabase(report, writer);
 			GetDataDefinition(report, writer);
-			//GetReportDefinition(report, writer);
 
 			writer.WriteEndElement();
 		}

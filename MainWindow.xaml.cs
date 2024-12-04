@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using System.Xml;
 using System.Xml.Linq;
 using FastColoredTextBoxNS;
 using LiteDB;
@@ -198,7 +199,7 @@ namespace CHEORptAnalyzer
                 rptPaths.AddRange(matchingFiles);
             }
 
-            RptToXml.RptToXml.Convert(rptPaths, dbLoc, progress, false);
+            RptToXml.RptToXml.Convert(rptPaths, dbLoc, progress, true);
 
             return rptPaths;
         }
@@ -214,20 +215,10 @@ namespace CHEORptAnalyzer
                     string rptPathId = Extensions.CalculateMD5Hash(rptPath);
 
                     XElement xelement;
-                    //try
-                    //{
-                        xelement = XElement.Load(db.FileStorage.OpenRead(rptPathId));
-                    //}
-                    //catch (XmlException ex)
-                    //{
-                    //   // Logs.Instance.log.Error(ex.Message, ex);
-                    //    continue;
-                    //}
-                    //catch (Exception ex)
-                    //{
-                    //    //Logs.Instance.log.Error(ex.Message, ex);
-                    //    continue;
-                    //}
+
+                    var file = db.FileStorage.OpenRead(rptPathId);
+                    xelement = XElement.Load(db.FileStorage.OpenRead(rptPathId));
+
 
                     root.Add(xelement);
                 }
@@ -237,12 +228,6 @@ namespace CHEORptAnalyzer
         }
 
 
-        private void PreviewReport(object sender, RoutedEventArgs e)
-        {
-            CRViewer crViewer = new CRViewer();
-            crViewer.Show();
-            crViewer.LoadReport(SelectedReportItems?.First().GetBaseReport().FilePath);
-        }
 
         private void ExportToXML(object sender, RoutedEventArgs e)
         {

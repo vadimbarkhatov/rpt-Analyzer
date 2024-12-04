@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:CHEORptAnalyzer"  
         xmlns:Controls="clr-namespace:System.Windows.Controls;assembly=MultiSelectTreeView" 
         xmlns:FastColoredTextBoxNS="clr-namespace:FastColoredTextBoxNS;assembly=FastColoredTextBox"
-    xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:Viewer="clr-namespace:SAPBusinessObjects.WPF.Viewer;assembly=SAPBusinessObjects.WPF.Viewer" x:Class="CHEORptAnalyzer.MainWindow"  
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"  x:Class="CHEORptAnalyzer.MainWindow"  
         mc:Ignorable="d"
         Title="{Binding Version, StringFormat= '.rpt Analyzer [\{0\}]'}" Height="768" Width="1366"  >
 
@@ -39,7 +39,6 @@
                     <MenuItem Header="_Exit" />
                 </MenuItem>
                 <MenuItem Header="_Report" >
-                    <MenuItem Header="_Preview (Experimental)" Click="PreviewReport"/>
                     <MenuItem Header="_Open in Designer" Click="OpenReportDesigner"/>
                 </MenuItem>
                 <MenuItem Header="_Help" >
